@@ -13,37 +13,78 @@ body, html {
 
 
 .top-bar {
-    background-color: #343845;
+    background-color: #343a40;
+    color: #ffffff;
+    padding: 10px 15px;
 }
 
-.top-bar .free-shipping {
+.top-bar .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding-left: 100px;
+    padding-right: 100px;
+    height: 100%;
+    margin: 0;
+}
+
+.top-bar .d-flex.align-items-center.justify-content-around {
+    justify-content: space-between;
+    width: 100%;
+}
+
+.top-bar .left-items,
+.top-bar .right-items {
+    display: flex;
+    align-items: center;
+}
+
+.top-bar .left-items a,
+.top-bar .right-items a {
+    color: #ffffff;
+    text-decoration: none;
+    margin-right: 15px;
+    font-size: 14px;
+}
+
+.top-bar .right-items a:last-child {
+    margin-right: 0;
+}
+
+.top-bar .center-text {
+    flex-grow: 1;
+    text-align: center;
+    font-size: 16px;
     color: #ffffff;
 }
 
-.top-bar a {
-    color: #ffffff; 
-    text-decoration: none;
-    font-size: 14px;
+.top-bar .separator {
+    margin: 0 10px;
+    color: #ffffff;
 }
 
-.top-bar a:hover {
-    color: #ff6600;
-}
+@media (max-width: 768px) {
+    .top-bar .container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 
-.top-bar .container-fluid {
-    padding-left: 15px;
-    padding-right: 15px;
-}
+    .top-bar .d-flex {
+        width: 100%;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
 
-.top-bar .text-white {
-    font-size: 14px;
-}
+    .top-bar .text-white {
+        width: 100%;
+        text-align: center;
+        margin-bottom: 10px;
+    }
 
-.top-bar .bi-chevron-down {
-    font-size: 10px;
-    margin-left: 5px;
+    .top-bar .separator {
+        display: none;
+    }
 }
-
 
 <!--Main Navigation Bar Styles-->
 
@@ -56,7 +97,7 @@ body, html {
 }
 
 .navbar-light .navbar-nav .nav-link:hover {
-    color: #FF5722;
+    color: #f67350;
 }
 
 .navbar-light .navbar-nav .dropdown-menu {
@@ -64,14 +105,25 @@ body, html {
 }
 
 .navbar-light .navbar-nav .dropdown-item:hover {
-    background-color: #FF5722;
+    background-color: #f67350;
     color: #fff;
 }
 
 /* Logo and Search Bar */
+.navbar {
+    height: 100px;
+}
+
+.container-fluid.d-flex.align-items-center.justify-content-between {
+    justify-content: space-between;
+}
+
 .navbar-brand {
     font-weight: bold;
     color: #000;
+    display: flex;
+    align-items: center;
+    flex-grow: 0;
 }
 
 .navbar-brand img {
@@ -79,13 +131,20 @@ body, html {
 }
 
 .search-bar {
-    width: 40%;
+    max-width: 600px;
+    flex-grow: 1;
+    margin-left: 20px;
+    flex-grow: 1;
 }
 
 .search-bar .form-control {
     border: 1px solid #ccc;
     border-right: none;
     border-radius: 0;
+    height: 45px;
+    font-size: 16px;
+    width: 100%;
+    max-width: 400px;
 }
 
 .search-bar .search-btn {
@@ -93,37 +152,107 @@ body, html {
     border-radius: 0;
     border: 1px solid #ccc;
     border-left: none;
+    height: 45px;
+    font-size: 18px;
 }
 
 .search-bar .search-btn i {
-    color: #fff;
+    color: #000;
+}
+
+.d-flex .btn-light i {
+    font-size: 30px;
 }
 
 /* Main Category Button */
 .category-btn {
-    background-color: #FF5722;
+    background-color: #f67350;
     color: #fff;
     border: none;
+    border-radius: 0px;
     padding: 10px 20px;
+    font-size: 18px;
     font-weight: bold;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    height: 100%;
+    width: 300px;
+}
+
+.container-fluid {
+    height: 100%;
+    display: flex;
+    align-items: center;
 }
 
 .category-btn i {
     margin-right: 10px;
 }
 
-/* Call Us Button */
-.call-btn {
-    background-color: #f8f9fa;
-    color: #FF5722;
-    font-weight: bold;
-    border: none;
-    padding: 10px 20px;
+.container-fluid.d-flex.align-items-center.justify-content-between {
+    overflow: hidden;
+    white-space: nowrap;
 }
 
-.call-btn i {
-    margin-right: 10px;
-    color: #FF5722;
+/* Circle around the telephone icon */
+.navbar .call-btn .icon-circle {
+    background-color: #f67350;
+    color: #fff;
+    border-radius: 50%;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+}
+
+.navbar .call-btn .icon-circle i {
+    font-size: 18px;
+    color: #fff;
+    font-weight: normal;
+}
+
+/* Call Us Button */
+.call-btn {
+    background-color: #fff;
+    color: #f67350;
+    font-weight: bold;
+    border: none;
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    max-width: 100%;
+    flex-shrink: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+}
+
+.call-btn .d-flex {
+    flex-shrink: 1;
+    min-width: 0;
+}
+
+.call-btn span {
+    margin-left: 10px;
+    color: #f67350;
+}
+
+.call-text {
+    color: #343845;
+    font-size: 15px;
+    font-weight: 500;
+    margin-top: 2px;
+    margin-bottom: 1px;
+}
+
+.call-num{
+    font-size: 24px;
+    font-weight: 500;
 }
 
 /* Main Navigation Links */
@@ -134,7 +263,7 @@ body, html {
 }
 
 .nav-link:hover {
-    color: #FF5722;
+    color: #f67350;
 }
 
 /* Dropdown */
@@ -143,7 +272,7 @@ body, html {
 }
 
 .dropdown-item:hover {
-    background-color: #FF5722;
+    background-color: #f67350;
     color: #fff;
 }
 
@@ -165,19 +294,97 @@ body, html {
     align-items: center;
 }
 
+.navbar .container-fluid {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: 100px;
+    padding-right: 100px;
+}
+
+.navbar-nav {
+    font-size: 20px;
+    display: flex;
+    height: 100%;
+    justify-content: space-evenly;
+    flex-direction: row;
+    flex-grow: 1;
+    align-items: center;
+}
+
+.navbar-nav .nav-item:last-child .nav-link {
+    padding-right: 0;
+}
+
+.navbar-nav .nav-item i {
+    font-size: 1.2em;
+}
+
+.navbar .navbar-nav .nav-item {
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+@media (max-width: 768px) {
+    .navbar .container-fluid {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .navbar .row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .navbar .col-md-3,
+    .navbar .col-md-6 {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .navbar .call-btn {
+        width: 100%;
+    }
+
+    .navbar .category-btn {
+        width: 400px;
+        margin-bottom: 10px;
+    }
+
+    .navbar .navbar-nav {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+    }
+
+    .navbar .container-fluid .navbar-nav {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+    }
+
+    .navbar .navbar-nav .nav-link {
+        padding: 10px 0;
+        width: 100%;
+    }
+
+    .navbar .container-fluid .call-btn,
+    .navbar .container-fluid .category-btn {
+        width: 100%;
+    }
+
+    .navbar .container-fluid .search-bar {
+        width: 100%;
+        margin-left: 0;
+    }
+
+}
+
 
 <!--Hero/Carousel Section-->
 
-.gray-background {
-    background-image: url('/e-commerce/assets/carousel-bg.jpg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    height: auto;
-    filter: grayscale(100%);
-    background-blend-mode: overlay;
-    background-color: rgba(128, 128, 128, 0.5);
-}
+
+/* Hero Section Styles */
 
 .content-wrapper {
     padding: 20px;
@@ -188,7 +395,7 @@ body, html {
     font-size: 14px;
     letter-spacing: 2px;
     text-transform: uppercase;
-    color: #FF5722;
+    color: #f67350;
     margin-bottom: 10px;
 }
 
@@ -200,7 +407,7 @@ body, html {
 }
 
 .main-heading .highlight {
-    color: #FF5722;
+    color: #f67350;
 }
 
 .shop-now-btn {
@@ -208,7 +415,7 @@ body, html {
     margin-top: 20px;
     padding: 10px 20px;
     color: #fff;
-    border: 2px solid #FF5722;
+    border: 2px solid #f67350;
     text-transform: uppercase;
     font-weight: bold;
     letter-spacing: 1px;
@@ -216,9 +423,31 @@ body, html {
 }
 
 .shop-now-btn:hover {
-    background-color: #FF5722;
+    background-color: #f67350;
     color: #fff;
 }
+
+.hero-section img {
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 20px;
+    }
+
+    .main-heading {
+        font-size: 36px;
+    }
+
+    .shop-now-btn {
+        padding: 8px 16px;
+    }
+}
+
 
 <!--Featured Categories Section-->
 

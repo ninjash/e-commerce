@@ -6,103 +6,120 @@
     <title>Car Parts E-Commerce</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/e-commerce/styles/styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
 <header>
     <!-- Top Bar -->
     <div class="top-bar bg-dark py-2">
-        <div class="container-fluid d-flex justify-content-between">
-            <div class="col-lg-4">
-                <a href="#" class="text-white me-3">Shipping</a>
-                <a href="#" class="text-white me-3">FAQ</a>
-                <a href="#" class="text-white">Track Order</a>
-            </div>
-            <div class="col-lg-4">
-                <h6 class="free-shipping">Free Shipping Worldwide</h6>
-            </div>
-            <div class="col-lg-4">
-                <a href="#" class="text-white me-3">Default USD pricelist <i class="bi bi-chevron-down"></i></a>
-                <a href="#" class="text-white">English (US) <i class="bi bi-chevron-down"></i></a>
+        <div class="container-fluid d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center justify-content-around w-100">
+                <div class="d-flex align-items-center" style="padding-left: 90px">
+                    <a href="#" class="text-white me-3">Shipping</a>
+                    <a href="#" class="text-white me-3">FAQ</a>
+                    <a href="#" class="text-white">Track Order</a>
+                </div>
+                <div class="text-white mx-auto text-center">
+                    Free Shipping Worldwide
+                </div>
+                <div class="d-flex align-items-center" style="padding-right: 90px">
+                    <a href="#" class="text-white me-3">Default USD pricelist <i class="bi bi-chevron-down"></i></a>
+                    <span class="separator text-white">|</span>
+                    <a href="#" class="text-white ms-3">English (US) <i class="bi bi-chevron-down"></i></a>
+                </div>
             </div>
         </div>
     </div>
 </header>
     <!-- Main Navigation Bar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
-        <div class="container-fluid">
-            <!-- Logo and Search Bar Row -->
-            <div class="row w-100 align-items-center">
-                <div class="col-md-3 d-flex align-items-center">
-                    <a class="navbar-brand d-flex align-items-center" href="#">
-                        <img src="/e-commerce/assets/auto-logo.png" alt="Auto-Logo" style="max-height: 100px;">
-                    </a>
-                </div>
-                <div class="col-md-6">
-                    <form class="d-flex mx-auto search-bar">
-                        <input class="form-control" type="search" placeholder="Search..." aria-label="Search">
-                        <button class="btn search-btn" type="submit">
-                            <i class="bi bi-search"></i>
-                        </button>
-                    </form>
-                </div>
-                <div class="col-md-3 d-flex justify-content-end align-items-center">
-                    <a href="#" class="btn btn-light"><i class="bi bi-person"></i></a>
-                    <a href="#" class="btn btn-light"><i class="bi bi-cart"></i></a>
-                </div>
+        <div class="container-fluid d-flex align-items-center justify-content-between">
+            <!-- Logo -->
+            <a class="navbar-brand" href="#">
+                <img src="/e-commerce/assets/auto-logo.png" alt="Auto-Logo" style="max-height: 50px; width: auto;">
+            </a>
+            <!-- Search Bar -->
+            <form class="d-flex search-bar">
+                <input class="form-control" type="search" placeholder="Search..." aria-label="Search">
+                <button class="btn search-btn" type="submit">
+                    <i class="bi bi-search"></i>
+                </button>
+            </form>
+            <!-- Icons -->
+            <div class="d-flex align-items-center">
+                <a href="#" class="btn btn-light me-3"><i class="bi bi-person"></i></a>
+                <a href="#" class="btn btn-light"><i class="bi bi-cart"></i></a>
             </div>
         </div>
     </nav>
-    <!-- Category and Navigation Links Row -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
-        <div class="container-fluid">
-            <div class="row w-100 align-items-center mt-3">
-                <div class="col-md-3">
-                    <button class="btn btn-orange category-btn w-100">
-                        <i class="bi bi-list"></i> ALL CATEGORIES <i class="bi bi-chevron-down"></i>
-                    </button>
-                </div>
-                <div class="col-md-6">
-                    <ul class="navbar-nav justify-content-center">
-                        <li class="nav-item"><a class="nav-link" href="#">HOME</a></li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                GADGETS
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <li><a class="dropdown-item" href="#">Option 1</a></li>
-                                <li><a class="dropdown-item" href="#">Option 2</a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item"><a class="nav-link" href="#">SHOP</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">BLOG</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">INDUSTRY</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">SHOP BY CATEGORY</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">EXTRA PAGES</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-3 d-flex justify-content-end">
-                    <a href="#" class="btn btn-light call-btn">
-                        <i class="bi bi-telephone-fill"></i> CALL US ON <span>(1800) 11-55-854</span>
+    <!-- Category and Navigation Links -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom" style="padding: 0px;">
+        <div class="container-fluid d-flex align-items-center justify-content-between">
+            <button class="btn btn-orange category-btn">
+                <i class="bi bi-list"></i> ALL CATEGORIES <i class="bi bi-chevron-down"></i>
+            </button>
+            <ul class="navbar-nav ms-1 me-5">
+                <li class="nav-item"><a class="nav-link" href="#">HOME</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        GADGETS
                     </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="#">Option 1</a></li>
+                        <li><a class="dropdown-item" href="#">Option 2</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="#">SHOP</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">BLOG</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">INDUSTRY</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">SHOP BY CATEGORY</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">EXTRA PAGES</a></li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <span><i class="bi bi-plus"></i></span>
+                    </a>
+                </li>
+            </ul>
+            <a href="#" class="btn call-btn d-flex align-items-center">
+                <div class="d-flex align-items-center">
+                    <span class="icon-circle">
+                        <i class="bi bi-telephone-fill"></i>
+                    </span>
+                    <div class="col text-start py-2">
+                        <p class="call-text ms-2">CALL US ON</p>
+                        <span class="call-num ms-2">(1800) 11-55-854</span>
+                    </div>
                 </div>
-            </div>
+            </a>
         </div>
     </nav>
 <main>
-    <!-- Hero/Carousel Section -->
-    <div class="container d-flex align-items-center justify-content-center gray-background">
-        <div class="col-lg-6">
-            <div class="content-wrapper">
-                <p class="small-heading">UPGRADE YOUR RIDE</p>
-                <h1 class="main-heading">
-                    Find the <span class="highlight">Perfect Parts</span> for Performance and Reliability
-                </h1>
-                <a href="#" class="btn btn-outline-light shop-now-btn">Shop Now</a>
+   <!-- Hero/Carousel Section -->
+   <div class="hero-section d-flex align-items-center justify-content-center"
+        style="
+        background-image: url('/e-commerce/assets/carousel-bg.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        width: 100%;
+        display: flex;
+        align-items: center;">
+        <div class="container">
+            <div class="row w-100 align-items-center">
+                <div class="col-lg-6">
+                    <div class="content-wrapper">
+                        <p class="small-heading">UPGRADE YOUR RIDE</p>
+                        <h1 class="main-heading">
+                            Find the <span class="highlight">Perfect Parts</span> for Performance and Reliability
+                        </h1>
+                        <a href="#" class="btn btn-outline-light shop-now-btn">Shop Now</a>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <img src="/e-commerce/assets/carousel-item.png" alt="Car Parts Image" class="img-fluid">
+                </div>
             </div>
-        </div>
-        <div class="col-lg-6">
-            <h1>PICTURE HERE</h1>
         </div>
     </div>
     <!-- Featured Categories Section -->
@@ -117,7 +134,6 @@
             <!-- next Category -->
         </div>
     </div>
-
     <!-- Promotional Banners Section -->
     <div class="container my-5">
         <div class="row">

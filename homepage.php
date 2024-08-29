@@ -37,7 +37,7 @@
         <div class="container-fluid d-flex align-items-center justify-content-between">
             <!-- Logo -->
             <a class="navbar-brand" href="#">
-                <img src="/e-commerce/assets/auto-logo.png" alt="Auto-Logo" style="max-height: 50px; width: auto;">
+                <img src="/e-commerce/assets/auto-logo.png" alt="Auto-Logo" style="max-height: 150px; width: auto;">
             </a>
             <!-- Search Bar -->
             <form class="d-flex search-bar">
@@ -123,79 +123,347 @@
         </div>
     </div>
     <!-- Featured Categories Section -->
-    <div class="container my-5">
-        <h2 class="text-center">Featured Categories</h2>
-        <div class="d-flex overflow-auto">
+    <div class="container-fluid">
+        <div class="col-12 category-menu px-5">
+            <h2 class="text-right-align m-4">Featured Categories</h2>
+        </div>
+    </div>
+    <div class="container-fluid d-flex justify-content-evenly">
+        <div class="row justify-content-around text-center">
             <!-- Category 1 -->
-            <div class="me-3">
-                <img src="/e-commerce/assets/temp.png" alt="Category 1" class="img-fluid">
-                <h5 class="text-center">Tires and Wheels</h5>
+            <div class="col-md-4 col-lg-2">
+                <a href="bumper-cover.html" class="category-link" style="text-decoration: none;">
+                    <img src="/e-commerce/assets/bumper_cover.webp" alt="Bumper Cover" class="img-fluid">
+                    <h5 class="category-title mt-3">Bumper Cover</h5>
+                    <p class="text-muted">4 Items</p>
+                </a>
             </div>
-            <!-- next Category -->
+            <!-- Category 2 -->
+            <div class="col-md-4 col-lg-2">
+                <a href="headlights.html" class="category-link" style="text-decoration: none;">
+                    <img src="/e-commerce/assets/headlights_-and-_components.webp" alt="Headlights and Components" class="img-fluid">
+                    <h5 class="category-title mt-3">Headlights</h5>
+                    <p class="text-muted">1 Items</p>
+                </a>
+            </div>
+            <!-- Category 3 -->
+            <div class="col-md-4 col-lg-2">
+                <a href="mirrors.html" class="category-link" style="text-decoration: none;">
+                    <img src="/e-commerce/assets/part-mirrors.webp" alt="Mirrors" class="img-fluid">
+                    <h5 class="category-title mt-3">Mirrors</h5>
+                    <p class="text-muted">2 Items</p>
+                </a>
+            </div>
+            <!-- Category 4 -->
+            <div class="col-md-4 col-lg-2">
+                <a href="grille-assemblies.html" class="category-link" style="text-decoration: none;">
+                    <img src="/e-commerce/assets/grille_assembly_bundles_images.webp" alt="Grille Assembly" class="img-fluid">
+                    <h5 class="category-title mt-3">Grille Assemblies</h5>
+                    <p class="text-muted">2 Items</p>
+                </a>
+            </div>
+            <!-- Category 5 -->
+            <div class="col-md-4 col-lg-2">
+                <a href="fenders.html" class="category-link" style="text-decoration: none;">
+                    <img src="/e-commerce/assets/fenders_-and-_components.webp" alt="Fender" class="img-fluid">
+                    <h5 class="category-title mt-3">Fenders</h5>
+                    <p class="text-muted">2 Items</p>
+                </a>
+            </div>
+            <!-- Category 6 -->
+            <div class="col-md-4 col-lg-2">
+                <a href="tail-lights.html" class="category-link" style="text-decoration: none;">
+                    <img src="/e-commerce/assets/tail_lights_-and-_components.webp" alt="Tail lights and Components" class="img-fluid">
+                    <h5 class="category-title mt-3">Tail Lights</h5>
+                    <p class="text-muted">1 Items</p>
+                </a>
+            </div>
         </div>
     </div>
     <!-- Promotional Banners Section -->
-    <div class="container my-5">
-        <div class="row">
+    <div class="container-fluid my-5">
+        <div class="row w-100">
+            <!-- Promotional Banner 1 -->
             <div class="col-md-6">
-                <div class="card">
-                    <img src="/e-commerce/assets/temp.png" class="card-img-top" alt="...">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Upgrade Your Ride</h5>
-                        <a href="#" class="btn btn-primary">Shop Now</a>
+                <div class="promotional-banner position-relative">
+                    <img src="/e-commerce/assets/promo-1.png" alt="Premium Interior Accessories" class="img-fluid">
+                    <div class="promo-content">
+                        <div class="col-7">
+                            <h2>Upgrade Your Ride with <span class="highlight">Premium<br>Interior Accessories</span></h2><br>
+                            <p>Save Up to <span class="discount">40%</span> on Selected Interior Upgrades</p><br>
+                            <a href="#" class="btn btn-orange">Shop Now</a>
+                        </div>
                     </div>
                 </div>
             </div>
+            <!-- Promotional Banner 2 -->
             <div class="col-md-6">
-                <div class="card">
-                    <img src="/e-commerce/assets/temp.png" class="card-img-top" alt="...">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Upgrade Your Car's Lighting</h5>
-                        <a href="#" class="btn btn-primary">Shop Now</a>
+                <div class="promotional-banner position-relative">
+                    <img src="/e-commerce/assets/promo-2.png" alt="Car Lighting" class="img-fluid">
+                    <div class="promo-content">
+                        <div class="col-7">
+                            <h2>Upgrade Your<br><span class="highlight">Car's Lighting</span> with Premium Options</h2><br>
+                            <p>Save Up to <span class="discount">50%</span> on Selected Interior Upgrades</p><br>
+                            <a href="#" class="btn btn-orange">Shop Now</a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
     <!-- Featured Products Section -->
-    <div class="container my-5">
-        <h2 class="text-center">Featured Products</h2>
-        <div class="row">
-            <!-- Product 1 -->
-            <div class="col-md-3">
-                <div class="card">
-                    <img src="/e-commerce/assets/temp.png" class="card-img-top" alt="Product Name">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Product Name</h5>
-                        <p class="card-text">$Price</p>
-                        <a href="#" class="btn btn-primary">Add to Cart</a>
+    <div class="container featured-products my-5">
+        <h2 class="text-center mb-4">Featured Products</h2>
+        <div class="row justify-content-center text-center">
+            <!-- Row 1 -->
+            <div class="col-md-3 mb-4">
+                <div class="product-card">
+                    <img src="/e-commerce/assets/aluminum-intercooler.webp" alt="Aluminum Intercooler" class="img-fluid">
+                    <div class="product-info">
+                        <div class="product-rating">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star"></i>
+                        </div>
+                        <h5 class="product-name">Aluminum Intercooler</h5>
+                        <p class="product-price">
+                            <span class="old-price">$4,500.00</span> 
+                            <span class="new-price">$1,350.00</span>
+                        </p>
                     </div>
                 </div>
             </div>
-            <!-- Next Product -->
+            <!-- Product 2 -->
+            <div class="col-md-3 mb-4">
+                <div class="product-card">
+                    <img src="/e-commerce/assets/reverse-backup-camera.webp" alt="AutoSky Reverse Backup Camera HD" class="img-fluid">
+                    <div class="product-info">
+                        <div class="product-rating">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star"></i>
+                        </div>
+                        <h5 class="product-name">AutoSky Reverse Backup Camera HD</h5>
+                        <p class="product-price">
+                            <span class="old-price">$5,000.00</span> 
+                            <span class="new-price">$4,500.00</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <!-- Product 3 -->
+            <div class="col-md-3 mb-4">
+                <div class="product-card">
+                    <img src="/e-commerce/assets/ball-joints.webp" alt="Ball Joints" class="img-fluid">
+                    <div class="product-info">
+                        <div class="product-rating">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star"></i>
+                        </div>
+                        <h5 class="product-name">Ball Joints</h5>
+                        <p class="product-price">
+                            <span class="old-price">$900.00</span> 
+                            <span class="new-price">$810.00</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <!-- Product 4 -->
+            <div class="col-md-3 mb-4">
+                <div class="product-card">
+                    <img src="/e-commerce/assets/brake-disc.webp" alt="Brake Disc" class="img-fluid">
+                    <div class="product-info">
+                        <div class="product-rating">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star"></i>
+                        </div>
+                        <h5 class="product-name">Brake Disc</h5>
+                        <p class="product-price">
+                            <span class="old-price">$5,000.00</span> 
+                            <span class="new-price">$4,500.00</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <!-- Row 2 -->
+            <div class="col-md-3 mb-4">
+                <div class="product-card">
+                    <img src="/e-commerce/assets/car-battery-charger.webp" alt="Car Battery Charger" class="img-fluid">
+                    <div class="product-info">
+                        <div class="product-rating">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star"></i>
+                        </div>
+                        <h5 class="product-name">Car Battery Charger</h5>
+                        <p class="product-price">
+                            <span class="old-price">$15,000.00</span> 
+                            <span class="new-price">$13,500.00</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <!-- Product 6 -->
+            <div class="col-md-3 mb-4">
+                <div class="product-card">
+                    <img src="/e-commerce/assets/catalytic-converters.webp" alt="Catalytic Converters" class="img-fluid">
+                    <div class="product-info">
+                        <div class="product-rating">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star"></i>
+                        </div>
+                        <h5 class="product-name">Catalytic Converters</h5>
+                        <p class="product-price">
+                            <span class="old-price">$5,500.00</span> 
+                            <span class="new-price">$4,950.00</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <!-- Product 7 -->
+            <div class="col-md-3 mb-4">
+                <div class="product-card">
+                    <img src="/e-commerce/assets/oxygen-sensors.webp" alt="Oxygen Sensors" class="img-fluid">
+                    <div class="product-info">
+                        <div class="product-rating">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star"></i>
+                        </div>
+                        <h5 class="product-name">Oxygen Sensors</h5>
+                        <p class="product-price">
+                            <span class="old-price">$2,000.00</span> 
+                            <span class="new-price">$1,800.00</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <!-- Product 8 -->
+            <div class="col-md-3 mb-4">
+                <div class="product-card">
+                    <img src="/e-commerce/assets/power-steering-pump.webp" alt="Power Steering Pump" class="img-fluid">
+                    <div class="product-info">
+                        <div class="product-rating">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star"></i>
+                        </div>
+                        <h5 class="product-name">Power Steering Pump</h5>
+                        <p class="product-price">
+                            <span class="old-price">$1,000.00</span> 
+                            <span class="new-price">$1,620.00</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Top Dealers Section -->
-    <div class="container my-5">
-        <h2 class="text-center">Top Dealers</h2>
-        <div class="row">
+   <!-- Top Dealers Section -->
+<div class="top-dealers" style="background-image: url('/e-commerce/assets/carousel-bg.png');">
+    <div class="container py-4">
+        <h2 class="text-right-align my-4">Top Dealers</h2>
+        <div class="row justify-content-center">
             <!-- Dealer 1 -->
-            <div class="col-md-3">
-                <div class="card text-center">
-                    <img src="/e-commerce/assets/temp.png" class="card-img-top" alt="Dealer Name">
-                    <div class="card-body">
-                        <h5 class="card-title">Dealer Name</h5>
-                        <p class="card-text">Location: City, Country</p>
-                        <a href="#" class="btn btn-primary">View Products</a>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="dealer-card p-4 shadow-sm">
+                    <div class="dealer-logo mb-3 text-center">
+                        <img src="/e-commerce/assets/dealer-logo1.png" alt="Dealer 1 Logo" class="img-fluid">
+                    </div>
+                    <div class="dealer-info">
+                        <p class="dealer-products">0 Products</p>
+                        <p class="dealer-address"><i class="bi bi-geo-alt"></i> 892382 J Ajman Fujairah United Arab Emirates</p>
+                        <p class="dealer-contact"><i class="bi bi-telephone"></i> (+91) - 540-025-124553</p>
                     </div>
                 </div>
             </div>
-            <!-- Next Dealer -->
+            <!-- Dealer 2 -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="dealer-card p-4 shadow-sm">
+                    <div class="dealer-logo mb-3 text-center">
+                        <img src="/e-commerce/assets/dealer-logo2.png" alt="Dealer 2 Logo" class="img-fluid">
+                    </div>
+                    <div class="dealer-info">
+                        <p class="dealer-products">0 Products</p>
+                        <p class="dealer-address"><i class="bi bi-geo-alt"></i> 892382 J Ajman Fujairah United Arab Emirates</p>
+                        <p class="dealer-contact"><i class="bi bi-telephone"></i> (+91) - 540-025-124553</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Dealer 3 -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="dealer-card p-4 shadow-sm">
+                    <div class="dealer-logo mb-3 text-center">
+                        <img src="/e-commerce/assets/dealer-logo3.png" alt="Dealer 3 Logo" class="img-fluid">
+                    </div>
+                    <div class="dealer-info">
+                        <p class="dealer-products">0 Products</p>
+                        <p class="dealer-address"><i class="bi bi-geo-alt"></i> 892382 J Ajman Fujairah United Arab Emirates</p>
+                        <p class="dealer-contact"><i class="bi bi-telephone"></i> (+91) - 540-025-124553</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Dealer 4 -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="dealer-card p-4 shadow-sm">
+                    <div class="dealer-logo mb-3 text-center">
+                        <img src="/e-commerce/assets/dealer-logo4.png" alt="Dealer 4 Logo" class="img-fluid">
+                    </div>
+                    <div class="dealer-info">
+                        <p class="dealer-products">0 Products</p>
+                        <p class="dealer-address"><i class="bi bi-geo-alt"></i> 892382 J Ajman Fujairah United Arab Emirates</p>
+                        <p class="dealer-contact"><i class="bi bi-telephone"></i> (+91) - 540-025-124553</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Dealer 5 -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="dealer-card p-4 shadow-sm">
+                    <div class="dealer-logo mb-3 text-center">
+                        <img src="/e-commerce/assets/dealer-logo5.png" alt="Dealer 5 Logo" class="img-fluid">
+                    </div>
+                    <div class="dealer-info">
+                        <p class="dealer-products">0 Products</p>
+                        <p class="dealer-address"><i class="bi bi-geo-alt"></i> 892382 J Ajman Fujairah United Arab Emirates</p>
+                        <p class="dealer-contact"><i class="bi bi-telephone"></i> (+91) - 540-025-124553</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Dealer 6 -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="dealer-card p-4 shadow-sm">
+                    <div class="dealer-logo mb-3 text-center">
+                        <img src="/e-commerce/assets/dealer-logo6.png" alt="Dealer 6 Logo" class="img-fluid">
+                    </div>
+                    <div class="dealer-info">
+                        <p class="dealer-products">0 Products</p>
+                        <p class="dealer-address"><i class="bi bi-geo-alt"></i> 892382 J Ajman Fujairah United Arab Emirates</p>
+                        <p class="dealer-contact"><i class="bi bi-telephone"></i> (+91) - 540-025-124553</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-
+</div>
     <!-- Trending Products Section -->
     <div class="container my-5">
         <h2 class="text-center">Trending Products</h2>

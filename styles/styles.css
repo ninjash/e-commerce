@@ -1009,28 +1009,28 @@ body, html {
     border-radius: 8px;
 }
 
-.category-nav .nav-link {
+.trending-products .category-nav .nav-link {
     color: #ffffff;
     padding: 10px 15px;
     border-bottom: 1px solid #444444;
     font-weight: 500;
 }
 
-.category-nav .nav-link:hover {
+.trending-products .category-nav .nav-link:hover {
     color: #f67350;
 }
 
-.category-nav .nav-link.active {
+.trending-products .category-nav .nav-link.active {
     background-color: #f67350;
     color: #ffffff;
 }
 
-.category-nav .chevron-right {
+.trending-products .category-nav .chevron-right {
     float: right;
     font-size: 18px;
 }
 
-.category-nav .nav-item:last-child .nav-link {
+.trending-products .category-nav .nav-item:last-child .nav-link {
     border-bottom: none;
 }
 

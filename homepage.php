@@ -68,7 +68,7 @@
     <nav class="navbar navbar-expand-lg navbar-light category-nav bg-white border-bottom py-0">
         <div class="container-fluid">
             <div class="row w-100" style="height: 100%;">
-                <div class="col-sm-4 col-md-4 col-lg-2 d-flex justify-content-start align-items-center pe-0">
+                <div class="col-sm-4 col-md-4 col-lg-2 d-flex justify-content-start align-items-center ps-0 pe-0">
                     <div class="dropdown d-flex" style="width: 100%; height: 100%;">    
                         <button class="btn btn-orange category-btn d-flex justify-content-start align-items-center" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-list"></i> 
@@ -253,7 +253,7 @@
         </div>
     </div>
     <!-- Carousel for Mobile View -->
-    <div id="categoryCarousel" class="carousel slide d-lg-none" data-bs-ride="carousel">
+    <div id="categoryCarousel" class="carousel slide d-lg-none">
         <div class="carousel-inner w-100 p-0 m-0">
             <!-- Category 1 -->
             <div class="carousel-item active">
@@ -724,118 +724,367 @@
     <div class="container-fluid trending-products">
         <div class="row w-100">
             <!-- Categories Navigation -->
-            <div class="col-lg-3 col-md-4">
-                <div class="category-nav bg-dark text-white">
-                    <ul class="nav flex-column">
-                        <li class="nav-item active">
-                            <a class="nav-link" href="#">Automotive Parts <span class="chevron-right">></span></a>
+            <div class="col-lg-12 col-xl-3 px-0">
+                <div class="category-nav">
+                    <ul class="nav flex-nowrap overflow-auto overflow-x-auto flex-xl-column flex-lg-row overflow-hidden" id="categoryTabs">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Automotive Parts<span class="chevron-right"><i class="bi bi-chevron-right"></i></span></a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Tires and Wheels <span class="chevron-right">></span></a>
+                            <a class="nav-link" href="#">Tires and Wheels<span class="chevron-right"><i class="bi bi-chevron-right"></i></span></a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Car Maintenance <span class="chevron-right">></span></a>
+                            <a class="nav-link" href="#">Car Maintenance<span class="chevron-right"><i class="bi bi-chevron-right"></i></span></a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Electronics and Gadgets <span class="chevron-right">></span></a>
+                            <a class="nav-link" href="#">Electronics and Gadgets<span class="chevron-right"><i class="bi bi-chevron-right"></i></span></a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Exterior Upgrades <span class="chevron-right">></span></a>
+                            <a class="nav-link" href="#">Exterior Upgrades<span class="chevron-right"><i class="bi bi-chevron-right"></i></span></a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Interior Accessories <span class="chevron-right">></span></a>
+                            <a class="nav-link" href="#">Interior Accessories<span class="chevron-right"><i class="bi bi-chevron-right"></i></span></a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Performance Parts <span class="chevron-right">></span></a>
+                            <a class="nav-link" href="#">Performance Parts<span class="chevron-right"><i class="bi bi-chevron-right"></i></span></a>
                         </li>
                     </ul>
                 </div>
             </div>
-
             <!-- Products Display -->
-            <div class="col-lg-9 col-md-8">
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="product-card">
-                            <img src="/e-commerce/assets/brake-disc.png" alt="Brake Disc" class="img-fluid">
-                            <div class="card-body text-center">
-                                <h5 class="product-name">Brake Disc</h5>
-                                <div class="product-rating mb-2">
-                                    <i class="bi bi-star-fill"></i>
-                                    <i class="bi bi-star-fill"></i>
-                                    <i class="bi bi-star-fill"></i>
-                                    <i class="bi bi-star-half"></i>
-                                    <i class="bi bi-star"></i>
+            <div id="productsCarousel" class="col-lg-12 col-xl-9 d-flex flex-xl-column flex-lg-row carousel slide p-4" style="border: 2px solid #d9d9d9">
+                <div class="carousel-inner w-100 py-4 px-2 m-0">
+                    <div class="carousel-item active">
+                        <div class="row w-100">
+                            <div class="col">
+                                <div class="product-card">
+                                    <img src="/e-commerce/assets/brake-disc.png" alt="Brake Disc" class="img-fluid">
+                                    <div class="product-info text-center py-3">
+                                        <h5 class="product-name">Brake Disc</h5>
+                                        <div class="row w-100 product-nav py-2 px-0">
+                                            <div class="col p-0 text-center">
+                                                <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
+                                            </div>
+                                            <div class="col p-0 text-center">
+                                                <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
+                                            </div>
+                                            <div class="col p-0 text-center">
+                                                <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
+                                            </div>
+                                        </div>
+                                        <div class="product-rating">
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-half"></i>
+                                            <i class="bi bi-star"></i>
+                                        </div>
+                                        <div class="product-price">
+                                            <span class="old-price">$5,000.00</span>
+                                            <span class="new-price">$4,500.00</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="product-price">
-                                    <span class="product-old-price">$5,000.00</span>
-                                    <span class="product-new-price">$4,500.00</span>
+                            </div>
+                            <div class="col">
+                                <div class="product-card">
+                                    <img src="/e-commerce/assets/car-battery-charger.png" alt="Car Battery" class="img-fluid">
+                                    <div class="product-info text-center py-3">
+                                        <h5 class="product-name">Car Battery</h5>
+                                        <div class="row w-100 product-nav py-2 px-0">
+                                            <div class="col p-0 text-center">
+                                                <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
+                                            </div>
+                                            <div class="col p-0 text-center">
+                                                <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
+                                            </div>
+                                            <div class="col p-0 text-center">
+                                                <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
+                                            </div>
+                                        </div>
+                                        <div class="product-rating">
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star"></i>
+                                        </div>
+                                        <div class="product-price">
+                                            <span class="old-price">$8,000.00</span>
+                                            <span class="new-price">$7,200.00</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="product-card">
+                                    <img src="/e-commerce/assets/power-steering-pump.png" alt="Power Steering Pump" class="img-fluid">
+                                    <div class="product-info text-center py-3">
+                                        <h5 class="product-name">Power Steering Pump</h5>
+                                        <div class="row w-100 product-nav py-2 px-0">
+                                            <div class="col p-0 text-center">
+                                                <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
+                                            </div>
+                                            <div class="col p-0 text-center">
+                                                <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
+                                            </div>
+                                            <div class="col p-0 text-center">
+                                                <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
+                                            </div>
+                                        </div>
+                                        <div class="product-rating">
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-half"></i>
+                                            <i class="bi bi-star"></i>
+                                        </div>
+                                        <div class="product-price">
+                                            <span class="old-price">$10,000.00</span>
+                                            <span class="new-price">$9,000.00</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <!-- Repeat for other products -->
-                    <div class="col-md-4">
-                        <div class="product-card">
-                            <img src="/e-commerce/assets/car-battery-charger.png" alt="Car Battery" class="img-fluid">
-                            <div class="card-body text-center">
-                                <h5 class="product-name">Car Battery</h5>
-                                <div class="product-rating mb-2">
-                                    <i class="bi bi-star-fill"></i>
-                                    <i class="bi bi-star-fill"></i>
-                                    <i class="bi bi-star-fill"></i>
-                                    <i class="bi bi-star-fill"></i>
-                                    <i class="bi bi-star"></i>
+                    <!--slide 2-->
+                    <div class="carousel-item">
+                        <div class="row w-100">
+                            <div class="col">
+                                <div class="product-card">
+                                    <img src="/e-commerce/assets/oxygen-sensors.png" alt="Oxygen Sensor" class="img-fluid">
+                                    <div class="product-info text-center py-3">
+                                        <h5 class="product-name">Oxygen Sensor Single</h5>
+                                        <div class="row w-100 product-nav py-2 px-0">
+                                            <div class="col p-0 text-center">
+                                                <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
+                                            </div>
+                                            <div class="col p-0 text-center">
+                                                <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
+                                            </div>
+                                            <div class="col p-0 text-center">
+                                                <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
+                                            </div>
+                                        </div>
+                                        <div class="product-rating">
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-half"></i>
+                                        </div>
+                                        <div class="product-price">
+                                            <span class="old-price">$6,000.00</span>
+                                            <span class="new-price">$5,500.00</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="product-price">
-                                    <span class="product-old-price">$8,000.00</span>
-                                    <span class="product-new-price">$7,200.00</span>
+                            </div>
+                            <div class="col">
+                                <div class="product-card">
+                                    <img src="/e-commerce/assets/catalytic-converters.png" alt="Catalytic Converter Single" class="img-fluid">
+                                    <div class="product-info text-center py-3">
+                                        <h5 class="product-name">Catalytic Converter Single</h5>
+                                        <div class="row w-100 product-nav py-2 px-0">
+                                            <div class="col p-0 text-center">
+                                                <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
+                                            </div>
+                                            <div class="col p-0 text-center">
+                                                <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
+                                            </div>
+                                            <div class="col p-0 text-center">
+                                                <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
+                                            </div>
+                                        </div>
+                                        <div class="product-rating">
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star"></i>
+                                        </div>
+                                        <div class="product-price">
+                                            <span class="old-price">$9,000.00</span>
+                                            <span class="new-price">$7,000.00</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="product-card">
+                                    <img src="/e-commerce/assets/aluminum-intercooler.png" alt="Aluminum Intercooler" class="img-fluid">
+                                    <div class="product-info text-center py-3">
+                                        <h5 class="product-name">Aluminum Intercooler</h5>
+                                        <div class="row w-100 product-nav py-2 px-0">
+                                            <div class="col p-0 text-center">
+                                                <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
+                                            </div>
+                                            <div class="col p-0 text-center">
+                                                <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
+                                            </div>
+                                            <div class="col p-0 text-center">
+                                                <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
+                                            </div>
+                                        </div>
+                                        <div class="product-rating">
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                        </div>
+                                        <div class="product-price">
+                                            <span class="old-price">$15,000.00</span>
+                                            <span class="new-price">$11,000.00</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="product-card">
-                            <img src="/e-commerce/assets/power-steering-pump.png" alt="Power Steering Pump" class="img-fluid">
-                            <div class="card-body text-center">
-                                <h5 class="product-name">Power Steering Pump</h5>
-                                <div class="product-rating mb-2">
-                                    <i class="bi bi-star-fill"></i>
-                                    <i class="bi bi-star-fill"></i>
-                                    <i class="bi bi-star-fill"></i>
-                                    <i class="bi bi-star-half"></i>
-                                    <i class="bi bi-star"></i>
-                                </div>
-                                <div class="product-price">
-                                    <span class="product-old-price">$10,000.00</span>
-                                    <span class="product-new-price">$9,000.00</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <button class="carousel-control-prev custom-carousel-control" type="button" data-bs-target="#productsCarousel" data-bs-slide="prev">
+                        <span class="visually-hidden">Previous</span>
+                        <span class="custom-control-icon">&#10094;</span>
+                    </button>
+                    <button class="carousel-control-next custom-carousel-control" type="button" data-bs-target="#productsCarousel" data-bs-slide="next">
+                        <span class="visually-hidden">Next</span>
+                        <span class="custom-control-icon">&#10095;</span>
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-
     <!-- Deal of the Day Section -->
-    <div class="container my-5">
-        <h2 class="text-center">Deal of the Day</h2>
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="row g-0">
-                        <div class="col-md-4">
-                            <img src="/e-commerce/assets/temp.png" class="img-fluid rounded-start" alt="Deal Product">
+    <div class="container-fluid dod-section">
+        <div class="row w-100">
+            <div class="col-md-8 col-lg-3 col-xl-3 py-lg-5 px-lg-5 py-md-3 px-md-4 d-flex justify-content-start align-items-center">
+                <h1>Deal Of The Day</h1>
+            </div>
+            <div class="col-md-8 col-lg-3 col-xl-3 py-lg-5 px-lg-3 py-md-3 px-md-4 d-flex flex-row justify-content-center align-items-center">
+                <h3>Sale is expired</h3>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid dod-section pb-5">
+        <div class="row w-100">
+            <div class="col-sm-6 col-md-6 col-lg-6 col-xl-3">
+                <div class="product-card">
+                    <img src="/e-commerce/assets/oxygen-sensors.png" alt="Oxygen Sensor" class="img-fluid">
+                    <div class="row w-100 product-nav py-2 px-0">
+                        <div class="col p-0 text-center">
+                            <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
                         </div>
-                        <div class="col-md-8">
-                            <div class="card-body">
-                                <h5 class="card-title">Deal Product Name</h5>
-                                <p class="card-text">$Price</p>
-                                <p class="card-text"><small class="text-danger">Sale is expired</small></p>
-                                <a href="#" class="btn btn-primary">View Details</a>
-                            </div>
+                        <div class="col p-0 text-center">
+                            <a href="#" class="btn pnav-icon"><i class="bi bi-heart-fill"></i></a>
+                        </div>
+                        <div class="col p-0 text-center">
+                            <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
+                        </div>
+                    </div>
+                    <div class="product-info text-center py-3">
+                        <h5 class="product-name">Oxygen Sensor Single</h5>
+                        <div class="product-rating">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-half"></i>
+                        </div>
+                        <div class="product-price">
+                            <span class="old-price">$6,000.00</span>
+                            <span class="new-price">$5,500.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-6 col-lg-6 col-xl-3">
+                <div class="product-card">
+                    <img src="/e-commerce/assets/catalytic-converters.png" alt="Catalytic Converter Single" class="img-fluid">
+                    <div class="row w-100 product-nav py-2 px-0">
+                        <div class="col p-0 text-center">
+                            <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
+                        </div>
+                        <div class="col p-0 text-center">
+                            <a href="#" class="btn pnav-icon"><i class="bi bi-heart-fill"></i></a>
+                        </div>
+                        <div class="col p-0 text-center">
+                            <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
+                        </div>
+                    </div>
+                    <div class="product-info text-center py-3">
+                        <h5 class="product-name">Catalytic Converter Single</h5>
+                        <div class="product-rating">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star"></i>
+                        </div>
+                        <div class="product-price">
+                            <span class="old-price">$9,000.00</span>
+                            <span class="new-price">$7,000.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-6 col-lg-6 col-xl-3">
+                <div class="product-card">
+                    <img src="/e-commerce/assets/power-steering-pump.png" alt="Power Steering Pump" class="img-fluid">
+                    <div class="row w-100 product-nav py-2 px-0">
+                        <div class="col p-0 text-center">
+                            <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
+                        </div>
+                        <div class="col p-0 text-center">
+                            <a href="#" class="btn pnav-icon"><i class="bi bi-heart-fill"></i></a>
+                        </div>
+                        <div class="col p-0 text-center">
+                            <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
+                        </div>
+                    </div>
+                    <div class="product-info text-center py-3">
+                        <h5 class="product-name">Power Steering Pump</h5>
+                        <div class="product-rating">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-half"></i>
+                            <i class="bi bi-star"></i>
+                        </div>
+                        <div class="product-price">
+                            <span class="old-price">$10,000.00</span>
+                            <span class="new-price">$9,000.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-6 col-lg-6 col-xl-3">
+                <div class="product-card">
+                    <img src="/e-commerce/assets/aluminum-intercooler.png" alt="Aluminum Intercooler" class="img-fluid">
+                    <div class="row w-100 product-nav py-2 px-0">
+                        <div class="col p-0 text-center">
+                            <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
+                        </div>
+                        <div class="col p-0 text-center">
+                            <a href="#" class="btn pnav-icon"><i class="bi bi-heart-fill"></i></a>
+                        </div>
+                        <div class="col p-0 text-center">
+                            <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
+                        </div>
+                    </div>
+                    <div class="product-info text-center py-3">
+                        <h5 class="product-name">Aluminum Intercooler</h5>
+                        <div class="product-rating">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                        </div>
+                        <div class="product-price">
+                            <span class="old-price">$15,000.00</span>
+                            <span class="new-price">$11,000.00</span>
                         </div>
                     </div>
                 </div>
@@ -844,56 +1093,155 @@
     </div>
 
     <!-- Browse by Brands Section -->
-    <div class="container my-5">
-        <h2 class="text-center">Browse By Brands</h2>
-        <div class="d-flex overflow-auto">
-            <!-- Brand 1 -->
-            <div class="me-3">
-                <img src="/e-commerce/assets/temp.png" alt="Brand Name" class="img-fluid">
+    <div class="container-fluid bbb-section py-5">
+        <div class="row w-100">
+            <div class="col-12 py-3 px-0 d-flex justify-content-start align-items-center">
+                <h1>Browse By Brands</h1>
             </div>
-            <!-- Next Brand -->
+        </div>
+    </div>
+    <div class="container-fluid brands-section pb-5">
+        <div class="row d-flex justify-content-between align-items-center">
+            <div class="col-md-4 col-lg-4 col-xl-2 px-2 text-center">
+                <a href="#">
+                    <img src="/e-commerce/assets/brand (1).png" alt="Brand 1" class="img-fluid brand-logo">
+                </a>
+            </div>
+            <div class="col-md-4 col-lg-4 col-xl-2 px-2 text-center">
+                <a href="#">
+                    <img src="/e-commerce/assets/brand (2).png" alt="Brand 2" class="img-fluid brand-logo">
+                </a>
+            </div>
+            <div class="col-md-4 col-lg-4 col-xl-2 px-2 text-center">
+                <a href="#">
+                    <img src="/e-commerce/assets/brand (3).png" alt="Brand 3" class="img-fluid brand-logo">
+                </a>
+            </div>
+            <div class="col-md-4 col-lg-4 col-xl-2 px-2 text-center">
+                <a href="#">
+                    <img src="/e-commerce/assets/brand (4).png" alt="Brand 4" class="img-fluid brand-logo">
+                </a>
+            </div>
+            <div class="col-md-4 col-lg-4 col-xl-2 px-2 text-center">
+                <a href="#">
+                    <img src="/e-commerce/assets/brand (5).png" alt="Brand 5" class="img-fluid brand-logo">
+                </a>
+            </div>
+            <div class="col-md-4 col-lg-4 col-xl-2 px-2 text-center">
+                <a href="#">
+                    <img src="/e-commerce/assets/brand (6).png" alt="Brand 6" class="img-fluid brand-logo">
+                </a>
+            </div>
         </div>
     </div>
 
+
+    <!--Promo Footer-->
+    <div class="container-fluid promo-features py-5" style="background-color: #f67350;">
+        <div class="row w-100 text-center">
+            <!-- Feature 1 -->
+            <div class="col-sm-6 col-md-6 col-lg-3 d-flex align-items-center justify-content-center">
+                <div class="promo-logo">
+                    <i class="bi bi-tags mb-3"></i>
+                </div>
+                <div class="feature-info px-3 d-flex flex-column justify-content-start">
+                    <h5 class="feature-title">Best prices & offers</h5>
+                    <p class="feature-text">Orders $50 or more</p>
+                </div>
+            </div>
+            <!-- Feature 2 -->
+            <div class="col-sm-6 col-md-6 col-lg-3 d-flex align-items-center justify-content-center">
+                <div class="promo-logo">
+                    <i class="bi bi-shield-lock mb-3"></i>
+                </div>
+                <div class="feature-info px-3 d-flex flex-column justify-content-start">
+                    <h5 class="feature-title">Secure payment</h5>
+                    <p class="feature-text">100% secure payment</p>
+                </div>
+            </div>
+            <!-- Feature 3 -->
+            <div class="col-sm-6 col-md-6 col-lg-3 d-flex align-items-center justify-content-center">
+                <div class="promo-logo">
+                    <i class="bi bi-headset mb-3"></i>
+                </div>
+                <div class="feature-info px-3 d-flex flex-column justify-content-start">
+                    <h5 class="feature-title">Support</h5>
+                    <p class="feature-text">24/7 amazing services</p>
+                </div>
+            </div>
+            <!-- Feature 4 -->
+            <div class="col-sm-6 col-md-6 col-lg-3 d-flex align-items-center justify-content-center">
+                <div class="promo-logo">
+                    <i class="bi bi-arrow-repeat mb-3"></i>
+                </div>
+                <div class="feature-info px-3 d-flex flex-column justify-content-start">
+                    <h5 class="feature-title">Easy returns</h5>
+                    <p class="feature-text">Orders $50 or more</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <!-- Footer -->
-    <footer class="bg-dark text-white py-4">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-3">
-                    <h5>Our Services</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="#" class="text-white">Company Information</a></li>
-                        <li><a href="#" class="text-white">Conditions of Sale</a></li>
+    <footer class="text-white footer-body py-4">
+        <div class="container-fluid">
+            <div class="row w-100">
+                <!-- Logo and Address Section -->
+                <div class="col-md-6 col-lg-3 col-xl-3">
+                    <img src="/e-commerce/assets/auto-logo.png" alt="Logo" class="img-fluid mb-3" style="max-height: 150px;">
+                    <p>
+                        <strong>Address :</strong><br>
+                        C/801, Dev Aurum Commercial, Near Anandnagar Cross Roads, Prahlad Nagar, Ahmedabad - 380015, Gujarat, India
+                    </p>
+                    <p>
+                        <strong>Phone :</strong><br>
+                        +91 91067 47559
+                    </p>
+                </div>
+                <!-- Our Services Section -->
+                <div class="col-md-6 col-lg-3 col-xl-3 pt-4">
+                    <h5 class="footer-heading">OUR SERVICES</h5>
+                    <ul class="list d-flex flex-column justify-content-between">
+                        <li class="flex-grow-1 d-flex align-items-center"><a href="#">Company Information</a></li>
+                        <li><a href="#">Conditions of Sales</a></li>
+                        <li><a href="#">Privacy policy</a></li>
+                        <li><a href="#">Returns and refunds</a></li>
+                        <li><a href="#">Dispute Resolution</a></li>
                     </ul>
                 </div>
-                <div class="col-md-3">
-                    <h5>Others</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="#" class="text-white">Fast Shipping</a></li>
-                        <li><a href="#" class="text-white">Secure Payment</a></li>
+                <!-- Others Section -->
+                <div class="col-md-6 col-lg-3 col-xl-3 pt-4">
+                    <h5 class="footer-heading">Others</h5>
+                    <ul class="list">
+                        <li><a href="#">Fast Shipping</a></li>
+                        <li><a href="#">Paypal/Secure Payment</a></li>
+                        <li><a href="#">30 Days Return Policy</a></li>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Business Development</a></li>
                     </ul>
                 </div>
-                <div class="col-md-3">
-                    <h5>Payment Options</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="#" class="text-white">Visa</a></li>
-                        <li><a href="#" class="text-white">MasterCard</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-3">
-                    <h5>Connect with Us</h5>
-                    <ul class="list-unstyled d-flex">
-                        <li><a href="#" class="text-white me-3">Facebook</a></li>
-                        <li><a href="#" class="text-white me-3">Twitter</a></li>
+                <!-- Payment Options Section -->
+                <div class="col-md-6 col-lg-3 col-xl-3 pt-4">
+                    <h5 class="footer-heading">PAYMENT OPTIONS</h5>
+                    <img src="/e-commerce/assets/credit-card.png" alt="Payment Options" class="img-fluid pt-4">
+                <!-- Connect with Us Section -->
+                    <h5 class="footer-heading pt-4">CONNECT WITH US</h5>
+                    <ul class="list-unstyled d-flex pt-3">
+                        <li><a href="#" class="social-icons me-3"><i class="bi bi-facebook"></i></a></li>
+                        <li><a href="#" class="social-icons me-3"><i class="bi bi-twitter"></i></a></li>
+                        <li><a href="#" class="social-icons me-3"><i class="bi bi-linkedin"></i></a></li>
+                        <li><a href="#" class="social-icons me-3"><i class="bi bi-youtube"></i></a></li>
+                        <li><a href="#" class="social-icons"><i class="bi bi-instagram"></i></a></li>
                     </ul>
                 </div>
             </div>
         </div>
     </footer>
 </main>
-    <div class="bg-secondary text-center text-white py-2">
+    <div class="text-center text-white footer-secondary py-2">
         <div class="container">
-            <p class="mb-0">© 2024 Car Parts E-Commerce. All Rights Reserved.</p>
+            <p class="mb-0">© 2024 Car Parts E-Commerce. All Rights Reserved.  English  | Francais</p>
         </div>
     </div>
 

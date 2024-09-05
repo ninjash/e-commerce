@@ -39,7 +39,7 @@
             <div class="row w-100">
                 <!-- Logo -->
                 <div class="col-sm-2 col-md-2 col-lg-2 d-flex justify-content-start align-items-center">
-                    <a class="navbar-brand" href="#">
+                    <a class="navbar-brand" href="/e-commerce/homepage.php">
                         <img src="/e-commerce/assets/auto-logo.png" alt="Auto-Logo" style="max-height: 80px; width: auto;">
                     </a>
                 </div>
@@ -177,10 +177,11 @@
     <div class="container-fluid my-5">
         <div class="row w-100">
             <!-- Product Image Section -->
-            <div class="col-md-6 d-flex justify-content-center align-items-center">
-                <img src="/e-commerce/assets/aluminum-intercooler.png" alt="Product Image" class="img-fluid">
-            </div>
-            
+                <div class="col-md-12 col-lg-6 d-flex justify-content-center align-items-center product-image-container">
+                    <img src="/e-commerce/assets/aluminum-intercooler.png" alt="Product Image" class="img-fluid">
+                </div>
+
+                
             <!-- Product Info Section -->
             <div class="col-md-12 col-lg-6">
                 <div class="products-main-info">
@@ -195,13 +196,17 @@
                             </li>
                         </ol>
                     </nav>
-                    <h2 class="product-title">Aluminium Intercooler</h2>
-                    <div class="product-rating m-0">
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-half"></i>
+                    <div class="title-rating d-flex flex-lg-column flex-sm-column-reverse">
+                        <div class="product-title">
+                            <h2 class="product-title">Aluminium Intercooler</h2>
+                        </div>
+                        <div class="product-rating m-0">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-half"></i>
+                        </div>
                     </div>
                     <p class="sku">SKU: SCT0017</p>
                     <p class="definition m-0">
@@ -223,7 +228,7 @@
                             <button class="quantity-btn plus">+</button>
                         </div>
                         <!-- Add to Cart Button -->
-                        <button class="btn btn-orange ms-3"><i class="bi bi-cart"></i> Add to Cart</button>
+                        <button class="btn btn-orange-cart ms-3"><i class="bi bi-cart"></i> Add to Cart</button>
                     </div>
                     <!-- Add to Wishlist Button -->
                     <a href="#" class="text-muted py-4"><i class="bi bi-heart"></i><span> Add to wishlist</span></a>
@@ -232,24 +237,26 @@
                 <div class="brand-logo">
                     <img src="/e-commerce/assets/brand (5).png" alt="brand logo">
                 </div>
-                <div class="wishlist-terms d-flex justify-content-between align-items-center">
+                <div class="wishlist-terms d-flex flex-lg-row flex-sm-column justify-content-lg-between justify-content-start align-items-lg-center">
                     <div class="terms">
                         <p class="text-title mb-0"><u>Terms and Conditions</u></p>
                         <p class="text-muted mb-0">30-day money-back guarantee</p>
                         <p class="text-muted">Shipping: 2-3 Business Days</p>
                     </div>
                     <!-- Share Buttons -->
-                    <div class="d-flex align-items-center mt-3">
+                    <div class="share-section d-flex align-items-center mt-3">
                         <span class="me-2">Share:</span>
-                        <a href="#" class="me-3"><i class="bi bi-facebook text-primary"></i></a>
-                        <a href="#" class="me-3"><i class="bi bi-twitter text-info"></i></a>
-                        <a href="#" class="me-3"><i class="bi bi-pinterest text-danger"></i></a>
-                        <a href="#"><i class="bi bi-envelope text-secondary"></i></a>
+                        <a href="#" class="me-3"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="me-3"><i class="bi bi-twitter"></i></a>
+                        <a href="#" class="me-3"><i class="bi bi-pinterest"></i></a>
+                        <a href="#"><i class="bi bi-envelope-fill"></i></a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+
     <!-- Tabs Section -->
     <div class="container-fluid py-3">
         <div class="row w-100">
@@ -262,29 +269,21 @@
                         <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab" aria-controls="reviews" aria-selected="false">Reviews</button>
                     </li>
                 </ul>
-                <div class="tab-content d-flex justify-content-center align-items-center pt-4" id="productTabContent">
+                <div class="tab-content pt-4" id="productTabContent">
                     <div class="tab-pane fade show active" id="description" role="tabpanel" aria-labelledby="description-tab">
-                        <h4 class="d-flex justify-content-center align-items-center mb-4">Product Details</h4>
-                        <ul>
-                            <li>
-                            <span>Lightweight: </span>Aluminum is a lightweight material, reducing the overall weight of your vehicle and improving fuel efficiency.
-                            </li>
-                            <li>
-                            <span>Efficient Heat Dissipation: </span>Aluminum is an excellent conductor of heat, allowing the intercooler to efficiently cool the compressed air and prevent heat soak.
-                            </li>
-                            <li>
-                            <span>Durability: </span>Aluminum is a strong and durable material, ensuring long-lasting performance.
-                            </li>
-                            <li>
-                            <span>Corrosion Resistance: </span>Aluminum is naturally resistant to corrosion, making it ideal for outdoor use and harsh environments.
-                            </li>
-                        </ul>
-                        <div class="read-more d-flex justify-content-center align-items-center">
-                            <a href="#">Read More</a>
+                        <h4 class="tab-title d-flex text-center mb-4">Product Details</h4>
+                        <p class="tab-description d-flex text-center px-5 mx-auto">
+                            Lightweight: Aluminum is a lightweight material, reducing the overall weight of your vehicle and improving fuel efficiency.<br>
+                            Efficient Heat Dissipation: Aluminum is an excellent conductor of heat, allowing the intercooler to efficiently cool the compressed air and prevent heat soak.<br>
+                            Durability: Aluminum is a strong and durable material, ensuring long-lasting performance.<br>
+                            Corrosion Resistance: Aluminum is naturally resistant to corrosion, making it ideal for outdoor use and harsh environments.
+                        </p>
+                        <div class="read-more text-center mt-4">
+                            <a href="#" class="btn btn-outline-dark px-5 py-2">Read More</a>
                         </div>
                     </div>
                     <div class="tab-pane fade" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">
-                        <p class="product-reviews">
+                        <p class="product-reviews text-center">
                             No reviews yet.
                         </p>
                     </div>
@@ -292,23 +291,25 @@
             </div>
         </div>
     </div>
+
+
     <!-- History Section -->
-    <div class="container-fluid py-3 history-section">
+    <div class="container-fluid history-section py-5">
         <div class="row w-100">
             <!-- Left Column (Title and Story Button) -->
-            <div class="col-md-6 d-flex flex-column justify-content-center">
-                <div class="title-history">
+            <div class="col-sm-12 col-md-12 col-lg-6 d-flex flex-column justify-content-center px-md-0 px-lg-5">
+                <div class="title-history pt-4">
                     <h1>Trusted and Professional business consultant to fulfill your dreams.</h1>
                 </div>
-                <div class="our-story d-flex align-items-center mt-3">
+                <div class="our-story d-flex align-items-center m-0">
                     <a href="#" class="story-link">
                         <span class="story-text">Our story</span>
-                        <i class="bi bi-play-circle ms-2 story-icon"></i>
+                        <i class="bi bi-play-circle-fill ms-2 story-icon"></i>
                     </a>
                 </div>
             </div>
             <!-- Right Column (Description) -->
-            <div class="col-md-6">
+            <div class="col-sm-12 col-md-12 col-lg-6 px-md-0 px-lg-5 py-4">
                 <p class="history-text">
                     Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
                     Quis ipsum suspendisse ultrices gravida. Risus commodo viverra maecenas accumsan lacus vel facilisis. Lorem ipsum dolor sit amet, 
@@ -327,22 +328,26 @@
     <!-- Product Details and Specifications Section -->
     <div class="container-fluid">
         <div class="row w-100">
-            <div class="col-6 mt-4">
+            <div class="col-6 table-category mt-4">
                 <h4 class="mb-4">Specifications</h4>
-                <table class="table table-bordered">
-                    <tr>
-                        <th>SUSPENSION LOCATION</th>
-                        <td>Front</td>
-                    </tr>
-                    <tr>
-                        <th>Weight</th>
-                        <td>2kg</td>
-                    </tr>
-                    <tr>
-                        <th>Length</th>
-                        <td>2 Feet</td>
-                    </tr>
-                </table>
+                <div class="col-3 table-body w-100">
+                    <table class="table col-6">
+                        <tbody>
+                            <tr>
+                                <th>SUSPENSION LOCATION</th>
+                                <td>Front</td>
+                            </tr>
+                            <tr>
+                                <th>Weight</th>
+                                <td>2kg</td>
+                            </tr>
+                            <tr>
+                                <th>Length</th>
+                                <td>2 Feet</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

@@ -1267,7 +1267,7 @@ footer ul li a:hover {
 }
 
 footer .social-icons {
-    font-size: 50px;
+    font-size: 36px;
     color: #6b6b6b;
     margin-right: 10px;
     transition: color 0.3s ease;
@@ -1289,14 +1289,7 @@ footer .social-icons a:hover {
 /* Base Styles */
 body {
     font-family: 'Avenir LT Pro', sans-serif;
-    background-color: #f7f7f7;
     color: #333;
-}
-
-/* General container padding */
-.container-fluid {
-    padding-left: 80px;
-    padding-right: 80px;
 }
 
 /* Breadcrumb Styles */
@@ -1325,10 +1318,25 @@ body {
 
 /* Product Title and Info */
 .product-title {
-    font-size: 46px;
+    font-size: 40px;
     font-weight: 700;
     color: #000;
     margin: 0;
+}
+
+.product-image-container {
+    max-width: auto;
+    max-height: 500px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.product-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .product-rating i{
@@ -1344,7 +1352,7 @@ body {
 }
 
 .definition {
-    font-size: 18px;
+    font-size: 22px;
     color: #343a40;
 }
 
@@ -1421,7 +1429,7 @@ body {
     outline: none;
 }
 
-.btn-orange {
+.btn-orange-cart {
     background-color: #f67350;
     border: none;
     color: white;
@@ -1437,7 +1445,7 @@ body {
     border-radius: 25px;
 }
 
-.btn-orange:hover {
+.btn-orange-cart:hover {
     background-color: #d45c3d;
 }
 
@@ -1483,70 +1491,109 @@ body {
     color: #f67350;
 }
 
+.wishlist-terms i {
+    color: #000
+}
+
 /* Tabs Section */
+.nav-underline {
+    border-bottom: 2px solid #ebeaea;
+}
+
 .nav-underline .nav-item {
     margin-right: 20px;
 }
 
 .nav-underline .nav-link {
     font-size: 18px;
-    color: #333;
+    color: #a1a1a1;
     padding-bottom: 5px;
     border-bottom: 2px solid transparent;
 }
 
-.nav-underline .nav-link:hover,
 .nav-underline .nav-link.active {
     border-bottom-color: #f67350;
+}
+
+.nav-underline .nav-link:hover {
     color: #f67350;
 }
 
 /* Product Details */
-#description {
-    max-width: 800px;
+.tab-title {
+    font-family: 'Roboto', sans-serif;
+    font-size: 50px;
+    font-weight: 800;
+    text-align: center;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-#description ul {
-    list-style: none;
-    padding-left: 0;
-}
-
-#description li {
-    font-size: 18px;
-    margin-bottom: 10px;
+.tab-description {
+    width: 80%;
+    font-size: 22px;
+    font-weight: 500;
     line-height: 1.5;
+    text-align: center;
+    margin: 0 auto;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .read-more a {
-    color: #f67350;
-    font-weight: bold;
+    color: #333;
+    font-size: 18px;
+    font-weight: 600;
+    border-radius: 0;
 }
 
 .read-more a:hover {
-    text-decoration: underline;
+    color: #f7f7f7;
 }
 
 /* History Section */
 .history-section {
-    background-color: #f7f7f7;
-    padding: 60px 80px;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.history-section .title-history {
+    display: flex;
+    justify-content: end;
+    align-items: flex-end;
 }
 
 .title-history h1 {
-    font-size: 32px;
+    font-size: 50px;
+    width: 100%;
     font-weight: 700;
-    color: #404040;
     line-height: 1.2;
-    text-align: left;
-    margin-bottom: 10px;
+    color: #404040;
+    text-align: end;
+    display: flex;
+    justify-content: end;
+    align-items: flex-end;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.our-story {
+    padding-top: 16px;
+    margin-top: 16px;
+    text-align: end;
+    display: flex;
+    justify-content: end;
+    align-items: flex-end;
 }
 
 .our-story .story-link {
     display: flex;
     align-items: center;
-    color: #404040;
-    font-size: 18px;
-    font-weight: bold;
+    color: #9e9e9e;
+    font-size: 24px;
+    font-weight: 700;
     text-decoration: none;
 }
 
@@ -1556,7 +1603,7 @@ body {
 }
 
 .our-story .story-icon {
-    font-size: 24px;
+    font-size: 48px;
     color: #404040;
     transition: color 0.3s ease;
 }
@@ -1566,16 +1613,17 @@ body {
 }
 
 .history-text {
-    font-size: 16px;
-    line-height: 1.8;
+    width: 100%;
+    font-size: 22px;
+    font-family: 'Roboto', sans-serif;
+    line-height: 1.2;
     color: #404040;
-    margin-bottom: 20px;
 }
 
 .read-more {
-    font-size: 16px;
-    font-weight: bold;
-    color: #f67350;
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
     text-decoration: none;
 }
 
@@ -1583,18 +1631,28 @@ body {
     text-decoration: underline;
 }
 
-
 /* Specifications Section */
+.table-category {
+    border-bottom: 1px solid #ddd;
+}
+
+.table-category h4 {
+    font-size: 40px;
+    font-weight: 600;
+}
+
 .table {
     margin-top: 20px;
     width: 100%;
-    font-size: 18px;
+    font-size: 20px;
 }
 
-.table th,
+.table th {
+    width: 20%;
+    font-weight: 600;
+}
+
 .table td {
-    padding: 15px;
-    border: 1px solid #ddd;
-    color: #404040;
-    background-color: #f9f9f9;
+    color: #8d8d8d;
+    width: 80%;
 }

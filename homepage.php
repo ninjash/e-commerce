@@ -39,7 +39,7 @@
             <div class="row w-100">
                 <!-- Logo -->
                 <div class="col-sm-2 col-md-2 col-lg-2 d-flex justify-content-start align-items-center">
-                    <a class="navbar-brand" href="#">
+                    <a class="navbar-brand" href="/e-commerce/homepage.php">
                         <img src="/e-commerce/assets/auto-logo.png" alt="Auto-Logo" style="max-height: 80px; width: auto;">
                     </a>
                 </div>

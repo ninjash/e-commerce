@@ -263,6 +263,78 @@ body, html {
     height: auto;
 }
 
+/*Off Canvas*/
+.offcanvas-75 {
+    width: 65% !important;
+    max-width: 65% !important;
+}
+
+.off-search-bar {
+    width: 100%;
+}
+
+.off-search-bar input {
+    padding: 0.75rem;
+    background-color: #f7f7f7;
+    border-right: none;
+    border-radius: 0;
+    height: 60px;
+    font-size: 22px;
+    border: none;
+}
+
+.off-search-bar .search-btn {
+    background-color: #f7f7f7;
+    border-radius: 0;
+    border-left: none;
+    height: 60px;
+    width: 60px;
+    font-size: 20px;
+    padding-right: 20px;
+    
+}
+
+.off-search-bar .search-btn i {
+    font-weight: 700;
+}
+
+.off-navbar-nav {
+    font-size: 24px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.off-navbar-nav .nav-link {
+    font-weight: bold;
+    font-size: 20px;
+    padding: 12px 0;
+}
+
+.btn-outline-primary {
+    border-color: #f67350;
+    color: #f67350;
+    font-size: 18px;
+    margin: none;
+}
+
+.btn-outline-primary:hover {
+    background-color: #f67350;
+    color: white;
+}
+
+.btn-primary {
+    background-color: #343845;
+    border-color: #343845;
+    border-radius: 0;
+    font-size: 18px;
+    font-weight: 600;
+    height: 60px;
+}
+
+.btn-primary:hover {
+    background-color: #f67350;
+}
+
 @media (max-width: 992px) {
     .navbar.navbar-expand-lg.navbar-light.category-nav {
         display: none;
@@ -293,42 +365,6 @@ body, html {
 
     .fixed-top {
         position: static !important;
-    }
-
-    #offcanvasNavbar {
-        width: 65%;
-        max-width: none;
-    }
-
-    .offcanvas-body .search-bar {
-        width: 100%;
-    }
-    
-    .offcanvas-body .search-bar .form-control {
-        background-color: #f4f4f4;
-        border: none;
-        border-radius: 5px 0 0 5px;
-        padding: 10px 15px;
-        font-size: 16px;
-        height: 45px;
-        box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.1);
-    }
-    
-    .offcanvas-body .search-bar .search-btn {
-        background-color: #f4f4f4;
-        border: none;
-        border-radius: 0 5px 5px 0;
-        padding: 0 15px;
-        height: 45px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.1);
-    }
-    
-    .offcanvas-body .search-bar .search-btn i {
-        font-size: 20px;
-        color: #333;
     }
 }
 
@@ -473,8 +509,7 @@ body, html {
     width: 100%;
     color: inherit;
     text-decoration: none;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    font-size: 20px; /* Increase overall text size */
+    font-size: 20px;
 }
 
 .category-link img {
@@ -540,7 +575,12 @@ body, html {
 }
 
 .category-link:hover h5 {
-    color: #f67350; /* Change the text color on hover */
+    color: #f67350;
+}
+
+.category-card:hover {
+    transform: translateY(-10px);
+    transition: transform 0.5s ease, box-shadow 0.5s ease;
 }
 
 @media (max-width: 992px) {
@@ -1102,12 +1142,26 @@ body, html {
 
 
 <!--Deal of the Day Section-->
+.dod-product-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    color: inherit;
+    text-decoration: none;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    font-size: 20px;
+}
 
-.dod-section {
-    border: 4px solid #f67350;
-    padding: 20px;
-    margin-bottom: 20px;
-    background-color: #ffffff;
+.dod-product-card img {
+    background-color: #f0f0f0;
+}
+
+.dod-product-card:hover .overlay-buttons {
+    opacity: 1;
+    visibility: visible;
 }
 
 .dod-section h1 {
@@ -1848,6 +1902,40 @@ body {
     display: none;
 }
 
+.product-category-card {
+    position: relative;
+}
+
+.image-container {
+    position: relative;
+    display: inline-block;
+}
+
+.new-tag {
+    background-color: #333;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 5px 10px;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    z-index: 10;
+}
+
+.sale-tag {
+    background-color: #df4357;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 5px 10px;
+    position: absolute;
+    border-radius: 0 15px 0 15px;
+    top: 0px;
+    left: 0px;
+    z-index: 10;
+}
+
 @media (max-width: 992px) {
     .form-label {
         display: none;
@@ -1910,5 +1998,72 @@ body {
 
     .btn-filter {
         display: inline-block;
+    }
+}
+
+/*Overlay functions*/
+.product-category-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.product-image {
+    width: 100%;
+    display: block;
+}
+
+.overlay-buttons {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%, -50%);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    z-index: 1;
+}
+
+.overlay-container {
+    position: relative;
+    transition: filter 0.3s ease;
+}
+
+.product-category-card:hover .overlay-buttons {
+    opacity: 1;
+    visibility: visible;
+}
+
+.button-overlay {
+    background-color: #404040;
+    color: #f7f7f7;
+    margin: 10px;
+    font-size: 20px;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+@media (min-width: 992px) {
+    /* Show buttons and blur info on hover */
+    .product-category-card:hover .overlay-buttons {
+        opacity: 1;
+        visibility: visible;
+    }
+  
+    .product-category-card:hover .product-info {
+        filter: blur(5px);
+    }
+
+    .dod-product-card:hover .overlay-buttons {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .dod-product-card:hover .product-info {
+        filter: blur(5px);
+        background-color: rgb(223, 67, 87, 0.2);
     }
 }

@@ -214,7 +214,7 @@
         <div class="row w-100">
             <!-- Row 1 -->
             <div class="col-sm-6 col-md-6 col-lg-3 mb-4">
-                <div class="product-card">
+                <div class="featured-product-card">
                     <img src="/e-commerce/assets/aluminum-intercooler.png" alt="Aluminum Intercooler" class="img-fluid">
                     <div class="row w-100 product-nav py-2 px-0">
                         <div class="col p-0 text-center">
@@ -245,7 +245,7 @@
             </div>
             <!-- Product 2 -->
             <div class="col-sm-6 col-md-6 col-lg-3 mb-4">
-                <div class="product-card">
+                <div class="featured-product-card">
                     <img src="/e-commerce/assets/reverse-backup-camera.png" alt="AutoSky Reverse Backup Camera HD" class="img-fluid">
                     <div class="row w-100 product-nav py-2 px-0">
                         <div class="col p-0 text-center">
@@ -266,7 +266,7 @@
                             <i class="bi bi-star-fill"></i>
                             <i class="bi bi-star"></i>
                         </div>
-                        <h5 class="product-name">AutoSky Reverse Backup Camera HD</h5>
+                        <h5 class="product-name">AutoSky Reverse Backup Camera HD Wide View Angle</h5>
                         <p class="product-price">
                             <span class="old-price">$5,000.00</span> 
                             <span class="new-price">$4,500.00</span>
@@ -276,8 +276,11 @@
             </div>
             <!-- Product 3 -->
             <div class="col-sm-6 col-md-6 col-lg-3 mb-4">
-                <div class="product-card">
-                    <img src="/e-commerce/assets/ball-joints.png" alt="Ball Joints" class="img-fluid">
+                <div class="featured-product-card">
+                    <div class="image-container position-relative">
+                        <div class="new-tag position-absolute">New</div>
+                        <img src="/e-commerce/assets/ball-joints.png" alt="Ball Joints" class="img-fluid">
+                    </div>
                     <div class="row w-100 product-nav py-2 px-0">
                         <div class="col p-0 text-center">
                             <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
@@ -307,7 +310,7 @@
             </div>
             <!-- Product 4 -->
             <div class="col-sm-6 col-md-6 col-lg-3 mb-4">
-                <div class="product-card">
+                <div class="featured-product-card">
                     <img src="/e-commerce/assets/brake-disc.png" alt="Brake Disc" class="img-fluid">
                     <div class="row w-100 product-nav py-2 px-0">
                         <div class="col p-0 text-center">
@@ -339,8 +342,11 @@
             <!-- Row 2 -->
              <!-- Product 5 -->
             <div class="col-sm-6 col-md-6 col-lg-3 mb-4">
-                <div class="product-card">
-                    <img src="/e-commerce/assets/car-battery-charger.png" alt="Car Battery Charger" class="img-fluid">
+                <div class="featured-product-card">
+                    <div class="image-container position-relative">
+                        <div class="sale-tag position-absolute">Sale</div>
+                        <img src="/e-commerce/assets/products/car-battery-charger.png" alt="Car Battery Charger" class="img-fluid product-image">
+                    </div>
                     <div class="row w-100 product-nav py-2 px-0">
                         <div class="col p-0 text-center">
                             <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
@@ -370,7 +376,7 @@
             </div>
             <!-- Product 6 -->
             <div class="col-sm-6 col-md-6 col-lg-3 mb-4">
-                <div class="product-card">
+                <div class="featured-product-card">
                     <img src="/e-commerce/assets/catalytic-converters.png" alt="Catalytic Converters" class="img-fluid">
                     <div class="row w-100 product-nav py-2 px-0">
                         <div class="col p-0 text-center">
@@ -401,7 +407,7 @@
             </div>
             <!-- Product 7 -->
             <div class="col-sm-6 col-md-6 col-lg-3 mb-4">
-                <div class="product-card">
+                <div class="featured-product-card">
                     <img src="/e-commerce/assets/oxygen-sensors.png" alt="Oxygen Sensors" class="img-fluid">
                     <div class="row w-100 product-nav py-2 px-0">
                         <div class="col p-0 text-center">
@@ -432,7 +438,7 @@
             </div>
             <!-- Product 8 -->
             <div class="col-sm-6 col-md-6 col-lg-3 mb-4">
-                <div class="product-card">
+                <div class="featured-product-card">
                     <img src="/e-commerce/assets/power-steering-pump.png" alt="Power Steering Pump" class="img-fluid">
                     <div class="row w-100 product-nav py-2 px-0">
                         <div class="col p-0 text-center">
@@ -598,7 +604,7 @@
                     <div class="carousel-item active">
                         <div class="row w-100">
                             <div class="col">
-                                <div class="product-card">
+                                <div class="trending-product-card">
                                     <img src="/e-commerce/assets/brake-disc.png" alt="Brake Disc" class="img-fluid">
                                     <div class="product-info text-center py-3">
                                         <h5 class="product-name">Brake Disc</h5>
@@ -628,7 +634,7 @@
                                 </div>
                             </div>
                             <div class="col">
-                                <div class="product-card">
+                                <div class="trending-product-card">
                                     <img src="/e-commerce/assets/car-battery-charger.png" alt="Car Battery" class="img-fluid">
                                     <div class="product-info text-center py-3">
                                         <h5 class="product-name">Car Battery</h5>
@@ -658,7 +664,7 @@
                                 </div>
                             </div>
                             <div class="col">
-                                <div class="product-card">
+                                <div class="trending-product-card">
                                     <img src="/e-commerce/assets/power-steering-pump.png" alt="Power Steering Pump" class="img-fluid">
                                     <div class="product-info text-center py-3">
                                         <h5 class="product-name">Power Steering Pump</h5>
@@ -693,7 +699,7 @@
                     <div class="carousel-item">
                         <div class="row w-100">
                             <div class="col">
-                                <div class="product-card">
+                                <div class="trending-product-card">
                                     <img src="/e-commerce/assets/oxygen-sensors.png" alt="Oxygen Sensor" class="img-fluid">
                                     <div class="product-info text-center py-3">
                                         <h5 class="product-name">Oxygen Sensor Single</h5>
@@ -723,7 +729,7 @@
                                 </div>
                             </div>
                             <div class="col">
-                                <div class="product-card">
+                                <div class="trending-product-card">
                                     <img src="/e-commerce/assets/catalytic-converters.png" alt="Catalytic Converter Single" class="img-fluid">
                                     <div class="product-info text-center py-3">
                                         <h5 class="product-name">Catalytic Converter Single</h5>
@@ -753,7 +759,7 @@
                                 </div>
                             </div>
                             <div class="col">
-                                <div class="product-card">
+                                <div class="trending-product-card">
                                     <img src="/e-commerce/assets/aluminum-intercooler.png" alt="Aluminum Intercooler" class="img-fluid">
                                     <div class="product-info text-center py-3">
                                         <h5 class="product-name">Aluminum Intercooler</h5>
@@ -954,33 +960,33 @@
         </div>
     </div>
     <div class="container-fluid brands-section pb-5">
-        <div class="row d-flex justify-content-between align-items-center">
-            <div class="col-md-4 col-lg-4 col-xl-2 px-2 text-center">
+        <div class="row d-flex justify-content-between">
+            <div class="col-sm-4 col-md-4 col-lg-4 col-xl-2 px-2 text-center brand-container">
                 <a href="#">
                     <img src="/e-commerce/assets/brand (1).png" alt="Brand 1" class="img-fluid brand-logo">
                 </a>
             </div>
-            <div class="col-md-4 col-lg-4 col-xl-2 px-2 text-center">
+            <div class="col-sm-4 col-md-4 col-lg-4 col-xl-2 px-2 text-center brand-container">
                 <a href="#">
                     <img src="/e-commerce/assets/brand (2).png" alt="Brand 2" class="img-fluid brand-logo">
                 </a>
             </div>
-            <div class="col-md-4 col-lg-4 col-xl-2 px-2 text-center">
+            <div class="col-sm-4 col-md-4 col-lg-4 col-xl-2 px-2 text-center brand-container">
                 <a href="#">
                     <img src="/e-commerce/assets/brand (3).png" alt="Brand 3" class="img-fluid brand-logo">
                 </a>
             </div>
-            <div class="col-md-4 col-lg-4 col-xl-2 px-2 text-center">
+            <div class="col-sm-4 col-md-4 col-lg-4 col-xl-2 px-2 text-center brand-container">
                 <a href="#">
                     <img src="/e-commerce/assets/brand (4).png" alt="Brand 4" class="img-fluid brand-logo">
                 </a>
             </div>
-            <div class="col-md-4 col-lg-4 col-xl-2 px-2 text-center">
+            <div class="col-sm-4 col-md-4 col-lg-4 col-xl-2 px-2 text-center brand-container">
                 <a href="#">
                     <img src="/e-commerce/assets/brand (5).png" alt="Brand 5" class="img-fluid brand-logo">
                 </a>
             </div>
-            <div class="col-md-4 col-lg-4 col-xl-2 px-2 text-center">
+            <div class="col-sm-4 col-md-4 col-lg-4 col-xl-2 px-2 text-center brand-container">
                 <a href="#">
                     <img src="/e-commerce/assets/brand (6).png" alt="Brand 6" class="img-fluid brand-logo">
                 </a>

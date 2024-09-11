@@ -173,7 +173,7 @@
     <div class="container-fluid py-5 promotional-banners">
         <div class="row w-100 gx-3">
             <!-- Promotional Banner 1 -->
-            <div class="col-md-12 col-lg-6 mb-4 d-flex justify-content-start align-items-center">
+            <div class="col-sm-12 col-md-12 col-lg-6 mb-4 d-flex justify-content-start align-items-center">
                 <div class="card bg-dark text-white h-100">
                     <img src="/e-commerce/assets/promo-1.png" class="card-img" alt="Premium Interior Accessories">
                     <div class="col-8 card-img-overlay d-flex flex-column justify-content-center px-5">
@@ -186,7 +186,7 @@
                 </div>
             </div>
             <!-- Promotional Banner 2 -->
-            <div class="col-md-12 col-lg-6 mb-4 justify-content-start align-items-center">
+            <div class="col-sm-12 col-md-12 col-lg-6 mb-4 justify-content-start align-items-center">
                 <div class="card bg-dark text-white h-100">
                     <img src="/e-commerce/assets/promo-2.png" class="card-img" alt="Car Lighting">
                     <div class="col-8 card-img-overlay d-flex flex-column justify-content-center px-5">
@@ -574,7 +574,7 @@
             <div class="col-lg-12 col-xl-3 px-0">
                 <div class="category-nav">
                     <ul class="nav flex-nowrap overflow-auto overflow-x-auto flex-xl-column flex-lg-row overflow-hidden" id="categoryTabs">
-                        <li class="nav-item">
+                        <li class="nav-item active">
                             <a class="nav-link" href="#">Automotive Parts<span class="chevron-right"><i class="bi bi-chevron-right"></i></span></a>
                         </li>
                         <li class="nav-item">
@@ -599,7 +599,7 @@
                 </div>
             </div>
             <!-- Products Display -->
-            <div id="productsCarousel" class="col-lg-12 col-xl-9 d-flex flex-xl-column flex-lg-row carousel slide p-4" style="border: 2px solid #d9d9d9">
+            <div id="productsCarousel" class="col-lg-12 col-xl-9 d-flex flex-xl-column flex-lg-row carousel slide p-2" style="border: 2px solid #d9d9d9">
                 <div class="carousel-inner w-100 py-4 px-2 m-0">
                     <div class="carousel-item active">
                         <div class="row w-100">
@@ -608,17 +608,6 @@
                                     <img src="/e-commerce/assets/brake-disc.png" alt="Brake Disc" class="img-fluid">
                                     <div class="product-info text-center py-3">
                                         <h5 class="product-name">Brake Disc</h5>
-                                        <div class="row w-100 product-nav py-2 px-0">
-                                            <div class="col p-0 text-center">
-                                                <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                                            </div>
-                                            <div class="col p-0 text-center">
-                                                <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
-                                            </div>
-                                            <div class="col p-0 text-center">
-                                                <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                                            </div>
-                                        </div>
                                         <div class="product-rating">
                                             <i class="bi bi-star-fill"></i>
                                             <i class="bi bi-star-fill"></i>
@@ -630,15 +619,7 @@
                                             <span class="old-price">$5,000.00</span>
                                             <span class="new-price">$4,500.00</span>
                                         </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="trending-product-card">
-                                    <img src="/e-commerce/assets/car-battery-charger.png" alt="Car Battery" class="img-fluid">
-                                    <div class="product-info text-center py-3">
-                                        <h5 class="product-name">Car Battery</h5>
-                                        <div class="row w-100 product-nav py-2 px-0">
+                                        <div class="row w-100 trending-product-nav">
                                             <div class="col p-0 text-center">
                                                 <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
                                             </div>
@@ -649,6 +630,14 @@
                                                 <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
                                             </div>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="trending-product-card">
+                                    <img src="/e-commerce/assets/car-battery-charger.png" alt="Car Battery" class="img-fluid">
+                                    <div class="product-info text-center py-3">
+                                        <h5 class="product-name">Car Battery</h5>
                                         <div class="product-rating">
                                             <i class="bi bi-star-fill"></i>
                                             <i class="bi bi-star-fill"></i>
@@ -660,15 +649,7 @@
                                             <span class="old-price">$8,000.00</span>
                                             <span class="new-price">$7,200.00</span>
                                         </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="trending-product-card">
-                                    <img src="/e-commerce/assets/power-steering-pump.png" alt="Power Steering Pump" class="img-fluid">
-                                    <div class="product-info text-center py-3">
-                                        <h5 class="product-name">Power Steering Pump</h5>
-                                        <div class="row w-100 product-nav py-2 px-0">
+                                        <div class="row w-100 trending-product-nav">
                                             <div class="col p-0 text-center">
                                                 <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
                                             </div>
@@ -679,6 +660,14 @@
                                                 <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
                                             </div>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="trending-product-card">
+                                    <img src="/e-commerce/assets/power-steering-pump.png" alt="Power Steering Pump" class="img-fluid">
+                                    <div class="product-info text-center py-3">
+                                        <h5 class="product-name">Power Steering Pump</h5>
                                         <div class="product-rating">
                                             <i class="bi bi-star-fill"></i>
                                             <i class="bi bi-star-fill"></i>
@@ -689,6 +678,17 @@
                                         <div class="product-price">
                                             <span class="old-price">$10,000.00</span>
                                             <span class="new-price">$9,000.00</span>
+                                        </div>
+                                        <div class="row w-100 trending-product-nav">
+                                            <div class="col p-0 text-center">
+                                                <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
+                                            </div>
+                                            <div class="col p-0 text-center">
+                                                <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
+                                            </div>
+                                            <div class="col p-0 text-center">
+                                                <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -703,17 +703,6 @@
                                     <img src="/e-commerce/assets/oxygen-sensors.png" alt="Oxygen Sensor" class="img-fluid">
                                     <div class="product-info text-center py-3">
                                         <h5 class="product-name">Oxygen Sensor Single</h5>
-                                        <div class="row w-100 product-nav py-2 px-0">
-                                            <div class="col p-0 text-center">
-                                                <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                                            </div>
-                                            <div class="col p-0 text-center">
-                                                <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
-                                            </div>
-                                            <div class="col p-0 text-center">
-                                                <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                                            </div>
-                                        </div>
                                         <div class="product-rating">
                                             <i class="bi bi-star-fill"></i>
                                             <i class="bi bi-star-fill"></i>
@@ -725,15 +714,7 @@
                                             <span class="old-price">$6,000.00</span>
                                             <span class="new-price">$5,500.00</span>
                                         </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="trending-product-card">
-                                    <img src="/e-commerce/assets/catalytic-converters.png" alt="Catalytic Converter Single" class="img-fluid">
-                                    <div class="product-info text-center py-3">
-                                        <h5 class="product-name">Catalytic Converter Single</h5>
-                                        <div class="row w-100 product-nav py-2 px-0">
+                                        <div class="row w-100 trending-product-nav">
                                             <div class="col p-0 text-center">
                                                 <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
                                             </div>
@@ -744,6 +725,14 @@
                                                 <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
                                             </div>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="trending-product-card">
+                                    <img src="/e-commerce/assets/catalytic-converters.png" alt="Catalytic Converter Single" class="img-fluid">
+                                    <div class="product-info text-center py-3">
+                                        <h5 class="product-name">Catalytic Converter Single</h5>
                                         <div class="product-rating">
                                             <i class="bi bi-star-fill"></i>
                                             <i class="bi bi-star-fill"></i>
@@ -755,15 +744,7 @@
                                             <span class="old-price">$9,000.00</span>
                                             <span class="new-price">$7,000.00</span>
                                         </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="trending-product-card">
-                                    <img src="/e-commerce/assets/aluminum-intercooler.png" alt="Aluminum Intercooler" class="img-fluid">
-                                    <div class="product-info text-center py-3">
-                                        <h5 class="product-name">Aluminum Intercooler</h5>
-                                        <div class="row w-100 product-nav py-2 px-0">
+                                        <div class="row w-100 trending-product-nav">
                                             <div class="col p-0 text-center">
                                                 <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
                                             </div>
@@ -774,6 +755,14 @@
                                                 <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
                                             </div>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="trending-product-card">
+                                    <img src="/e-commerce/assets/aluminum-intercooler.png" alt="Aluminum Intercooler" class="img-fluid">
+                                    <div class="product-info text-center py-3">
+                                        <h5 class="product-name">Aluminum Intercooler</h5>
                                         <div class="product-rating">
                                             <i class="bi bi-star-fill"></i>
                                             <i class="bi bi-star-fill"></i>
@@ -784,6 +773,17 @@
                                         <div class="product-price">
                                             <span class="old-price">$15,000.00</span>
                                             <span class="new-price">$11,000.00</span>
+                                        </div>
+                                        <div class="row w-100 trending-product-nav">
+                                            <div class="col p-0 text-center">
+                                                <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
+                                            </div>
+                                            <div class="col p-0 text-center">
+                                                <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
+                                            </div>
+                                            <div class="col p-0 text-center">
+                                                <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

@@ -804,153 +804,156 @@
     </div>
 
     <!-- Deal of the Day Section -->
-    <div class="container-fluid dod-section">
-        <div class="row w-100">
-            <div class="col-md-8 col-lg-3 col-xl-3 py-lg-5 px-lg-5 py-md-3 px-md-4 d-flex justify-content-start align-items-center">
-                <h1>Deal Of The Day</h1>
+    <div class="container-fluid pt-5 mt-5">
+        <div class="d-flex flex-column dod-body" style="border: solid 15px #f67350;">
+            <div class="container-fluid dod-section position-relative">
+                <div class="row position-absolute" style="background: white">
+                    <div class="col-md-12 col-lg-6 col-xl-6">
+                        <h1>Deal Of The Day</h1>
+                    </div>
+                    <div class="col-md-12 col-lg-6 col-xl-6 d-flex justify-content-center align-items-center justify-content-sm-start">
+                        <h3>Sale is expired</h3>
+                    </div>
+                </div>
             </div>
-            <div class="col-md-8 col-lg-3 col-xl-3 py-lg-5 px-lg-3 py-md-3 px-md-4 d-flex flex-row justify-content-center align-items-center">
-                <h3>Sale is expired</h3>
+            <div class="dod-section pt-5 mt-5 px-4">
+                <div class="row w-100">
+                    <div class="col-sm-6 col-md-6 col-lg-6 col-xl-3">
+                        <div class="dod-product-card">
+                            <img src="/e-commerce/assets/oxygen-sensors.png" alt="Oxygen Sensor" class="img-fluid product-image">
+                            <div class="row w-100 product-nav py-2 px-0">
+                                <div class="col p-0 text-center">
+                                    <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
+                                </div>
+                                <div class="col p-0 text-center">
+                                    <a href="#" class="btn pnav-icon"><i class="bi bi-heart-fill"></i></a>
+                                </div>
+                                <div class="col p-0 text-center">
+                                    <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
+                                </div>
+                            </div>
+                            <div class="overlay-container">
+                                <div class="product-info text-center py-3">
+                                    <h5 class="product-name">Oxygen Sensor Single</h5>
+                                    <div class="product-rating">
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-half"></i>
+                                    </div>
+                                    <div class="product-price">
+                                        <span class="old-price">$6,000.00</span>
+                                        <span class="new-price">$5,500.00</span>
+                                    </div>
+                                </div>
+                                <?php include 'functions/overlay-buttons.php'; ?>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-6 col-lg-6 col-xl-3">
+                        <div class="dod-product-card">
+                            <img src="/e-commerce/assets/catalytic-converters.png" alt="Catalytic Converter Single" class="img-fluid product-image">
+                            <div class="row w-100 product-nav py-2 px-0">
+                                <div class="col p-0 text-center">
+                                    <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
+                                </div>
+                                <div class="col p-0 text-center">
+                                    <a href="#" class="btn pnav-icon"><i class="bi bi-heart-fill"></i></a>
+                                </div>
+                                <div class="col p-0 text-center">
+                                    <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
+                                </div>
+                            </div>
+                            <div class="overlay-container">
+                                <div class="product-info text-center py-3">
+                                    <h5 class="product-name">Catalytic Converter Single</h5>
+                                    <div class="product-rating">
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star"></i>
+                                    </div>
+                                    <div class="product-price">
+                                        <span class="old-price">$9,000.00</span>
+                                        <span class="new-price">$7,000.00</span>
+                                    </div>
+                                </div>
+                                <?php include 'functions/overlay-buttons.php'; ?>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-6 col-lg-6 col-xl-3">
+                        <div class="dod-product-card">
+                            <img src="/e-commerce/assets/power-steering-pump.png" alt="Power Steering Pump" class="img-fluid product-image">
+                            <div class="row w-100 product-nav py-2 px-0">
+                                <div class="col p-0 text-center">
+                                    <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
+                                </div>
+                                <div class="col p-0 text-center">
+                                    <a href="#" class="btn pnav-icon"><i class="bi bi-heart-fill"></i></a>
+                                </div>
+                                <div class="col p-0 text-center">
+                                    <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
+                                </div>
+                            </div>
+                            <div class="overlay-container">
+                                <div class="product-info text-center py-3">
+                                    <h5 class="product-name">Power Steering Pump</h5>
+                                    <div class="product-rating">
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-half"></i>
+                                        <i class="bi bi-star"></i>
+                                    </div>
+                                    <div class="product-price">
+                                        <span class="old-price">$10,000.00</span>
+                                        <span class="new-price">$9,000.00</span>
+                                    </div>
+                                </div>
+                                <?php include 'functions/overlay-buttons.php'; ?>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-6 col-lg-6 col-xl-3">
+                        <div class="dod-product-card">
+                            <img src="/e-commerce/assets/aluminum-intercooler.png" alt="Aluminum Intercooler" class="img-fluid product-image">
+                            <div class="row w-100 product-nav py-2 px-0">
+                                <div class="col p-0 text-center">
+                                    <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
+                                </div>
+                                <div class="col p-0 text-center">
+                                    <a href="#" class="btn pnav-icon"><i class="bi bi-heart-fill"></i></a>
+                                </div>
+                                <div class="col p-0 text-center">
+                                    <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
+                                </div>
+                            </div>
+                            <div class="overlay-container">
+                                <div class="product-info text-center py-3">
+                                    <h5 class="product-name">Aluminum Intercooler</h5>
+                                    <div class="product-rating">
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                    </div>
+                                    <div class="product-price">
+                                        <span class="old-price">$15,000.00</span>
+                                        <span class="new-price">$11,000.00</span>
+                                    </div>
+                                </div>
+                                <?php include 'functions/overlay-buttons.php'; ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-    <div class="container-fluid dod-section pb-5">
-        <div class="row w-100">
-            <div class="col-sm-6 col-md-6 col-lg-6 col-xl-3">
-                <div class="dod-product-card">
-                    <img src="/e-commerce/assets/oxygen-sensors.png" alt="Oxygen Sensor" class="img-fluid product-image">
-                    <div class="row w-100 product-nav py-2 px-0">
-                        <div class="col p-0 text-center">
-                            <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                        </div>
-                        <div class="col p-0 text-center">
-                            <a href="#" class="btn pnav-icon"><i class="bi bi-heart-fill"></i></a>
-                        </div>
-                        <div class="col p-0 text-center">
-                            <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                        </div>
-                    </div>
-                    <div class="overlay-container">
-                        <div class="product-info text-center py-3">
-                            <h5 class="product-name">Oxygen Sensor Single</h5>
-                            <div class="product-rating">
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-half"></i>
-                            </div>
-                            <div class="product-price">
-                                <span class="old-price">$6,000.00</span>
-                                <span class="new-price">$5,500.00</span>
-                            </div>
-                        </div>
-                        <?php include 'functions/overlay-buttons.php'; ?>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-6 col-md-6 col-lg-6 col-xl-3">
-                <div class="dod-product-card">
-                    <img src="/e-commerce/assets/catalytic-converters.png" alt="Catalytic Converter Single" class="img-fluid product-image">
-                    <div class="row w-100 product-nav py-2 px-0">
-                        <div class="col p-0 text-center">
-                            <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                        </div>
-                        <div class="col p-0 text-center">
-                            <a href="#" class="btn pnav-icon"><i class="bi bi-heart-fill"></i></a>
-                        </div>
-                        <div class="col p-0 text-center">
-                            <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                        </div>
-                    </div>
-                    <div class="overlay-container">
-                        <div class="product-info text-center py-3">
-                            <h5 class="product-name">Catalytic Converter Single</h5>
-                            <div class="product-rating">
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star"></i>
-                            </div>
-                            <div class="product-price">
-                                <span class="old-price">$9,000.00</span>
-                                <span class="new-price">$7,000.00</span>
-                            </div>
-                        </div>
-                        <?php include 'functions/overlay-buttons.php'; ?>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-6 col-md-6 col-lg-6 col-xl-3">
-                <div class="dod-product-card">
-                    <img src="/e-commerce/assets/power-steering-pump.png" alt="Power Steering Pump" class="img-fluid product-image">
-                    <div class="row w-100 product-nav py-2 px-0">
-                        <div class="col p-0 text-center">
-                            <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                        </div>
-                        <div class="col p-0 text-center">
-                            <a href="#" class="btn pnav-icon"><i class="bi bi-heart-fill"></i></a>
-                        </div>
-                        <div class="col p-0 text-center">
-                            <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                        </div>
-                    </div>
-                    <div class="overlay-container">
-                        <div class="product-info text-center py-3">
-                            <h5 class="product-name">Power Steering Pump</h5>
-                            <div class="product-rating">
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-half"></i>
-                                <i class="bi bi-star"></i>
-                            </div>
-                            <div class="product-price">
-                                <span class="old-price">$10,000.00</span>
-                                <span class="new-price">$9,000.00</span>
-                            </div>
-                        </div>
-                        <?php include 'functions/overlay-buttons.php'; ?>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-6 col-md-6 col-lg-6 col-xl-3">
-                <div class="dod-product-card">
-                    <img src="/e-commerce/assets/aluminum-intercooler.png" alt="Aluminum Intercooler" class="img-fluid product-image">
-                    <div class="row w-100 product-nav py-2 px-0">
-                        <div class="col p-0 text-center">
-                            <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                        </div>
-                        <div class="col p-0 text-center">
-                            <a href="#" class="btn pnav-icon"><i class="bi bi-heart-fill"></i></a>
-                        </div>
-                        <div class="col p-0 text-center">
-                            <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                        </div>
-                    </div>
-                    <div class="overlay-container">
-                        <div class="product-info text-center py-3">
-                            <h5 class="product-name">Aluminum Intercooler</h5>
-                            <div class="product-rating">
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                            </div>
-                            <div class="product-price">
-                                <span class="old-price">$15,000.00</span>
-                                <span class="new-price">$11,000.00</span>
-                            </div>
-                        </div>
-                        <?php include 'functions/overlay-buttons.php'; ?>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Browse by Brands Section -->
     <div class="container-fluid bbb-section py-5">
         <div class="row w-100">

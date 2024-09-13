@@ -67,7 +67,7 @@
                         </span>
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item" href="#">All Products</a></li>
+                        <li><a class="dropdown-item" href="category_page.php">All Products</a></li>
                         <li><a class="dropdown-item" href="#">Automobile</a></li>
                         <li><a class="dropdown-item" href="#">Automotive Parts</a></li>
                         <li><a class="dropdown-item" href="#">Tires and Wheels</a></li>
@@ -88,8 +88,8 @@
                             GADGETS
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="#">Option 1</a></li>
-                            <li><a class="dropdown-item" href="#">Option 2</a></li>
+                            <li><a class="dropdown-item" href="#">Digital Screen & Audio</a></li>
+                            <li><a class="dropdown-item" href="#">GPS Unit</a></li>
                         </ul>
                     </li>
                     <li class="nav-item"><a class="nav-link" href="#">SHOP</a></li>

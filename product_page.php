@@ -50,8 +50,9 @@
                     </div>
                     <p class="sku">SKU: SCT0017</p>
                     <p class="definition m-0">
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
-                        Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                    Designed to optimize forced induction systems, this intercooler is crafted from premium aluminum, ensuring exceptional durability and heat dissipation. 
+                    Its efficient design effectively cools compressed air before it enters your engine, resulting in increased horsepower and torque, improved throttle response, reduced engine strain, and enhanced fuel economy.
+                    Upgrade your vehicle's performance today with our Aluminum Intercooler. Experience the difference!
                     </p>
                 </div>  
                 <div class="col-md-12 col-lg-6 product-buttons-section d-flex flex-column justify-content-start py-2 m-0 w-100">
@@ -151,13 +152,12 @@
             <!-- Right Column (Description) -->
             <div class="col-sm-12 col-md-12 col-lg-6 px-md-0 px-lg-5 py-4">
                 <p class="history-text">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
-                    Quis ipsum suspendisse ultrices gravida. Risus commodo viverra maecenas accumsan lacus vel facilisis. Lorem ipsum dolor sit amet, 
-                    consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                Auto Tech is a leading provider of high-quality automotive parts and accessories, dedicated to serving the needs of car owners and mechanics alike.
+                With a vast inventory of products from top brands, we offer a comprehensive range of solutions for all your automotive needs.
                 </p>
                 <p class="history-text">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
-                    Quis ipsum suspendisse ultrices gravida. Risus commodo viverra maecenas accumsan lacus vel facilisis.
+                Whether you're looking for engine parts, transmission components, suspension systems, brakes, or electrical accessories, our knowledgeable staff is here to assist you in finding the perfect fit for your vehicle.
+                We pride ourselves on our commitment to customer satisfaction, offering competitive prices, reliable products, and exceptional service.
                 </p>
                 <a href="#" class="read-more">Read more</a>
             </div>

@@ -24,7 +24,7 @@
                         ALL CATEGORIES
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item" href="#">All Products</a></li>
+                        <li><a class="dropdown-item" href="category_page.php">All Products</a></li>
                         <li><a class="dropdown-item" href="#">Automobile</a></li>
                         <li><a class="dropdown-item" href="#">Automotive Parts</a></li>
                         <li><a class="dropdown-item" href="#">Tires and Wheels</a></li>
@@ -38,14 +38,14 @@
                 </li>
 
                 <!-- Simple Nav Links -->
-                <li class="nav-item my-2"><a class="nav-link fw-bold" href="#">HOME</a></li>
+                <li class="nav-item my-2"><a class="nav-link fw-bold" href="homepage.php">HOME</a></li>
                 <li class="nav-item dropdown my-2">
                     <a class="nav-link dropdown-toggle fw-bold" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         GADGETS
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item" href="#">Option 1</a></li>
-                        <li><a class="dropdown-item" href="#">Option 2</a></li>
+                        <li><a class="dropdown-item" href="#">Digital Screen & Audio/a></li>
+                        <li><a class="dropdown-item" href="#">GPS Unit</a></li>
                     </ul>
                 </li>
                 <li class="nav-item my-2"><a class="nav-link fw-bold" href="#">SHOP</a></li>

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 30, 2024 at 12:55 PM
+-- Generation Time: Oct 01, 2024 at 02:53 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -56,7 +56,9 @@ INSERT INTO `categories` (`id`, `name`) VALUES
 (6, 'Exterior Upgrades'),
 (7, 'Interior Accessories'),
 (8, 'Performance Parts'),
-(9, 'Safety and Security');
+(9, 'Safety and Security'),
+(10, 'Body Parts'),
+(11, 'Lights and Electronics');
 
 -- --------------------------------------------------------
 
@@ -227,7 +229,7 @@ ALTER TABLE `attributes`
 -- AUTO_INCREMENT for table `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `products`

@@ -1,7 +1,6 @@
 <?php
 require 'db_connect.php';
 
-
 if (!isset($_GET['id'])) {
     echo "Product ID is missing.";
     exit;
@@ -9,7 +8,7 @@ if (!isset($_GET['id'])) {
 
 $product_id = $_GET['id'];
 
-$query = "SELECT p.id, p.name, p.sku, p.short_description, p.price, p.description, p.feature_product, c.name as category_name 
+$query = "SELECT p.id, p.name, p.sku, p.short_description, p.price, p.old_price, p.description, p.feature_product, c.name as category_name 
           FROM products p
           JOIN categories c ON p.category_id = c.id
           WHERE p.id = $product_id";
@@ -24,6 +23,12 @@ $product = mysqli_fetch_assoc($result);
 
 $image_query = "SELECT image_path FROM product_images WHERE product_id = $product_id";
 $image_result = mysqli_query($conn, $image_query);
+
+$attribute_query = "SELECT a.name, pa.value 
+                    FROM product_attributes pa
+                    JOIN attributes a ON pa.attribute_id = a.id
+                    WHERE pa.product_id = $product_id";
+$attribute_result = mysqli_query($conn, $attribute_query);
 ?>
 
 <!DOCTYPE html>
@@ -45,8 +50,23 @@ $image_result = mysqli_query($conn, $image_query);
             <p><strong>Category:</strong> <?php echo $product['category_name']; ?></p>
             <p><strong>Short Description:</strong> <?php echo $product['short_description']; ?></p>
             <p><strong>Description:</strong> <?php echo $product['description']; ?></p>
-            <p><strong>Price:</strong> $<?php echo number_format($product['price'], 2); ?></p>
             <p><strong>Featured Product:</strong> <?php echo $product['feature_product'] ? 'Yes' : 'No'; ?></p>
+            <p><strong>Price:</strong> $<?php echo number_format($product['price'], 2); ?></p>
+            
+            <?php if (!empty($product['old_price'])): ?>
+                <p><strong>Old Price:</strong> <span style="text-decoration: line-through;">$<?php echo number_format($product['old_price'], 2); ?></span></p>
+            <?php endif; ?>
+
+            <h3>Product Attributes</h3>
+            <?php if (mysqli_num_rows($attribute_result) > 0): ?>
+                <ul>
+                    <?php while ($attribute = mysqli_fetch_assoc($attribute_result)): ?>
+                        <li><strong><?php echo $attribute['name']; ?>:</strong> <?php echo $attribute['value']; ?></li>
+                    <?php endwhile; ?>
+                </ul>
+            <?php else: ?>
+                <p>No attributes available for this product.</p>
+            <?php endif; ?>
 
             <h3>Product Images</h3>
             <?php if (mysqli_num_rows($image_result) > 0): ?>

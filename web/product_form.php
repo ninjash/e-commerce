@@ -9,6 +9,11 @@ if (!isset($_SESSION['products'])) {
     $_SESSION['products'] = [];
 }
 
+
+$attributes_query = "SELECT * FROM attributes";
+$attributes_result = mysqli_query($conn, $attributes_query);
+
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_product'])) {
 
     $name = $_POST['name'];
@@ -27,6 +32,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_product'])) {
 
         if (move_uploaded_file($main_image["tmp_name"], $_SERVER['DOCUMENT_ROOT'] . $target_file)) {
 
+            $attributes = [];
+            if (isset($_POST['attributes'])) {
+                foreach ($_POST['attributes'] as $attribute_id => $value) {
+                    $attributes[$attribute_id] = $value;
+                }
+            }
+
             $product_data = [
                 'name' => $name,
                 'sku' => $sku,
@@ -35,7 +47,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_product'])) {
                 'description' => $description,
                 'feature_product' => $feature_product,
                 'category_id' => $category_id,
-                'main_image' => $target_file
+                'main_image' => $target_file,
+                'attributes' => $attributes
             ];
 
             $_SESSION['products'][] = $product_data;
@@ -68,6 +81,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_products'])) {
             $image_query = "INSERT INTO product_images (product_id, image_path) 
                             VALUES ($product_id, '$main_image')";
             mysqli_query($conn, $image_query);
+
+            if (isset($product['attributes'])) {
+                foreach ($product['attributes'] as $attribute_id => $value) {
+                    $attribute_query = "INSERT INTO product_attributes (product_id, attribute_id, value) 
+                                        VALUES ($product_id, $attribute_id, '$value')";
+                    mysqli_query($conn, $attribute_query);
+                }
+            }
         }
     }
     $_SESSION['products'] = [];
@@ -110,6 +131,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_products'])) {
     <label>Main Image</label><br>
     <input type="file" name="main_image" required><br>
 
+    <h3>Product Attributes</h3>
+    <?php if (mysqli_num_rows($attributes_result) > 0): ?>
+        <?php while ($attribute = mysqli_fetch_assoc($attributes_result)): ?>
+            <label><?php echo $attribute['name']; ?></label>
+            <input type="text" name="attributes[<?php echo $attribute['id']; ?>]" placeholder="Enter <?php echo $attribute['name']; ?>"><br>
+        <?php endwhile; ?>
+    <?php endif; ?>
 
     <button type="submit" name="add_product">Add Product</button><br>
 </form>

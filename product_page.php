@@ -13,12 +13,31 @@ $product = new Product($conn, $product_id);
 
 $product_details = $product->getProductDetails();
 
-if (!$product_details) {
+$product_query = "SELECT * FROM products WHERE id = $product_id";
+$product_result = mysqli_query($conn, $product_query);
+
+if (!$product_result || mysqli_num_rows($product_result) == 0) {
     echo "Product not found.";
     exit;
 }
 
 $product_attributes = $product->getProductAttributes();
+
+$product = mysqli_fetch_assoc($product_result);
+
+
+$next_query = "SELECT id FROM products WHERE id > $product_id ORDER BY id ASC LIMIT 1";
+$next_result = mysqli_query($conn, $next_query);
+$next_product = mysqli_fetch_assoc($next_result);
+
+
+$prev_query = "SELECT id FROM products WHERE id < $product_id ORDER BY id DESC LIMIT 1";
+$prev_result = mysqli_query($conn, $prev_query);
+$prev_product = mysqli_fetch_assoc($prev_result);
+
+
+$next_id = isset($next_product['id']) ? $next_product['id'] : null;
+$prev_id = isset($prev_product['id']) ? $prev_product['id'] : null;
 ?>
 
 <!DOCTYPE html>
@@ -52,8 +71,16 @@ $product_attributes = $product->getProductAttributes();
                             <li class="breadcrumb-item"><a href="#">Products</a></li>
                             <li class="breadcrumb-item active" aria-current="page"><?php echo $product_details['name']; ?></li>
                             <li class="ms-auto">
-                                <a href="#" class="text-muted"><i class="bi bi-chevron-left"></i> prev</a>
-                                <a href="#" class="text-muted">next <i class="bi bi-chevron-right"></i></a>
+                                <?php if ($prev_id): ?>
+                                    <a href="product_page.php?id=<?php echo $prev_id; ?>" class="text-muted">
+                                        <i class="bi bi-chevron-left"></i> prev
+                                    </a>
+                                <?php endif; ?>
+                                <?php if ($next_id): ?>
+                                    <a href="product_page.php?id=<?php echo $next_id; ?>" class="text-muted">
+                                        next <i class="bi bi-chevron-right"></i>
+                                    </a>
+                                <?php endif; ?>
                             </li>
                         </ol>
                     </nav>
@@ -154,10 +181,12 @@ $product_attributes = $product->getProductAttributes();
                     <table class="table col-6">
                         <tbody>
                             <?php while ($attribute = $product_attributes->fetch_assoc()) : ?>
-                                <tr>
-                                    <th><?php echo $attribute['name']; ?></th>
-                                    <td><?php echo $attribute['value']; ?></td>
-                                </tr>
+                                <?php if (!empty($attribute['value'])) : // Only display attributes with a value ?>
+                                    <tr>
+                                        <th><?php echo $attribute['name']; ?></th>
+                                        <td><?php echo $attribute['value']; ?></td>
+                                    </tr>
+                                <?php endif; ?>
                             <?php endwhile; ?>
                         </tbody>
                     </table>

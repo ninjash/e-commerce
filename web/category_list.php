@@ -10,6 +10,7 @@ $result = mysqli_query($conn, $query);
         <tr>
             <th>ID</th>
             <th>Category Name</th>
+            <th>Description</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -18,6 +19,7 @@ $result = mysqli_query($conn, $query);
             <tr>
                 <td><?php echo $category['id']; ?></td>
                 <td><?php echo $category['name']; ?></td>
+                <td><?php echo $category['description']; ?></td>
                 <td>
                     <a href="category.php?id=<?php echo $category['id']; ?>">View</a>
                 </td>

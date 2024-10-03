@@ -1,3 +1,38 @@
+<?php
+require 'web/db_connect.php';
+require 'Product.php';
+
+// Fetch all categories
+$category_query = "SELECT c.id, c.name, c.description, COUNT(p.id) as product_count
+                   FROM categories c
+                   LEFT JOIN products p ON c.id = p.category_id
+                   GROUP BY c.id";
+$category_result = mysqli_query($conn, $category_query);
+
+// Handle selected category (default to all products)
+$category_id = isset($_GET['category_id']) ? (int)$_GET['category_id'] : 0;
+$product_query = "SELECT p.*, pi.image_path 
+                  FROM products p
+                  LEFT JOIN product_images pi ON p.id = pi.product_id";
+
+// Fetch the specific category details if a category is selected
+if ($category_id > 0) {
+    $category_detail_query = "SELECT * FROM categories WHERE id = $category_id";
+    $category_detail_result = mysqli_query($conn, $category_detail_query);
+
+    if ($category_detail_result && mysqli_num_rows($category_detail_result) > 0) {
+        $category = mysqli_fetch_assoc($category_detail_result); // Store the category details
+        $product_query .= " WHERE p.category_id = $category_id"; // Fetch products for the selected category
+    } else {
+        echo "Category not found.";
+        exit;
+    }
+}
+
+// Fetch products
+$product_result = mysqli_query($conn, $product_query);
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,43 +49,44 @@
     <?php include 'global/header.php'; ?>
 </header>
 <main>
-<!-- Main Content -->
+    <!-- Main Content -->
     <div class="container-fluid category-product-container">
         <div class="row w-100">
             <div class="category-header d-flex justify-content-between align-items-center py-4 px-0">
                 <div class="col-6">
-                    <h3 class="m-0"><strong>All Products</strong></h3>
+                    <h3 class="m-0"><strong>
+                        <?php if ($category_id > 0 && isset($category)) : ?>
+                            Category: <?php echo $category['name']; ?>
+                        <?php else : ?>
+                            All Products
+                        <?php endif; ?>
+                    </strong></h3>
                 </div>
                 <div class="col-6 d-flex justify-content-end">
                     <nav aria-label="breadcrumb" class="breadcrumb-tab">
                         <ol class="breadcrumb ms-auto">
                             <li class="breadcrumb-item"><a href="#">Home</a></li>
-                            <li class="breadcrumb-item">
-                                <i class="bi bi-chevron-right mx-2"></i>
-                            </li>
-                            <li class="breadcrumb-item"><a href="#">Products</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Products</li>
                         </ol>
                     </nav>
                 </div>
             </div>
         </div>
     </div>
+    <!-- Category List -->
     <div class="container-fluid py-lg-5">
         <div class="row w-100">
             <div class="col-3 category-list-column px-0">
                 <div class="category-list-section py-4" id="categoryListSection">
                     <h5 class="category-list-title mb-3">Categories</h5>
                     <ul class="category-list-menu d-flex flex-column justify-content-start px-3">
-                        <li><a href="#">All Products</a></li>
-                        <li><a href="#">Automobile <span>(1)</span></a></li>
-                        <li><a href="#">Automotive Parts <span>(7)</span></a></li>
-                        <li><a href="#">Tires and Wheels <span>(4)</span></a></li>
-                        <li><a href="#">Car Maintenance <span>(1)</span></a></li>
-                        <li><a href="#">Electronics and Gadgets <span>(2)</span></a></li>
-                        <li><a href="#">Exterior Upgrades <span>(1)</span></a></li>
-                        <li><a href="#">Interior Accessories <span>(2)</span></a></li>
-                        <li><a href="#">Performance Parts <span>(2)</span></a></li>
-                        <li><a href="#">Safety and Security <span>(1)</span></a></li>
+                        <li><a href="?category_id=0">All Products</a></li>
+                        <?php while ($category_row = mysqli_fetch_assoc($category_result)): ?>
+                            <li><a href="?category_id=<?= $category_row['id']; ?>">
+                                <?php echo $category_row['name']; ?>
+                                <span>(<?php echo $category_row['product_count']; ?>)</span>
+                            </a></li>
+                        <?php endwhile; ?>
                     </ul>
                 </div>
             </div>
@@ -78,616 +114,30 @@
                         </button>
                         <button class="btn btn-filter">
                             <i class="bi bi-sliders"></i>
-                        </button>
+                     </button>
                     </div>
                 </div>
                 <div class="product-category-body row d-flex justify-content-between">
-                    <!-- Product 1 -->
-                    <div class="col-sm-12 col-md-6 col-lg-3 category-product mb-4 p-0">
-                        <div class="product-category-card p-3 pb-0 position-relative">
-                            <img src="/e-commerce/assets/products/aluminum-intercooler.png" alt="Aluminum Intercooler" class="img-fluid product-image">
-                            <div class="overlay-container">
-                                <div class="product-info text-center pt-3">
-                                    <div class="product-rating-category">
-                                        <p><i class="bi bi-star-fill"></i> 4.0</p>
+                    <?php while ($product = mysqli_fetch_assoc($product_result)) : ?>
+                        <div class="col-sm-12 col-md-6 col-lg-3 category-product mb-4 p-0">
+                            <div class="product-category-card p-3 pb-0 position-relative">
+                                <img src="<?php echo $product['image_path']; ?>" alt="Product Image" class="img-fluid product-image">
+                                <div class="overlay-container">
+                                    <div class="product-info text-center pt-3">
+                                        <div class="product-rating-category">
+                                            <p><i class="bi bi-star-fill"></i> 4.0</p>
+                                        </div>
+                                        <h5 class="product-category-name"><?php echo $product['name']; ?></h5>
+                                        <p class="product-category-price">
+                                            <span class="category-old-price">$<?php echo number_format($product['old_price'], 2); ?></span>
+                                            <span class="category-new-price">$<?php echo number_format($product['price'], 2); ?></span>
+                                        </p>
                                     </div>
-                                    <h5 class="product-category-name">Aluminum Intercooler</h5>
-                                    <p class="product-category-price">
-                                        <span class="category-old-price">$1,500.00</span> 
-                                        <span class="category-new-price">$1,350.00</span>
-                                    </p>
+                                    <?php include 'functions/overlay-buttons.php'; ?>
                                 </div>
-                                <?php include 'functions/overlay-buttons.php'; ?>
                             </div>
                         </div>
-                        <div class="row w-100 product-nav-category px-0">
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Product 2 -->
-                    <div class="col-sm-12 col-md-6 col-lg-3 category-product mb-4 p-0">
-                        <div class="product-category-card p-3 pb-0">
-                            <img src="/e-commerce/assets/products/power-steering-pump.png" alt="Power Steering Pump" class="img-fluid product-image">
-                            <div class="overlay-container">  
-                                <div class="product-info text-center pt-3">
-                                    <div class="product-rating-category">
-                                        <p><i class="bi bi-star-fill"></i> 3.5</p>
-                                    </div>
-                                    <h5 class="product-category-name">Power Steering Pump</h5>
-                                    <p class="product-category-price">
-                                        <span class="category-old-price">$1,800.00</span> 
-                                        <span class="category-new-price">$1,620.00</span>
-                                    </p>
-                                </div>
-                                <?php include 'functions/overlay-buttons.php'; ?>
-                            </div>  
-                        </div>
-                        <div class="row w-100 product-nav-category px-0">
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Product 3 -->
-                    <div class="col-sm-12 col-md-6 col-lg-3 category-product mb-4 p-0">
-                        <div class="product-category-card p-3 pb-0">
-                            <img src="/e-commerce/assets/products/rims-tires.png" alt="Rim and Tire set" class="img-fluid product-image">
-                            <div class="overlay-container">
-                                <div class="product-info text-center pt-3">
-                                    <div class="product-rating-category">
-                                        <p><i class="bi bi-star-fill"></i> 4.0</p>
-                                    </div>
-                                    <h5 class="product-category-name">Rim and Tire set</h5>
-                                    <p class="product-category-price">
-                                        <span class="category-old-price">$4,500.00</span> 
-                                        <span class="category-new-price">$3,150.00</span>
-                                    </p>
-                                </div>
-                                <?php include 'functions/overlay-buttons.php'; ?>
-                            </div>  
-                        </div>
-                        <div class="row w-100 product-nav-category px-0">
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Product 4 -->
-                    <div class="col-sm-12 col-md-6 col-lg-3 category-product mb-4 p-0">
-                        <div class="product-category-card p-3 pb-0">
-                            <div class="image-container position-relative">
-                                <div class="new-tag position-absolute">New</div>
-                                <img src="/e-commerce/assets/products/ball-joints.png" alt="Ball Joints" class="img-fluid product-image">
-                            </div>
-                            <div class="overlay-container">
-                                <div class="product-info text-center pt-3">
-                                    <div class="product-rating-category">
-                                        <p><i class="bi bi-star-fill"></i> 4.0</p>
-                                    </div>
-                                    <h5 class="product-category-name">Ball Joints</h5>
-                                    <p class="product-category-price">
-                                        <span class="category-old-price">$900.00</span> 
-                                        <span class="category-new-price">$810.00</span>
-                                    </p>
-                                </div>
-                                <?php include 'functions/overlay-buttons.php'; ?>
-                            </div>  
-                        </div>
-                        <div class="row w-100 product-nav-category px-0">
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Product 5 -->
-                    <div class="col-sm-12 col-md-6 col-lg-3 category-product mb-4 p-0">
-                        <div class="product-category-card p-3 pb-0">
-                            <img src="/e-commerce/assets/products/oxygen-sensors.png" alt="Oxygen Sensors" class="img-fluid product-image">
-                            <div class="overlay-container">
-                                <div class="product-info text-center pt-3">
-                                    <div class="product-rating-category">
-                                        <p><i class="bi bi-star-fill"></i> 4.0</p>
-                                    </div>
-                                    <h5 class="product-category-name">Oxygen Sensors</h5>
-                                    <p class="product-category-price">
-                                        <span class="category-old-price">$2,000.00</span> 
-                                        <span class="category-new-price">$1,800.00</span>
-                                    </p>
-                                </div>
-                                <?php include 'functions/overlay-buttons.php'; ?>
-                            </div> 
-                        </div>
-                        <div class="row w-100 product-nav-category px-0">
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Product 6 -->
-                    <div class="col-sm-12 col-md-6 col-lg-3 category-product mb-4 p-0">
-                        <div class="product-category-card p-3 pb-0">
-                            <img src="/e-commerce/assets/products/momo-steering-wheel-1.png" alt="Momo MOD27/C Steering Wheel" class="img-fluid product-image">
-                            <div class="overlay-container">
-                                <div class="product-info text-center pt-3">
-                                    <div class="product-rating-category">
-                                        <p><i class="bi bi-star-fill"></i> 4.0</p>
-                                    </div>
-                                    <h5 class="product-category-name">Momo MOD27/C Steering Wheel</h5>
-                                    <p class="product-category-price">
-                                        <span class="category-old-price">$7,600.00</span> 
-                                        <span class="category-new-price">$6,750.00</span>
-                                    </p>
-                                </div>
-                                <?php include 'functions/overlay-buttons.php'; ?>
-                            </div> 
-                        </div>
-                        <div class="row w-100 product-nav-category px-0">
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Product 7 -->
-                    <div class="col-sm-12 col-md-6 col-lg-3 category-product mb-4 p-0">
-                        <div class="product-category-card p-3 pb-0">
-                            <img src="/e-commerce/assets/products/reverse-backup-camera.png" alt="AutoSky Reverse Backup Camera HD Wide View Angle" class="img-fluid product-image">
-                            <div class="overlay-container">
-                                <div class="product-info text-center pt-3">
-                                    <div class="product-rating-category">
-                                        <p><i class="bi bi-star-fill"></i> 4.0</p>
-                                    </div>
-                                    <h5 class="product-category-name">AutoSky Reverse Backup Camera HD Wide View Angle</h5>
-                                    <p class="product-category-price">
-                                        <span class="category-old-price">$5,000.00</span> 
-                                        <span class="category-new-price">$4,500.00</span>
-                                    </p>
-                                </div>
-                                <?php include 'functions/overlay-buttons.php'; ?>
-                            </div> 
-                        </div>
-                        <div class="row w-100 product-nav-category px-0">
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Product 8 -->
-                    <div class="col-sm-12 col-md-6 col-lg-3 category-product mb-4 p-0">
-                        <div class="product-category-card p-3 pb-0">
-                            <img src="/e-commerce/assets/products/bosch-oil-filter.png" alt="Bosch Oil Filter" class="img-fluid product-image">
-                            <div class="overlay-container">
-                                <div class="product-info text-center pt-3">
-                                    <div class="product-rating-category">
-                                        <p><i class="bi bi-star-fill"></i> 5.0</p>
-                                    </div>
-                                    <h5 class="product-category-name">Bosch Oil Filter</h5>
-                                    <p class="product-category-price">
-                                        <span class="category-old-price">$5,000.00</span> 
-                                        <span class="category-new-price">$4,500.00</span>
-                                    </p>
-                                </div>
-                                <?php include 'functions/overlay-buttons.php'; ?>
-                            </div> 
-                        </div>
-                        <div class="row w-100 product-nav-category px-0">
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Product 9 -->
-                    <div class="col-sm-12 col-md-6 col-lg-3 category-product mb-4 p-0">
-                        <div class="product-category-card p-3 pb-0">
-                            <img src="/e-commerce/assets/products/car-spark-plug.png" alt="Spark Plug Car" class="img-fluid product-image">
-                            <div class="overlay-container">
-                                <div class="product-info text-center pt-3">
-                                    <div class="product-rating-category">
-                                        <p><i class="bi bi-star-fill"></i> 4.0</p>
-                                    </div>
-                                    <h5 class="product-category-name">Spark Plug Car</h5>
-                                    <p class="product-category-price">
-                                        <span class="category-old-price">$750.00</span> 
-                                        <span class="category-new-price">$675.00</span>
-                                    </p>
-                                </div>
-                                <?php include 'functions/overlay-buttons.php'; ?>
-                            </div> 
-                        </div>
-                        <div class="row w-100 product-nav-category px-0">
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Product 10 -->
-                    <div class="col-sm-12 col-md-6 col-lg-3 category-product mb-4 p-0">
-                        <div class="product-category-card p-3 pb-0">
-                            <img src="/e-commerce/assets/products/brake-kit.png" alt="Front and Rear Autospecialty Brake Kit" class="img-fluid product-image">
-                            <div class="overlay-container">
-                                <div class="product-info text-center pt-3">
-                                    <div class="product-rating-category">
-                                        <p><i class="bi bi-star-fill"></i> 4.5</p>
-                                    </div>
-                                    <h5 class="product-category-name">Front and Rear Autospecialty Brake Kit</h5>
-                                    <p class="product-category-price">
-                                        <span class="category-old-price">$10,000.00</span> 
-                                        <span class="category-new-price">$9,000.00</span>
-                                    </p>
-                                </div>
-                                <?php include 'functions/overlay-buttons.php'; ?>
-                            </div> 
-                        </div>
-                        <div class="row w-100 product-nav-category px-0">
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Product 11 -->
-                    <div class="col-sm-12 col-md-6 col-lg-3 category-product mb-4 p-0">
-                        <div class="product-category-card p-3 pb-0">
-                            <div class="image-container position-relative">
-                                <div class="sale-tag position-absolute">Sale</div>
-                                <img src="/e-commerce/assets/products/car-battery-charger.png" alt="Car Battery Charger" class="img-fluid product-image">
-                            </div>
-                            <div class="overlay-container">
-                                <div class="product-info text-center pt-3">
-                                    <div class="product-rating-category">
-                                        <p><i class="bi bi-star-fill"></i> 4.0</p>
-                                    </div>
-                                    <h5 class="product-category-name">Car Battery Charger</h5>
-                                    <p class="product-category-price">
-                                        <span class="category-old-price">$15,000.00</span> 
-                                        <span class="category-new-price">$13,500.00</span>
-                                    </p>
-                                </div>
-                                <?php include 'functions/overlay-buttons.php'; ?>
-                            </div> 
-                        </div>
-                        <div class="row w-100 product-nav-category px-0">
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Product 12 -->
-                    <div class="col-sm-12 col-md-6 col-lg-3 category-product mb-4 p-0">
-                        <div class="product-category-card p-3 pb-0">
-                            <img src="/e-commerce/assets/products/catalytic-converters.png" alt="Catalytic Converters" class="img-fluid product-image">
-                            <div class="overlay-container">
-                                <div class="product-info text-center pt-3">
-                                    <div class="product-rating-category">
-                                        <p><i class="bi bi-star-fill"></i> 5.0</p>
-                                    </div>
-                                    <h5 class="product-category-name">Catalytic Converters</h5>
-                                    <p class="product-category-price">
-                                        <span class="category-old-price">$5,500.00</span> 
-                                        <span class="category-new-price">$4,950.00</span>
-                                    </p>
-                                </div>
-                                <?php include 'functions/overlay-buttons.php'; ?>
-                            </div> 
-                        </div>
-                        <div class="row w-100 product-nav-category px-0">
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Product 13 -->
-                    <div class="col-sm-12 col-md-6 col-lg-3 category-product mb-4 p-0">
-                        <div class="product-category-card p-3 pb-0">
-                            <img src="/e-commerce/assets/products/gear-stick.png" alt="Gear Stick" class="img-fluid product-image">
-                            <div class="overlay-container">
-                                <div class="product-info text-center pt-3">
-                                    <div class="product-rating-category">
-                                        <p><i class="bi bi-star-fill"></i> 5.0</p>
-                                    </div>
-                                    <h5 class="product-category-name">Gear Stick</h5>
-                                    <p class="product-category-price">
-                                        <span class="category-old-price">$1,500.00</span> 
-                                        <span class="category-new-price">$1,350.00</span>
-                                    </p>
-                                </div>
-                                <?php include 'functions/overlay-buttons.php'; ?>
-                            </div> 
-                        </div>
-                        <div class="row w-100 product-nav-category px-0">
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Product 14 -->
-                    <div class="col-sm-12 col-md-6 col-lg-3 category-product mb-4 p-0">
-                        <div class="product-category-card p-3 pb-0">
-                            <img src="/e-commerce/assets/products/momo-steering-wheel-2.png" alt="Momo R1907/33S Steering Wheel" class="img-fluid product-image">
-                            <div class="overlay-container">
-                                <div class="product-info text-center pt-3">
-                                    <div class="product-rating-category">
-                                        <p><i class="bi bi-star-fill"></i> 4.0</p>
-                                    </div>
-                                    <h5 class="product-category-name">Momo R1907/33S Steering Wheel</h5>
-                                    <p class="product-category-price">
-                                        <span class="category-old-price">$2,000.00</span> 
-                                        <span class="category-new-price">$1,800.00</span>
-                                    </p>
-                                </div>
-                                <?php include 'functions/overlay-buttons.php'; ?>
-                            </div> 
-                        </div>
-                        <div class="row w-100 product-nav-category px-0">
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Product 15 -->
-                    <div class="col-sm-12 col-md-6 col-lg-3 category-product mb-4 p-0">
-                        <div class="product-category-card p-3 pb-0">
-                            <img src="/e-commerce/assets/products/car-seat.png" alt="Recliner Car Seat" class="img-fluid product-image">
-                            <div class="overlay-container">
-                                <div class="product-info text-center pt-3">
-                                    <div class="product-rating-category">
-                                        <p><i class="bi bi-star-fill"></i> 5.0</p>
-                                    </div>
-                                    <h5 class="product-category-name">Recliner Car Seat</h5>
-                                    <p class="product-category-price">
-                                        <span class="category-old-price">$15,000.00</span> 
-                                        <span class="category-new-price">$13,500.00</span>
-                                    </p>
-                                </div>
-                                <?php include 'functions/overlay-buttons.php'; ?>
-                            </div> 
-                        </div>
-                        <div class="row w-100 product-nav-category px-0">
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Product 16 -->
-                    <div class="col-sm-12 col-md-6 col-lg-3 category-product mb-4 p-0">
-                        <div class="product-category-card p-3 pb-0">
-                            <img src="/e-commerce/assets/products/piston-sparkplug.png" alt="Engine Piston and Spark Plug Isolated White" class="img-fluid product-image">
-                            <div class="overlay-container">
-                                <div class="product-info text-center pt-3">
-                                    <div class="product-rating-category">
-                                        <p><i class="bi bi-star-fill"></i> 5.0</p>
-                                    </div>
-                                    <h5 class="product-category-name">Engine Piston and Spark Plug Isolated White</h5>
-                                    <p class="product-category-price">
-                                        <span class="category-old-price">$8,000.00</span> 
-                                        <span class="category-new-price">$7,200.00</span>
-                                    </p>
-                                </div>
-                                <?php include 'functions/overlay-buttons.php'; ?>
-                            </div> 
-                        </div>
-                        <div class="row w-100 product-nav-category px-0">
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Product 17 -->
-                    <div class="col-sm-12 col-md-6 col-lg-3 category-product mb-4 p-0">
-                        <div class="product-category-card p-3 pb-0">
-                            <img src="/e-commerce/assets/products/brake-disc.png" alt="Brake Disc" class="img-fluid product-image">
-                            <div class="overlay-container">
-                                <div class="product-info text-center pt-3">
-                                    <div class="product-rating-category">
-                                        <p><i class="bi bi-star-fill"></i> 3.0</p>
-                                    </div>
-                                    <h5 class="product-category-name">Brake Disc</h5>
-                                    <p class="product-category-price">
-                                        <span class="category-old-price">$5,000.00</span> 
-                                        <span class="category-new-price">$4,500.00</span>
-                                    </p>
-                                </div>
-                                <?php include 'functions/overlay-buttons.php'; ?>
-                            </div> 
-                        </div>
-                        <div class="row w-100 product-nav-category px-0">
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Product 18 -->
-                    <div class="col-sm-12 col-md-6 col-lg-3 category-product mb-4 p-0">
-                        <div class="product-category-card p-3 pb-0">
-                            <img src="/e-commerce/assets/products/alternator.png" alt="Alternator Electrical Wires & Cable Spare Part" class="img-fluid product-image">
-                            <div class="overlay-container">
-                                <div class="product-info text-center pt-3">
-                                    <div class="product-rating-category">
-                                        <p><i class="bi bi-star-fill"></i> 5.0</p>
-                                    </div>
-                                    <h5 class="product-category-name">Alternator Electrical Wires & Cable Spare Part</h5>
-                                    <p class="product-category-price">
-                                        <span class="category-old-price">$20,000.00</span> 
-                                        <span class="category-new-price">$18,000.00</span>
-                                    </p>
-                                </div>
-                                <?php include 'functions/overlay-buttons.php'; ?>
-                            </div>
-                        </div>
-                        <div class="row w-100 product-nav-category px-0">
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Product 19 -->
-                    <div class="col-sm-12 col-md-6 col-lg-3 category-product mb-4 p-0">
-                        <div class="product-category-card p-3 pb-0">
-                            <img src="/e-commerce/assets/products/spark-plugs.png" alt="Spark Plugs" class="img-fluid product-image">
-                            <div class="overlay-container">
-                                <div class="product-info text-center pt-3">
-                                    <div class="product-rating-category">
-                                        <p><i class="bi bi-star-fill"></i> 4.0</p>
-                                    </div>
-                                    <h5 class="product-category-name">Spark Plugs</h5>
-                                    <p class="product-category-price">
-                                        <span class="category-old-price">$2,500.00</span> 
-                                        <span class="category-new-price">$2,250.00</span>
-                                    </p>
-                                </div>
-                                <?php include 'functions/overlay-buttons.php'; ?>
-                            </div>
-                        </div>
-                        <div class="row w-100 product-nav-category px-0">
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Product 20 -->
-                    <div class="col-sm-12 col-md-6 col-lg-3 category-product mb-4 p-0">
-                        <div class="product-category-card p-3 pb-0">
-                            <img src="/e-commerce/assets/products/service-tyre.png" alt="Service Tyre" class="img-fluid product-image">
-                            <div class="overlay-container">
-                                <div class="product-info text-center pt-3">
-                                    <div class="product-rating-category">
-                                        <p><i class="bi bi-star-fill"></i> 0</p>
-                                    </div>
-                                    <h5 class="product-category-name">Service Tyre</h5>
-                                    <p class="product-category-price">
-                                        <span class="category-old-price">$8,000.00</span> 
-                                        <span class="category-new-price">$7,200.00</span>
-                                    </p>
-                                </div>
-                                <?php include 'functions/overlay-buttons.php'; ?>
-                            </div>
-                        </div>
-                        <div class="row w-100 product-nav-category px-0">
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
-                            </div>
-                            <div class="col p-0 text-center">
-                                <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                            </div>
-                        </div>
-                    </div>
+                    <?php endwhile; ?>
                 </div>
             </div>
         </div>

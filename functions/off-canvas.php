@@ -44,7 +44,7 @@
                         GADGETS
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item" href="#">Digital Screen & Audio/a></li>
+                        <li><a class="dropdown-item" href="#">Digital Screen & Audio</a></li>
                         <li><a class="dropdown-item" href="#">GPS Unit</a></li>
                     </ul>
                 </li>

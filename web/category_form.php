@@ -4,8 +4,9 @@ require 'db_connect.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $category_name = $_POST['category_name'];
+    $description = $_POST['description']; 
 
-    $query = "INSERT INTO categories (name) VALUES ('$category_name')";
+    $query = "INSERT INTO categories (name, description) VALUES ('$category_name', '$description')";
     
     if (mysqli_query($conn, $query)) {
         header("Location: category_list.php");
@@ -34,7 +35,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <label for="category_name" class="form-label">Category Name</label>
             <input type="text" class="form-control" id="category_name" name="category_name" required>
         </div>
-        
+        <div class="mb-3">
+            <label for="description" class="form-label">Category Description</label>
+            <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+        </div>
         <button type="submit" class="btn btn-primary">Add Category</button>
         <a href="category_list.php" class="btn btn-secondary">Cancel</a>
     </form>

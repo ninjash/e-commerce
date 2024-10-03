@@ -39,6 +39,8 @@ $product_result = mysqli_query($conn, $product_query);
         <div class="card-body">
             <h2><?php echo $category['name']; ?></h2>
 
+            <p><strong>Description:</strong> <?php echo $category['description']; ?></p>
+            
             <h3>Products in this Category</h3>
             <?php if (mysqli_num_rows($product_result) > 0): ?>
                 <table class="table table-striped">

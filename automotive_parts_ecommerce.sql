@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 02, 2024 at 11:32 AM
+-- Generation Time: Oct 03, 2024 at 09:57 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -52,25 +52,26 @@ INSERT INTO `attributes` (`id`, `name`) VALUES
 
 CREATE TABLE `categories` (
   `id` int(11) NOT NULL,
-  `name` varchar(255) NOT NULL
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `categories`
 --
 
-INSERT INTO `categories` (`id`, `name`) VALUES
-(1, 'Automobile'),
-(2, 'Automotive Parts'),
-(3, 'Tires and Wheels'),
-(4, 'Car Maintenance'),
-(5, 'Electronics and Gadgets'),
-(6, 'Exterior Upgrades'),
-(7, 'Interior Accessories'),
-(8, 'Performance Parts'),
-(9, 'Safety and Security'),
-(10, 'Body Parts'),
-(11, 'Lights and Electronics');
+INSERT INTO `categories` (`id`, `name`, `description`) VALUES
+(1, 'Automobile', 'Vehicles designed for road use, including cars, trucks, and other motor vehicles.'),
+(2, 'Automotive Parts', 'Parts and accessories used for the repair, maintenance, and enhancement of vehicles.'),
+(3, 'Tires and Wheels', 'A variety of tires and wheels designed to fit various vehicles and driving conditions.'),
+(4, 'Car Maintenance', 'Products and services focused on maintaining and servicing automobiles.'),
+(5, 'Electronics and Gadgets', 'Electronic devices and gadgets designed for use in automobiles for convenience or entertainment.'),
+(6, 'Exterior Upgrades', 'Upgrades and accessories that enhance the exterior appearance and functionality of vehicles.'),
+(7, 'Interior Accessories', 'Accessories and parts designed to improve the interior comfort and functionality of vehicles.'),
+(8, 'Performance Parts', 'High-performance parts designed to boost a vehicle’s performance in terms of speed, handling, and power.'),
+(9, 'Safety and Security', 'Products focused on improving vehicle safety and security, including alarms and tracking devices.'),
+(10, 'Body Parts', 'Body parts such as bumpers, doors, and fenders used for repairs or custom modifications.'),
+(11, 'Lights and Electronics', 'Lights, bulbs, and electronic components used in vehicles for both functional and aesthetic purposes.');
 
 -- --------------------------------------------------------
 

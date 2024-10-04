@@ -1,7 +1,7 @@
 <?php
 require 'db_connect.php';
 
-
+// Check if category ID is provided
 if (!isset($_GET['id'])) {
     echo "Category ID is missing.";
     exit;
@@ -9,6 +9,7 @@ if (!isset($_GET['id'])) {
 
 $category_id = $_GET['id'];
 
+// Fetch the category details
 $category_query = "SELECT * FROM categories WHERE id = $category_id";
 $category_result = mysqli_query($conn, $category_query);
 
@@ -19,7 +20,13 @@ if (!$category_result || mysqli_num_rows($category_result) == 0) {
 
 $category = mysqli_fetch_assoc($category_result);
 
-$product_query = "SELECT * FROM products WHERE category_id = $category_id";
+// Fetch products for this category using the product_categories junction table
+$product_query = "
+    SELECT p.*
+    FROM products p
+    INNER JOIN product_categories pc ON p.id = pc.product_id
+    WHERE pc.category_id = $category_id
+";
 $product_result = mysqli_query($conn, $product_query);
 ?>
 
@@ -37,9 +44,9 @@ $product_result = mysqli_query($conn, $product_query);
 
     <div class="card mb-4">
         <div class="card-body">
-            <h2><?php echo $category['name']; ?></h2>
+            <h2><?php echo htmlspecialchars($category['name']); ?></h2>
 
-            <p><strong>Description:</strong> <?php echo $category['description']; ?></p>
+            <p><strong>Description:</strong> <?php echo htmlspecialchars($category['description']); ?></p>
             
             <h3>Products in this Category</h3>
             <?php if (mysqli_num_rows($product_result) > 0): ?>
@@ -56,12 +63,12 @@ $product_result = mysqli_query($conn, $product_query);
                     <tbody>
                         <?php while ($product = mysqli_fetch_assoc($product_result)): ?>
                             <tr>
-                                <td><?php echo $product['name']; ?></td>
-                                <td><?php echo $product['sku']; ?></td>
+                                <td><?php echo htmlspecialchars($product['name']); ?></td>
+                                <td><?php echo htmlspecialchars($product['sku']); ?></td>
                                 <td>$<?php echo number_format($product['price'], 2); ?></td>
                                 <td><?php echo $product['feature_product'] ? 'Yes' : 'No'; ?></td>
                                 <td>
-                                    <a href="product.php?id=<?php echo $product['id']; ?>">View</a>
+                                    <a href="product.php?id=<?php echo $product['id']; ?>" class="btn btn-primary">View</a>
                                 </td>
                             </tr>
                         <?php endwhile; ?>

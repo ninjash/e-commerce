@@ -4,15 +4,18 @@ require 'db_connect.php';
 
 $target_dir = "/e-commerce/assets/products/";
 
-
+// Initialize products in session if not set
 if (!isset($_SESSION['products'])) {
     $_SESSION['products'] = [];
 }
 
-
+// Fetch all attributes
 $attributes_query = "SELECT * FROM attributes";
 $attributes_result = mysqli_query($conn, $attributes_query);
 
+// Fetch all categories
+$category_query = "SELECT id, name FROM categories";
+$category_result = mysqli_query($conn, $category_query);
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_product'])) {
 
@@ -22,9 +25,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_product'])) {
     $price = $_POST['price'];
     $description = $_POST['description'];
     $feature_product = isset($_POST['feature_product']) ? 1 : 0;
-    $category_id = $_POST['category_id'];
+    $categories = $_POST['categories'];  // Multiple categories
 
-
+    // Handle file upload
     if (isset($_FILES['main_image']) && $_FILES['main_image']['error'] == 0) {
         $main_image = $_FILES['main_image'];
         $target_file = $target_dir . basename($main_image["name"]);
@@ -32,6 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_product'])) {
 
         if (move_uploaded_file($main_image["tmp_name"], $_SERVER['DOCUMENT_ROOT'] . $target_file)) {
 
+            // Collect attributes data
             $attributes = [];
             if (isset($_POST['attributes'])) {
                 foreach ($_POST['attributes'] as $attribute_id => $value) {
@@ -39,6 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_product'])) {
                 }
             }
 
+            // Store product data in session
             $product_data = [
                 'name' => $name,
                 'sku' => $sku,
@@ -46,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_product'])) {
                 'price' => $price,
                 'description' => $description,
                 'feature_product' => $feature_product,
-                'category_id' => $category_id,
+                'categories' => $categories,  // Store multiple categories
                 'main_image' => $target_file,
                 'attributes' => $attributes
             ];
@@ -60,7 +65,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_product'])) {
     }
 }
 
-
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_products'])) {
     foreach ($_SESSION['products'] as $product) {
         $name = $product['name'];
@@ -69,25 +73,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_products'])) {
         $price = $product['price'];
         $description = $product['description'];
         $feature_product = $product['feature_product'];
-        $category_id = $product['category_id'];
+        $categories = $product['categories'];
         $main_image = $product['main_image'];
 
-
-        $query = "INSERT INTO products (name, sku, short_description, price, description, feature_product, category_id) 
-                  VALUES ('$name', '$sku', '$short_description', $price, '$description', $feature_product, $category_id)";
+        // Insert product into products table
+        $query = "INSERT INTO products (name, sku, short_description, price, description, feature_product) 
+                  VALUES ('$name', '$sku', '$short_description', $price, '$description', $feature_product)";
         if (mysqli_query($conn, $query)) {
             $product_id = mysqli_insert_id($conn);
 
+            // Insert main image into product_images table
             $image_query = "INSERT INTO product_images (product_id, image_path) 
                             VALUES ($product_id, '$main_image')";
             mysqli_query($conn, $image_query);
 
+            // Insert attributes into product_attributes table
             if (isset($product['attributes'])) {
                 foreach ($product['attributes'] as $attribute_id => $value) {
                     $attribute_query = "INSERT INTO product_attributes (product_id, attribute_id, value) 
                                         VALUES ($product_id, $attribute_id, '$value')";
                     mysqli_query($conn, $attribute_query);
                 }
+            }
+
+            // Insert categories into product_categories table
+            foreach ($categories as $category_id) {
+                $category_query = "INSERT INTO product_categories (product_id, category_id) 
+                                   VALUES ($product_id, $category_id)";
+                mysqli_query($conn, $category_query);
             }
         }
     }
@@ -98,36 +111,37 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_products'])) {
 }
 ?>
 
+<!-- HTML Form to Add Product -->
 <form method="POST" action="product_form.php" enctype="multipart/form-data">
     <label>Name</label>
     <input type="text" name="name" required><br>
-    
+
     <label>SKU</label>
     <input type="text" name="sku" required><br>
-    
+
     <label>Short Description</label>
     <textarea name="short_description" required></textarea><br>
-    
+
     <label>Price</label>
     <input type="number" name="price" step="0.01" required><br>
-    
+
     <label>Description</label>
     <textarea name="description" required></textarea><br>
-    
+
     <label>Feature Product</label>
     <input type="checkbox" name="feature_product"><br>
-    
-    <label>Category</label>
-    <select name="category_id" required><br>
-        <?php
-        $category_query = "SELECT id, name FROM categories";
-        $category_result = mysqli_query($conn, $category_query);
-        while ($row = mysqli_fetch_assoc($category_result)) {
-            echo "<option value='" . $row['id'] . "'>" . $row['name'] . "</option>";
-        }
-        ?>
-    </select><br>
-    
+
+    <!-- Modify Category Section to allow multiple selections -->
+    <label>Categories</label><br>
+    <?php
+    while ($row = mysqli_fetch_assoc($category_result)) {
+        echo "<div class='form-check'>
+                <input class='form-check-input' type='checkbox' name='categories[]' value='" . $row['id'] . "'>
+                <label class='form-check-label'>" . $row['name'] . "</label>
+            </div>";
+    }
+    ?><br>
+
     <label>Main Image</label><br>
     <input type="file" name="main_image" required><br>
 
@@ -142,12 +156,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_products'])) {
     <button type="submit" name="add_product">Add Product</button><br>
 </form>
 
-
+<!-- Form to Save All Products -->
 <form method="POST" action="product_form.php">
     <button type="submit" name="save_products">Save All Products</button>
 </form>
 
-
+<!-- Display Products Pending Save -->
 <?php if (!empty($_SESSION['products'])): ?>
     <h2>Products to be Saved</h2>
     <ul>

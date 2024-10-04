@@ -3,10 +3,9 @@ require 'web/db_connect.php';
 require 'Product.php';
 
 // Fetch all categories
-$category_query = "SELECT c.id, c.name, c.description, COUNT(p.id) as product_count
-                   FROM categories c
-                   LEFT JOIN products p ON c.id = p.category_id
-                   GROUP BY c.id";
+$category_query = "SELECT c.id, c.name, c.description, 
+                   (SELECT COUNT(pc.product_id) FROM product_categories pc WHERE pc.category_id = c.id) as product_count
+                   FROM categories c";
 $category_result = mysqli_query($conn, $category_query);
 
 // Handle selected category (default to all products)
@@ -22,7 +21,8 @@ if ($category_id > 0) {
 
     if ($category_detail_result && mysqli_num_rows($category_detail_result) > 0) {
         $category = mysqli_fetch_assoc($category_detail_result); // Store the category details
-        $product_query .= " WHERE p.category_id = $category_id"; // Fetch products for the selected category
+        // Use the product_categories table to filter products by selected category
+        $product_query .= " JOIN product_categories pc ON p.id = pc.product_id WHERE pc.category_id = $category_id"; 
     } else {
         echo "Category not found.";
         exit;
@@ -117,25 +117,27 @@ $product_result = mysqli_query($conn, $product_query);
                      </button>
                     </div>
                 </div>
-                <div class="product-category-body row d-flex justify-content-between">
+                <div class="product-category-body grid gap-2 gap-lg-3 row d-flex flex-row flex-wrap">
                     <?php while ($product = mysqli_fetch_assoc($product_result)) : ?>
                         <div class="col-sm-12 col-md-6 col-lg-3 category-product mb-4 p-0">
-                            <div class="product-category-card p-3 pb-0 position-relative">
-                                <img src="<?php echo $product['image_path']; ?>" alt="Product Image" class="img-fluid product-image">
-                                <div class="overlay-container">
-                                    <div class="product-info text-center pt-3">
-                                        <div class="product-rating-category">
-                                            <p><i class="bi bi-star-fill"></i> 4.0</p>
+                            <a href="product_page.php?id=<?php echo $product['id']; ?>" class="text-decoration-none text-reset">
+                                <div class="product-category-card p-3 pb-0 position-relative">
+                                    <img src="<?php echo $product['image_path']; ?>" alt="Product Image" class="img-fluid product-image">
+                                    <div class="overlay-container">
+                                        <div class="product-info text-center pt-3">
+                                            <div class="product-rating-category">
+                                                <p><i class="bi bi-star-fill"></i> 4.0</p>
+                                            </div>
+                                            <h5 class="product-category-name"><?php echo $product['name']; ?></h5>
+                                            <p class="product-category-price">
+                                                <span class="category-old-price">$<?php echo number_format($product['old_price'], 2); ?></span>
+                                                <span class="category-new-price">$<?php echo number_format($product['price'], 2); ?></span>
+                                            </p>
                                         </div>
-                                        <h5 class="product-category-name"><?php echo $product['name']; ?></h5>
-                                        <p class="product-category-price">
-                                            <span class="category-old-price">$<?php echo number_format($product['old_price'], 2); ?></span>
-                                            <span class="category-new-price">$<?php echo number_format($product['price'], 2); ?></span>
-                                        </p>
+                                        <?php include 'functions/overlay-buttons.php'; ?>
                                     </div>
-                                    <?php include 'functions/overlay-buttons.php'; ?>
                                 </div>
-                            </div>
+                            </a>
                         </div>
                     <?php endwhile; ?>
                 </div>

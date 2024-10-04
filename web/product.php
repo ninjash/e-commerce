@@ -1,6 +1,7 @@
 <?php
 require 'db_connect.php';
 
+// Check if product ID is provided
 if (!isset($_GET['id'])) {
     echo "Product ID is missing.";
     exit;
@@ -8,9 +9,9 @@ if (!isset($_GET['id'])) {
 
 $product_id = $_GET['id'];
 
-$query = "SELECT p.id, p.name, p.sku, p.short_description, p.price, p.old_price, p.description, p.feature_product, c.name as category_name 
+// Fetch product details
+$query = "SELECT p.id, p.name, p.sku, p.short_description, p.price, p.old_price, p.description, p.feature_product 
           FROM products p
-          JOIN categories c ON p.category_id = c.id
           WHERE p.id = $product_id";
 $result = mysqli_query($conn, $query);
 
@@ -21,9 +22,20 @@ if (!$result || mysqli_num_rows($result) == 0) {
 
 $product = mysqli_fetch_assoc($result);
 
+// Fetch categories for this product using the product_categories junction table
+$category_query = "
+    SELECT c.name
+    FROM categories c
+    INNER JOIN product_categories pc ON c.id = pc.category_id
+    WHERE pc.product_id = $product_id
+";
+$category_result = mysqli_query($conn, $category_query);
+
+// Fetch product images
 $image_query = "SELECT image_path FROM product_images WHERE product_id = $product_id";
 $image_result = mysqli_query($conn, $image_query);
 
+// Fetch product attributes
 $attribute_query = "SELECT a.name, pa.value 
                     FROM product_attributes pa
                     JOIN attributes a ON pa.attribute_id = a.id
@@ -45,11 +57,23 @@ $attribute_result = mysqli_query($conn, $attribute_query);
 
     <div class="card mb-4">
         <div class="card-body">
-            <h2><?php echo $product['name']; ?></h2>
-            <p><strong>SKU:</strong> <?php echo $product['sku']; ?></p>
-            <p><strong>Category:</strong> <?php echo $product['category_name']; ?></p>
-            <p><strong>Short Description:</strong> <?php echo $product['short_description']; ?></p>
-            <p><strong>Description:</strong> <?php echo $product['description']; ?></p>
+            <h2><?php echo htmlspecialchars($product['name']); ?></h2>
+            <p><strong>SKU:</strong> <?php echo htmlspecialchars($product['sku']); ?></p>
+
+            <p><strong>Categories:</strong>
+                <?php if (mysqli_num_rows($category_result) > 0): ?>
+                    <ul>
+                        <?php while ($category = mysqli_fetch_assoc($category_result)): ?>
+                            <li><?php echo htmlspecialchars($category['name']); ?></li>
+                        <?php endwhile; ?>
+                    </ul>
+                <?php else: ?>
+                    <p>No categories assigned.</p>
+                <?php endif; ?>
+            </p>
+
+            <p><strong>Short Description:</strong> <?php echo htmlspecialchars($product['short_description']); ?></p>
+            <p><strong>Description:</strong> <?php echo htmlspecialchars($product['description']); ?></p>
             <p><strong>Featured Product:</strong> <?php echo $product['feature_product'] ? 'Yes' : 'No'; ?></p>
             <p><strong>Price:</strong> $<?php echo number_format($product['price'], 2); ?></p>
             
@@ -61,7 +85,7 @@ $attribute_result = mysqli_query($conn, $attribute_query);
             <?php if (mysqli_num_rows($attribute_result) > 0): ?>
                 <ul>
                     <?php while ($attribute = mysqli_fetch_assoc($attribute_result)): ?>
-                        <li><strong><?php echo $attribute['name']; ?>:</strong> <?php echo $attribute['value']; ?></li>
+                        <li><strong><?php echo htmlspecialchars($attribute['name']); ?>:</strong> <?php echo htmlspecialchars($attribute['value']); ?></li>
                     <?php endwhile; ?>
                 </ul>
             <?php else: ?>
@@ -73,7 +97,7 @@ $attribute_result = mysqli_query($conn, $attribute_query);
                 <div class="row">
                     <?php while ($image = mysqli_fetch_assoc($image_result)): ?>
                         <div class="col-md-3 mb-3">
-                            <img src="<?php echo $image['image_path']; ?>" alt="<?php echo $product['name']; ?>" class="img-fluid">
+                            <img src="<?php echo htmlspecialchars($image['image_path']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>" class="img-fluid">
                         </div>
                     <?php endwhile; ?>
                 </div>

@@ -8,6 +8,7 @@ if (!isset($_GET['id'])) {
 
 $category_id = $_GET['id'];
 
+// Fetch category details
 $category_query = "SELECT * FROM categories WHERE id = $category_id";
 $category_result = mysqli_query($conn, $category_query);
 
@@ -18,29 +19,42 @@ if (!$category_result || mysqli_num_rows($category_result) == 0) {
 
 $category = mysqli_fetch_assoc($category_result);
 
-$current_products_query = "SELECT * FROM products WHERE category_id = $category_id";
+// Fetch products currently in this category (using the product_categories table)
+$current_products_query = "
+    SELECT p.id, p.name, p.sku 
+    FROM products p
+    JOIN product_categories pc ON p.id = pc.product_id
+    WHERE pc.category_id = $category_id";
 $current_products_result = mysqli_query($conn, $current_products_query);
 
-$all_products_query = "SELECT * FROM products WHERE category_id IS NULL OR category_id != $category_id";
+// Fetch all products not in this category (to add to the category)
+$all_products_query = "
+    SELECT p.id, p.name, p.sku 
+    FROM products p
+    WHERE p.id NOT IN (SELECT product_id FROM product_categories WHERE category_id = $category_id)";
 $all_products_result = mysqli_query($conn, $all_products_query);
 
+// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $category_name = $_POST['category_name'];
     $description = $_POST['description'];
     
+    // Update category details
     $update_category_query = "UPDATE categories SET name = '$category_name', description = '$description' WHERE id = $category_id";
     mysqli_query($conn, $update_category_query);
     
+    // Add new products to this category
     if (isset($_POST['add_products'])) {
         foreach ($_POST['add_products'] as $product_id) {
-            $update_product_query = "UPDATE products SET category_id = $category_id WHERE id = $product_id";
-            mysqli_query($conn, $update_product_query);
+            $add_product_query = "INSERT INTO product_categories (product_id, category_id) VALUES ($product_id, $category_id)";
+            mysqli_query($conn, $add_product_query);
         }
     }
 
+    // Remove selected products from this category
     if (isset($_POST['remove_products'])) {
         foreach ($_POST['remove_products'] as $product_id) {
-            $remove_product_query = "UPDATE products SET category_id = NULL WHERE id = $product_id";
+            $remove_product_query = "DELETE FROM product_categories WHERE product_id = $product_id AND category_id = $category_id";
             mysqli_query($conn, $remove_product_query);
         }
     }

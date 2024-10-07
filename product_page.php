@@ -122,7 +122,7 @@ $prev_id = isset($prev_product['id']) ? $prev_product['id'] : null;
                 </div>
                 <!-- Wishlist and Terms -->
                 <div class="brand-logo">
-                    <img src="/e-commerce/assets/brand (5).png" alt="brand logo">
+                    <img src="/e-commerce/assets/brands/brand (5).png" alt="brand logo">
                 </div>
                 <div class="wishlist-terms d-flex flex-lg-row flex-sm-column justify-content-lg-between justify-content-start align-items-lg-center">
                     <div class="terms">

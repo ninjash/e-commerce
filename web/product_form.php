@@ -17,6 +17,10 @@ $attributes_result = mysqli_query($conn, $attributes_query);
 $category_query = "SELECT id, name FROM categories";
 $category_result = mysqli_query($conn, $category_query);
 
+// Fetch all manufacturers
+$manufacturer_query = "SELECT id, name FROM manufacturers";
+$manufacturer_result = mysqli_query($conn, $manufacturer_query);
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_product'])) {
 
     $name = $_POST['name'];
@@ -26,6 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_product'])) {
     $description = $_POST['description'];
     $feature_product = isset($_POST['feature_product']) ? 1 : 0;
     $categories = $_POST['categories'];  // Multiple categories
+    $manufacturer_id = $_POST['manufacturer_id'];  // Manufacturer
 
     // Handle file upload
     if (isset($_FILES['main_image']) && $_FILES['main_image']['error'] == 0) {
@@ -53,6 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_product'])) {
                 'feature_product' => $feature_product,
                 'categories' => $categories,  // Store multiple categories
                 'main_image' => $target_file,
+                'manufacturer_id' => $manufacturer_id,  // Store manufacturer ID
                 'attributes' => $attributes
             ];
 
@@ -75,10 +81,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_products'])) {
         $feature_product = $product['feature_product'];
         $categories = $product['categories'];
         $main_image = $product['main_image'];
+        $manufacturer_id = $product['manufacturer_id'];
 
-        // Insert product into products table
-        $query = "INSERT INTO products (name, sku, short_description, price, description, feature_product) 
-                  VALUES ('$name', '$sku', '$short_description', $price, '$description', $feature_product)";
+        // Insert product into products table with manufacturer ID
+        $query = "INSERT INTO products (name, sku, short_description, price, description, feature_product, manufacturer_id) 
+                  VALUES ('$name', '$sku', '$short_description', $price, '$description', $feature_product, $manufacturer_id)";
         if (mysqli_query($conn, $query)) {
             $product_id = mysqli_insert_id($conn);
 
@@ -141,6 +148,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_products'])) {
             </div>";
     }
     ?><br>
+
+    <!-- Manufacturer Selection -->
+    <label>Manufacturer</label>
+    <select name="manufacturer_id" required>
+        <option value="">Select a manufacturer</option>
+        <?php
+        while ($row = mysqli_fetch_assoc($manufacturer_result)) {
+            echo "<option value='" . $row['id'] . "'>" . $row['name'] . "</option>";
+        }
+        ?>
+    </select><br>
 
     <label>Main Image</label><br>
     <input type="file" name="main_image" required><br>

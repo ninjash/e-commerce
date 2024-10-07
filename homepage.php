@@ -966,32 +966,32 @@
         <div class="row d-flex justify-content-between">
             <div class="col-sm-4 col-md-4 col-lg-4 col-xl-2 px-2 text-center brand-container">
                 <a href="#">
-                    <img src="/e-commerce/assets/brand (1).png" alt="Brand 1" class="img-fluid brand-logo">
+                    <img src="/e-commerce/assets/brands/brand (1).png" alt="Brand 1" class="img-fluid brand-logo">
                 </a>
             </div>
             <div class="col-sm-4 col-md-4 col-lg-4 col-xl-2 px-2 text-center brand-container">
                 <a href="#">
-                    <img src="/e-commerce/assets/brand (2).png" alt="Brand 2" class="img-fluid brand-logo">
+                    <img src="/e-commerce/assets/brands/brand (2).png" alt="Brand 2" class="img-fluid brand-logo">
                 </a>
             </div>
             <div class="col-sm-4 col-md-4 col-lg-4 col-xl-2 px-2 text-center brand-container">
                 <a href="#">
-                    <img src="/e-commerce/assets/brand (3).png" alt="Brand 3" class="img-fluid brand-logo">
+                    <img src="/e-commerce/assets/brands/brand (3).png" alt="Brand 3" class="img-fluid brand-logo">
                 </a>
             </div>
             <div class="col-sm-4 col-md-4 col-lg-4 col-xl-2 px-2 text-center brand-container">
                 <a href="#">
-                    <img src="/e-commerce/assets/brand (4).png" alt="Brand 4" class="img-fluid brand-logo">
+                    <img src="/e-commerce/assets/brands/brand (4).png" alt="Brand 4" class="img-fluid brand-logo">
                 </a>
             </div>
             <div class="col-sm-4 col-md-4 col-lg-4 col-xl-2 px-2 text-center brand-container">
                 <a href="#">
-                    <img src="/e-commerce/assets/brand (5).png" alt="Brand 5" class="img-fluid brand-logo">
+                    <img src="/e-commerce/assets/brands/brand (5).png" alt="Brand 5" class="img-fluid brand-logo">
                 </a>
             </div>
             <div class="col-sm-4 col-md-4 col-lg-4 col-xl-2 px-2 text-center brand-container">
                 <a href="#">
-                    <img src="/e-commerce/assets/brand (6).png" alt="Brand 6" class="img-fluid brand-logo">
+                    <img src="/e-commerce/assets/brands/brand (6).png" alt="Brand 6" class="img-fluid brand-logo">
                 </a>
             </div>
         </div>

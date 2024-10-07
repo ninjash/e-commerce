@@ -9,9 +9,11 @@ if (!isset($_GET['id'])) {
 
 $product_id = $_GET['id'];
 
-// Fetch product details
-$query = "SELECT p.id, p.name, p.sku, p.short_description, p.price, p.old_price, p.description, p.feature_product 
+// Fetch product details, including the associated manufacturer
+$query = "SELECT p.id, p.name, p.sku, p.short_description, p.price, p.old_price, p.description, p.feature_product, 
+                 m.name as manufacturer_name, m.logo_path
           FROM products p
+          LEFT JOIN manufacturers m ON p.manufacturer_id = m.id
           WHERE p.id = $product_id";
 $result = mysqli_query($conn, $query);
 
@@ -69,6 +71,17 @@ $attribute_result = mysqli_query($conn, $attribute_query);
                     </ul>
                 <?php else: ?>
                     <p>No categories assigned.</p>
+                <?php endif; ?>
+            </p>
+
+            <p><strong>Manufacturer:</strong> 
+                <?php if (!empty($product['manufacturer_name'])): ?>
+                    <span><?php echo htmlspecialchars($product['manufacturer_name']); ?></span><br>
+                    <?php if (!empty($product['logo_path'])): ?>
+                        <img src="<?php echo htmlspecialchars($product['logo_path']); ?>" alt="<?php echo htmlspecialchars($product['manufacturer_name']); ?>" style="max-width: 150px;">
+                    <?php endif; ?>
+                <?php else: ?>
+                    <span>No manufacturer assigned.</span>
                 <?php endif; ?>
             </p>
 

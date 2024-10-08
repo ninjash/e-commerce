@@ -1,3 +1,36 @@
+<?php
+require 'web/db_connect.php';
+
+// Fetch featured categories and products
+$category_query = "
+    SELECT c.id, c.name, ci.image_path
+    FROM categories c
+    LEFT JOIN category_images ci ON c.id = ci.category_id
+    WHERE c.featured = 1
+    LIMIT 6
+";
+$category_result = mysqli_query($conn, $category_query);
+
+// Update product query to fetch images from product_images table
+$product_query = "
+    SELECT p.id, p.name, p.price, p.old_price, pi.image_path, p.feature_product 
+    FROM products p
+    LEFT JOIN product_images pi ON p.id = pi.product_id
+    WHERE p.feature_product = 1
+    GROUP BY p.id
+";
+$product_result = mysqli_query($conn, $product_query);
+
+// Fetch manufacturers
+$manufacturer_query = "
+    SELECT id, name, logo_path 
+    FROM manufacturers
+    LIMIT 6
+";
+$manufacturer_result = mysqli_query($conn, $manufacturer_query);
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -43,120 +76,55 @@
     </div>
     <div class="container-fluid category-menu d-flex justify-content-between d-none d-lg-block">
         <div class="row d-flex justify-content-between w-100 p-0 m-0">
-            <!-- Category 1 -->
-            <div class="col-sm-6 col-md-4 col-lg-2 category-card">
-                <a href="bumper-cover.html" class="category-link" style="text-decoration: none;">
-                    <img src="/e-commerce/assets/bumper_cover.png" alt="Bumper Cover" class="img-fluid">
-                    <h5 class="category-title mt-3">Bumper Cover</h5>
-                    <p class="text-muted">4 Items</p>
-                </a>
-            </div>
-            <!-- Category 2 -->
-            <div class="col-sm-6 col-md-4 col-lg-2 category-card">
-                <a href="headlights.html" class="category-link" style="text-decoration: none;">
-                    <img src="/e-commerce/assets/headlights_-and-_components.png" alt="Headlights and Components" class="img-fluid">
-                    <h5 class="category-title mt-3">Headlights</h5>
-                    <p class="text-muted">1 Items</p>
-                </a>
-            </div>
-            <!-- Category 3 -->
-            <div class="col-sm-6 col-md-4 col-lg-2 category-card">
-                <a href="mirrors.html" class="category-link" style="text-decoration: none;">
-                    <img src="/e-commerce/assets/part-mirrors.png" alt="Mirrors" class="img-fluid">
-                    <h5 class="category-title mt-3">Mirrors</h5>
-                    <p class="text-muted">2 Items</p>
-                </a>
-            </div>
-            <!-- Category 4 -->
-            <div class="col-sm-6 col-md-4 col-lg-2 category-card">
-                <a href="grille-assemblies.html" class="category-link" style="text-decoration: none;">
-                    <img src="/e-commerce/assets/grille_assembly_bundles_images.png" alt="Grille Assembly" class="img-fluid">
-                    <h5 class="category-title mt-3">Grille Assemblies</h5>
-                    <p class="text-muted">2 Items</p>
-                </a>
-            </div>
-            <!-- Category 5 -->
-            <div class="col-sm-6 col-md-4 col-lg-2 category-card">
-                <a href="fenders.html" class="category-link" style="text-decoration: none;">
-                    <img src="/e-commerce/assets/fenders_-and-_components.png" alt="Fender" class="img-fluid">
-                    <h5 class="category-title mt-3">Fenders</h5>
-                    <p class="text-muted">2 Items</p>
-                </a>
-            </div>
-            <!-- Category 6 -->
-            <div class="col-sm-6 col-md-4 col-lg-2 category-card">
-                <a href="tail-lights.html" class="category-link" style="text-decoration: none;">
-                    <img src="/e-commerce/assets/tail_lights_-and-_components.png" alt="Tail lights and Components" class="img-fluid">
-                    <h5 class="category-title mt-3">Tail Lights</h5>
-                    <p class="text-muted">1 Items</p>
-                </a>
-            </div>
+            <?php if (mysqli_num_rows($category_result) > 0): ?>
+                <?php while ($category = mysqli_fetch_assoc($category_result)): ?>
+                    <div class="col-sm-6 col-md-4 col-lg-2 category-card">
+                        <a href="category_page.php?category_id=<?= $category['id'] ?>" class="category-link" style="text-decoration: none;">
+                            <img src="<?= htmlspecialchars($category['image_path']) ?>" alt="<?= htmlspecialchars($category['name']) ?>" class="img-fluid">
+                            <h5 class="category-title mt-3"><?= htmlspecialchars($category['name']) ?></h5>
+                        </a>
+                    </div>
+                <?php endwhile; ?>
+            <?php else: ?>
+                <p>No featured categories available.</p>
+            <?php endif; ?>
         </div>
     </div>
+
     <!-- Carousel for Mobile View -->
-    <div id="categoryCarousel" class="carousel slide d-lg-none">
+    <div id="categoryCarousel" class="carousel slide d-lg-none" data-bs-ride="carousel">
         <div class="carousel-inner w-100 p-0 m-0">
-            <!-- Category 1 -->
-            <div class="carousel-item active">
-                <div class="row w-100">
-                    <div class="col">
-                        <a href="bumper-cover.html" class="category-link" style="text-decoration: none;">
-                            <img src="/e-commerce/assets/bumper_cover.png" alt="Bumper Cover" class="img-fluid">
-                            <h5 class="category-title mt-3">Bumper Cover</h5>
-                            <p class="text-muted">4 Items</p>
-                        </a>
-                    </div>
-                <!-- Category 2 -->
-                    <div class="col">
-                        <a href="headlights.html" class="category-link" style="text-decoration: none;">
-                            <img src="/e-commerce/assets/headlights_-and-_components.png" alt="Headlights and Components" class="img-fluid">
-                            <h5 class="category-title mt-3">Headlights</h5>
-                            <p class="text-muted">1 Items</p>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <!-- Category 3 -->
-            <div class="carousel-item">
-                <div class="row">
-                    <div class="col">
-                        <a href="mirrors.html" class="category-link" style="text-decoration: none;">
-                            <img src="/e-commerce/assets/part-mirrors.png" alt="Mirrors" class="img-fluid">
-                            <h5 class="category-title mt-3">Mirrors</h5>
-                            <p class="text-muted">2 Items</p>
-                        </a>
-                    </div>
-                <!-- Category 4 -->
-                    <div class="col">
-                        <a href="grille-assemblies.html" class="category-link" style="text-decoration: none;">
-                            <img src="/e-commerce/assets/grille_assembly_bundles_images.png" alt="Grille Assembly" class="img-fluid">
-                            <h5 class="category-title mt-3">Grille Assemblies</h5>
-                            <p class="text-muted">2 Items</p>
-                        </a>
+            <?php 
+            // Reset the result set pointer back to the beginning
+            mysqli_data_seek($category_result, 0); 
+            $active = true; // This will be used to mark the first item as active
+            $counter = 0; // Counter to manage items per slide
+
+            while ($category = mysqli_fetch_assoc($category_result)): 
+                if ($counter % 2 == 0): // Start a new carousel-item every 2 categories
+            ?>
+                <div class="carousel-item <?= $active ? 'active' : '' ?>">
+                    <div class="row w-100">
+            <?php $active = false; endif; ?>
+                        <div class="col-6">
+                            <a href="category_page.php?id=<?= $category['id'] ?>" class="category-link" style="text-decoration: none;">
+                                <img src="<?= htmlspecialchars($category['image_path']) ?>" alt="<?= htmlspecialchars($category['name']) ?>" class="img-fluid">
+                                <h5 class="category-title mt-3"><?= htmlspecialchars($category['name']) ?></h5>
+                            </a>
+                        </div>
+            <?php 
+                $counter++;
+                if ($counter % 2 == 0): // Close the carousel-item every 2 categories
+            ?>
                     </div>
                 </div>
-            </div>
-            <!-- Category 5 -->
-            <div class="carousel-item">
-                <div class="row">
-                    <div class="col">
-                        <a href="fenders.html" class="category-link" style="text-decoration: none;">
-                            <img src="/e-commerce/assets/fenders_-and-_components.png" alt="Fender" class="img-fluid">
-                            <h5 class="category-title mt-3">Fenders</h5>
-                            <p class="text-muted">2 Items</p>
-                        </a>
-                    </div>
-                <!-- Category 6 -->
-                    <div class="col">
-                        <a href="tail-lights.html" class="category-link" style="text-decoration: none;">
-                            <img src="/e-commerce/assets/tail_lights_-and-_components.png" alt="Tail lights and Components" class="img-fluid">
-                            <h5 class="category-title mt-3">Tail Lights</h5>
-                            <p class="text-muted">1 Items</p>
-                        </a>
-                    </div>
+            <?php endif; endwhile; ?>
+            <?php if ($counter % 2 != 0): ?>
                 </div>
             </div>
+            <?php endif; ?>
         </div>
+
         <!-- Carousel Controls -->
         <button class="carousel-control-prev custom-carousel-control" type="button" data-bs-target="#categoryCarousel" data-bs-slide="prev">
             <span class="visually-hidden">Previous</span>
@@ -167,7 +135,7 @@
             <span class="custom-control-icon">&#10095;</span>
         </button>
     </div>
-
+    
 
     <!-- Promotional Banners Section -->
     <div class="container-fluid py-5 promotional-banners">
@@ -212,261 +180,45 @@
     </div>
     <div class="container-fluid">
         <div class="row w-100">
-            <!-- Row 1 -->
-            <div class="col-sm-6 col-md-6 col-lg-3 mb-4">
-                <div class="featured-product-card">
-                    <img src="/e-commerce/assets/aluminum-intercooler.png" alt="Aluminum Intercooler" class="img-fluid">
-                    <div class="row w-100 product-nav py-2 px-0">
-                        <div class="col p-0 text-center">
-                            <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                        </div>
-                        <div class="col p-0 text-center">
-                            <a href="#" class="btn pnav-icon"><i class="bi bi-heart-fill"></i></a>
-                        </div>
-                        <div class="col p-0 text-center">
-                            <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                        </div>
+            <?php if (mysqli_num_rows($product_result) > 0): ?>
+                <?php while ($product = mysqli_fetch_assoc($product_result)): ?>
+                    <div class="col-sm-6 col-md-6 col-lg-3 mb-4">
+                        <!-- Wrap the entire product card with an anchor tag -->
+                        <a href="product_page.php?id=<?= $product['id'] ?>" class="product-link" style="text-decoration: none;">
+                            <div class="featured-product-card">
+                                <img src="<?= htmlspecialchars($product['image_path']) ?>" alt="<?= htmlspecialchars($product['name']) ?>" class="img-fluid">
+                                <div class="row w-100 product-nav py-2 px-0">
+                                    <div class="col p-0 text-center">
+                                        <a href="product_page.php?id=<?= $product['id'] ?>" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
+                                    </div>
+                                    <div class="col p-0 text-center">
+                                        <a href="#" class="btn pnav-icon"><i class="bi bi-heart-fill"></i></a>
+                                    </div>
+                                    <div class="col p-0 text-center">
+                                        <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
+                                    </div>
+                                </div>
+                                <div class="product-info text-center py-3">
+                                    <div class="product-rating">
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star"></i>
+                                    </div>
+                                    <h5 class="product-name"><?= htmlspecialchars($product['name']) ?></h5>
+                                    <p class="product-price">
+                                        <span class="old-price">$<?= number_format($product['old_price'], 2) ?></span> 
+                                        <span class="new-price">$<?= number_format($product['price'], 2) ?></span>
+                                    </p>
+                                </div>
+                            </div>
+                        </a>
                     </div>
-                    <div class="product-info text-center py-3">
-                        <div class="product-rating">
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star"></i>
-                        </div>
-                        <h5 class="product-name">Aluminum Intercooler</h5>
-                        <p class="product-price">
-                            <span class="old-price">$4,500.00</span> 
-                            <span class="new-price">$1,350.00</span>
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <!-- Product 2 -->
-            <div class="col-sm-6 col-md-6 col-lg-3 mb-4">
-                <div class="featured-product-card">
-                    <img src="/e-commerce/assets/reverse-backup-camera.png" alt="AutoSky Reverse Backup Camera HD" class="img-fluid">
-                    <div class="row w-100 product-nav py-2 px-0">
-                        <div class="col p-0 text-center">
-                            <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                        </div>
-                        <div class="col p-0 text-center">
-                            <a href="#" class="btn pnav-icon"><i class="bi bi-heart-fill"></i></a>
-                        </div>
-                        <div class="col p-0 text-center">
-                            <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                        </div>
-                    </div>
-                    <div class="product-info text-center py-3">
-                        <div class="product-rating">
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star"></i>
-                        </div>
-                        <h5 class="product-name">AutoSky Reverse Backup Camera HD Wide View Angle</h5>
-                        <p class="product-price">
-                            <span class="old-price">$5,000.00</span> 
-                            <span class="new-price">$4,500.00</span>
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <!-- Product 3 -->
-            <div class="col-sm-6 col-md-6 col-lg-3 mb-4">
-                <div class="featured-product-card">
-                    <div class="image-container position-relative">
-                        <div class="new-tag position-absolute">New</div>
-                        <img src="/e-commerce/assets/ball-joints.png" alt="Ball Joints" class="img-fluid">
-                    </div>
-                    <div class="row w-100 product-nav py-2 px-0">
-                        <div class="col p-0 text-center">
-                            <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                        </div>
-                        <div class="col p-0 text-center">
-                            <a href="#" class="btn pnav-icon"><i class="bi bi-heart-fill"></i></a>
-                        </div>
-                        <div class="col p-0 text-center">
-                            <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                        </div>
-                    </div>
-                    <div class="product-info text-center py-3">
-                        <div class="product-rating">
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star"></i>
-                        </div>
-                        <h5 class="product-name">Ball Joints</h5>
-                        <p class="product-price">
-                            <span class="old-price">$900.00</span> 
-                            <span class="new-price">$810.00</span>
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <!-- Product 4 -->
-            <div class="col-sm-6 col-md-6 col-lg-3 mb-4">
-                <div class="featured-product-card">
-                    <img src="/e-commerce/assets/brake-disc.png" alt="Brake Disc" class="img-fluid">
-                    <div class="row w-100 product-nav py-2 px-0">
-                        <div class="col p-0 text-center">
-                            <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                        </div>
-                        <div class="col p-0 text-center">
-                            <a href="#" class="btn pnav-icon"><i class="bi bi-heart-fill"></i></a>
-                        </div>
-                        <div class="col p-0 text-center">
-                            <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                        </div>
-                    </div>
-                    <div class="product-info text-center py-3">
-                        <div class="product-rating">
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star"></i>
-                        </div>
-                        <h5 class="product-name">Brake Disc</h5>
-                        <p class="product-price">
-                            <span class="old-price">$5,000.00</span> 
-                            <span class="new-price">$4,500.00</span>
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <!-- Row 2 -->
-             <!-- Product 5 -->
-            <div class="col-sm-6 col-md-6 col-lg-3 mb-4">
-                <div class="featured-product-card">
-                    <div class="image-container position-relative">
-                        <div class="sale-tag position-absolute">Sale</div>
-                        <img src="/e-commerce/assets/products/car-battery-charger.png" alt="Car Battery Charger" class="img-fluid product-image">
-                    </div>
-                    <div class="row w-100 product-nav py-2 px-0">
-                        <div class="col p-0 text-center">
-                            <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                        </div>
-                        <div class="col p-0 text-center">
-                            <a href="#" class="btn pnav-icon"><i class="bi bi-heart-fill"></i></a>
-                        </div>
-                        <div class="col p-0 text-center">
-                            <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                        </div>
-                    </div>
-                    <div class="product-info text-center py-3">
-                        <div class="product-rating">
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star"></i>
-                        </div>
-                        <h5 class="product-name">Car Battery Charger</h5>
-                        <p class="product-price">
-                            <span class="old-price">$15,000.00</span> 
-                            <span class="new-price">$13,500.00</span>
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <!-- Product 6 -->
-            <div class="col-sm-6 col-md-6 col-lg-3 mb-4">
-                <div class="featured-product-card">
-                    <img src="/e-commerce/assets/catalytic-converters.png" alt="Catalytic Converters" class="img-fluid">
-                    <div class="row w-100 product-nav py-2 px-0">
-                        <div class="col p-0 text-center">
-                            <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                        </div>
-                        <div class="col p-0 text-center">
-                            <a href="#" class="btn pnav-icon"><i class="bi bi-heart-fill"></i></a>
-                        </div>
-                        <div class="col p-0 text-center">
-                            <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                        </div>
-                    </div>
-                    <div class="product-info text-center py-3">
-                        <div class="product-rating">
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star"></i>
-                        </div>
-                        <h5 class="product-name">Catalytic Converters</h5>
-                        <p class="product-price">
-                            <span class="old-price">$5,500.00</span> 
-                            <span class="new-price">$4,950.00</span>
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <!-- Product 7 -->
-            <div class="col-sm-6 col-md-6 col-lg-3 mb-4">
-                <div class="featured-product-card">
-                    <img src="/e-commerce/assets/oxygen-sensors.png" alt="Oxygen Sensors" class="img-fluid">
-                    <div class="row w-100 product-nav py-2 px-0">
-                        <div class="col p-0 text-center">
-                            <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                        </div>
-                        <div class="col p-0 text-center">
-                            <a href="#" class="btn pnav-icon"><i class="bi bi-heart-fill"></i></a>
-                        </div>
-                        <div class="col p-0 text-center">
-                            <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                        </div>
-                    </div>
-                    <div class="product-info text-center py-3">
-                        <div class="product-rating">
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star"></i>
-                        </div>
-                        <h5 class="product-name">Oxygen Sensors</h5>
-                        <p class="product-price">
-                            <span class="old-price">$2,000.00</span> 
-                            <span class="new-price">$1,800.00</span>
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <!-- Product 8 -->
-            <div class="col-sm-6 col-md-6 col-lg-3 mb-4">
-                <div class="featured-product-card">
-                    <img src="/e-commerce/assets/power-steering-pump.png" alt="Power Steering Pump" class="img-fluid">
-                    <div class="row w-100 product-nav py-2 px-0">
-                        <div class="col p-0 text-center">
-                            <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                        </div>
-                        <div class="col p-0 text-center">
-                            <a href="#" class="btn pnav-icon"><i class="bi bi-heart-fill"></i></a>
-                        </div>
-                        <div class="col p-0 text-center">
-                            <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                        </div>
-                    </div>
-                    <div class="product-info text-center py-3">
-                        <div class="product-rating">
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star"></i>
-                        </div>
-                        <h5 class="product-name">Power Steering Pump</h5>
-                        <p class="product-price">
-                            <span class="old-price">$1,000.00</span> 
-                            <span class="new-price">$1,620.00</span>
-                        </p>
-                    </div>
-                </div>
-            </div>
+                <?php endwhile; ?>
+            <?php else: ?>
+                <p>No featured products available.</p>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -964,36 +716,17 @@
     </div>
     <div class="container-fluid brands-section pb-5">
         <div class="row d-flex justify-content-between">
-            <div class="col-sm-4 col-md-4 col-lg-4 col-xl-2 px-2 text-center brand-container">
-                <a href="#">
-                    <img src="/e-commerce/assets/brands/brand (1).png" alt="Brand 1" class="img-fluid brand-logo">
-                </a>
-            </div>
-            <div class="col-sm-4 col-md-4 col-lg-4 col-xl-2 px-2 text-center brand-container">
-                <a href="#">
-                    <img src="/e-commerce/assets/brands/brand (2).png" alt="Brand 2" class="img-fluid brand-logo">
-                </a>
-            </div>
-            <div class="col-sm-4 col-md-4 col-lg-4 col-xl-2 px-2 text-center brand-container">
-                <a href="#">
-                    <img src="/e-commerce/assets/brands/brand (3).png" alt="Brand 3" class="img-fluid brand-logo">
-                </a>
-            </div>
-            <div class="col-sm-4 col-md-4 col-lg-4 col-xl-2 px-2 text-center brand-container">
-                <a href="#">
-                    <img src="/e-commerce/assets/brands/brand (4).png" alt="Brand 4" class="img-fluid brand-logo">
-                </a>
-            </div>
-            <div class="col-sm-4 col-md-4 col-lg-4 col-xl-2 px-2 text-center brand-container">
-                <a href="#">
-                    <img src="/e-commerce/assets/brands/brand (5).png" alt="Brand 5" class="img-fluid brand-logo">
-                </a>
-            </div>
-            <div class="col-sm-4 col-md-4 col-lg-4 col-xl-2 px-2 text-center brand-container">
-                <a href="#">
-                    <img src="/e-commerce/assets/brands/brand (6).png" alt="Brand 6" class="img-fluid brand-logo">
-                </a>
-            </div>
+            <?php if (mysqli_num_rows($manufacturer_result) > 0): ?>
+                <?php while ($manufacturer = mysqli_fetch_assoc($manufacturer_result)): ?>
+                    <div class="col-sm-4 col-md-4 col-lg-4 col-xl-2 px-2 text-center brand-container">
+                        <a href="manufacturer_page.php?id=<?= $manufacturer['id'] ?>">
+                            <img src="<?= htmlspecialchars($manufacturer['logo_path']) ?>" alt="<?= htmlspecialchars($manufacturer['name']) ?>" class="img-fluid brand-logo">
+                        </a>
+                    </div>
+                <?php endwhile; ?>
+            <?php else: ?>
+                <p>No manufacturers available.</p>
+            <?php endif; ?>
         </div>
     </div>
 

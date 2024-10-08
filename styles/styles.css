@@ -1454,10 +1454,6 @@ body, html {
     transition: transform 0.3s ease-in-out;
 }
 
-.brand-logo:hover {
-    transform: scale(1.1);
-}
-
 /* Responsive adjustments */
 @media (max-width: 992px) {
     .bbb-section{

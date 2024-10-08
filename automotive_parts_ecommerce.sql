@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 07, 2024 at 02:43 PM
+-- Generation Time: Oct 08, 2024 at 01:14 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -53,25 +53,55 @@ INSERT INTO `attributes` (`id`, `name`) VALUES
 CREATE TABLE `categories` (
   `id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL,
-  `description` text DEFAULT NULL
+  `description` text DEFAULT NULL,
+  `featured` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `categories`
 --
 
-INSERT INTO `categories` (`id`, `name`, `description`) VALUES
-(1, 'Automobile', 'Vehicles designed for road use, including cars, trucks, and other motor vehicles.'),
-(2, 'Automotive Parts', 'Parts and accessories used for the repair, maintenance, and enhancement of vehicles.'),
-(3, 'Tires and Wheels', 'A variety of tires and wheels designed to fit various vehicles and driving conditions.'),
-(4, 'Car Maintenance', 'Products and services focused on maintaining and servicing automobiles.'),
-(5, 'Electronics and Gadgets', 'Electronic devices and gadgets designed for use in automobiles for convenience or entertainment.'),
-(6, 'Exterior Upgrades', 'Upgrades and accessories that enhance the exterior appearance and functionality of vehicles.'),
-(7, 'Interior Accessories', 'Accessories and parts designed to improve the interior comfort and functionality of vehicles.'),
-(8, 'Performance Parts', 'High-performance parts designed to boost a vehicle’s performance in terms of speed, handling, and power.'),
-(9, 'Safety and Security', 'Products focused on improving vehicle safety and security, including alarms and tracking devices.'),
-(10, 'Body Parts', 'Body parts such as bumpers, doors, and fenders used for repairs or custom modifications.'),
-(11, 'Lights and Electronics', 'Lights, bulbs, and electronic components used in vehicles for both functional and aesthetic purposes.');
+INSERT INTO `categories` (`id`, `name`, `description`, `featured`) VALUES
+(1, 'Automobile', 'Vehicles designed for road use, including cars, trucks, and other motor vehicles.', 1),
+(2, 'Automotive Parts', 'Parts and accessories used for the repair, maintenance, and enhancement of vehicles.', 1),
+(3, 'Tires and Wheels', 'A variety of tires and wheels designed to fit various vehicles and driving conditions.', 1),
+(4, 'Car Maintenance', 'Products and services focused on maintaining and servicing automobiles.', 1),
+(5, 'Electronics and Gadgets', 'Electronic devices and gadgets designed for use in automobiles for convenience or entertainment.', 1),
+(6, 'Exterior Upgrades', 'Upgrades and accessories that enhance the exterior appearance and functionality of vehicles.', 1),
+(7, 'Interior Accessories', 'Accessories and parts designed to improve the interior comfort and functionality of vehicles.', 0),
+(8, 'Performance Parts', 'High-performance parts designed to boost a vehicle’s performance in terms of speed, handling, and power.', 0),
+(9, 'Safety and Security', 'Products focused on improving vehicle safety and security, including alarms and tracking devices.', 0),
+(10, 'Body Parts', 'Body parts such as bumpers, doors, and fenders used for repairs or custom modifications.', 0),
+(11, 'Lights and Electronics', 'Lights, bulbs, and electronic components used in vehicles for both functional and aesthetic purposes.', 0);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `category_images`
+--
+
+CREATE TABLE `category_images` (
+  `id` int(11) NOT NULL,
+  `category_id` int(11) NOT NULL,
+  `image_path` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `category_images`
+--
+
+INSERT INTO `category_images` (`id`, `category_id`, `image_path`) VALUES
+(1, 1, '/e-commerce/assets/categories/automobile.png'),
+(2, 2, '/e-commerce/assets/categories/automotive_parts.png'),
+(3, 3, '/e-commerce/assets/categories/tires_and_wheels.png'),
+(4, 4, '/e-commerce/assets/categories/car_maintenance.png'),
+(5, 5, '/e-commerce/assets/categories/electronics_and_gadgets.png'),
+(6, 6, '/e-commerce/assets/categories/exterior_upgrades.png'),
+(7, 7, '/e-commerce/assets/categories/interior_accessories.png'),
+(8, 8, '/e-commerce/assets/categories/performance_parts.png'),
+(9, 9, '/e-commerce/assets/categories/safety_and_security.png'),
+(10, 10, '/e-commerce/assets/categories/body_parts.png'),
+(11, 11, '/e-commerce/assets/categories/lights_and_electronics.png');
 
 -- --------------------------------------------------------
 
@@ -100,7 +130,9 @@ INSERT INTO `manufacturers` (`id`, `name`, `logo_path`, `specialty`) VALUES
 (7, 'LAMCOR', '/e-commerce/assets/brands/Lamcor.png', 'electronic components'),
 (8, 'Bimparts', '/e-commerce/assets/brands/Bimparts.png', 'automotive parts'),
 (9, 'Bosch', '/e-commerce/assets/brands/Bosch.png', 'batteries, starters, and electronic systems'),
-(10, 'Autophil Zone', '/e-commerce/assets/brands/AutophilZone.png', 'lubricants, tires, brake parts');
+(10, 'Autophil Zone', '/e-commerce/assets/brands/AutophilZone.png', 'lubricants, tires, brake parts'),
+(11, 'Momo Italy', '/e-commerce/assets/brands/Momo.png', 'Wheels and Steering Wheels'),
+(12, 'AutoSky', '/e-commerce/assets/brands/AutoSky.png', 'automotive gadgets');
 
 -- --------------------------------------------------------
 
@@ -116,7 +148,6 @@ CREATE TABLE `products` (
   `price` decimal(10,2) NOT NULL,
   `description` text NOT NULL,
   `feature_product` tinyint(1) DEFAULT 0,
-  `main_image` varchar(255) DEFAULT NULL,
   `old_price` decimal(10,2) DEFAULT NULL,
   `manufacturer_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -125,27 +156,27 @@ CREATE TABLE `products` (
 -- Dumping data for table `products`
 --
 
-INSERT INTO `products` (`id`, `name`, `sku`, `short_description`, `price`, `description`, `feature_product`, `main_image`, `old_price`, `manufacturer_id`) VALUES
-(1, 'Aluminum Intercooler', 'ALT-001', 'High-quality car alternator for enhanced performance.', 1350.00, 'High-quality aluminum intercooler designed to provide enhanced cooling efficiency.', 1, NULL, 1500.00, NULL),
-(2, 'Power Steering Pump', 'PSP-002', 'Reliable power steering pump for smooth steering.', 1620.00, 'This power steering pump ensures smooth and responsive steering.', 1, NULL, 1800.00, NULL),
-(3, 'Rim and Tire Set', 'RT-003', 'Premium rims and tires for enhanced style and performance.', 3150.00, 'These rims and tires offer superior performance and add a stylish touch to your vehicle.', 1, NULL, 4500.00, NULL),
-(4, 'Ball Joints', 'BJ-004', 'Heavy-duty ball joints for smoother suspension.', 810.00, 'These ball joints are designed for strength and durability, providing smoother suspension and steering.', 1, NULL, 900.00, NULL),
-(5, 'Oxygen Sensors', 'OS-005', 'High-quality oxygen sensors for better fuel efficiency.', 1800.00, 'These oxygen sensors ensure better fuel efficiency by monitoring the oxygen levels in the exhaust gases.', 1, NULL, 2000.00, NULL),
-(6, 'Momo MOD27/C Steering Wheel', 'SW-006', 'High-quality Momo steering wheel for improved control.', 6750.00, 'This Momo steering wheel offers exceptional control and grip for a superior driving experience.', 1, NULL, 7600.00, NULL),
-(7, 'AutoSky Reverse Backup Camera', 'RC-007', 'High-resolution reverse camera for better visibility.', 4500.00, 'This reverse backup camera offers clear visibility when reversing, improving safety and convenience.', 1, NULL, 5000.00, NULL),
-(8, 'Bosch Oil Filter', 'OF-008', 'High-performance oil filter by Bosch.', 4500.00, 'This Bosch oil filter ensures clean engine oil for better engine health and longevity.', 1, NULL, 5000.00, NULL),
-(9, 'Spark Plug Car', 'SP-009', 'High-performance spark plugs for efficient ignition.', 675.00, 'These spark plugs offer efficient ignition for improved engine performance and fuel economy.', 1, NULL, 750.00, NULL),
-(10, 'Front and Rear Autospecialty Brake Kit', 'BK-010', 'Complete brake kit for superior braking performance.', 9000.00, 'This comprehensive brake kit includes all necessary components for optimal braking performance.', 1, NULL, 10000.00, NULL),
-(11, 'Car Battery Charger', 'BC-011', 'Portable car battery charger for emergencies.', 13500.00, 'This car battery charger is perfect for keeping your car battery charged during emergencies.', 1, NULL, 15000.00, NULL),
-(12, 'Catalytic Converters', 'CC-012', 'Advanced catalytic converters for reduced emissions.', 4950.00, 'These catalytic converters help reduce emissions and improve overall engine efficiency.', 1, NULL, 5500.00, NULL),
-(13, 'Gear Stick', 'GS-013', 'Durable gear stick for smooth shifting.', 1350.00, 'This gear stick is designed for smooth and precise shifting, enhancing your driving experience.', 1, NULL, 1500.00, NULL),
-(14, 'Momo R1907/33S Steering Wheel', 'SW-014', 'Stylish Momo steering wheel with superior grip.', 1800.00, 'This stylish Momo steering wheel provides excellent grip and adds a sporty touch to your vehicle.', 1, NULL, 2000.00, NULL),
-(15, 'Recliner Car Seat', 'CS-015', 'Comfortable and ergonomic car seat.', 13500.00, 'This ergonomic car seat provides maximum comfort and support during long drives.', 1, NULL, 15000.00, NULL),
-(16, 'Engine Piston and Spark Plug Isolated White', 'EP-016', 'Durable piston spark plugs for enhanced performance.', 7200.00, 'These piston spark plugs are designed to improve performance and durability.', 1, '', 8000.00, NULL),
-(17, 'Brake Disc', 'BD-017', 'High-quality brake discs for reliable stopping power.', 4500.00, 'These brake discs provide exceptional braking performance, ensuring reliable stopping power in all conditions.', 1, NULL, 5000.00, NULL),
-(18, 'Alternator Electrical Wires & Cable Spare Part', 'ALT-018', 'Alternator designed to provide high electrical output.', 18000.00, 'This alternator provides high electrical output for improved engine performance.', 1, NULL, 20000.00, NULL),
-(19, 'Spark Plugs', 'SP-019', 'Premium spark plugs for improved ignition and fuel efficiency.', 2250.00, 'These premium spark plugs enhance engine performance and fuel efficiency by ensuring reliable ignition.', 1, NULL, 2500.00, NULL),
-(20, 'Service Tyre', 'ST-020', 'Durable service tyre for long-lasting performance.', 7200.00, 'This service tyre is built to withstand tough conditions, offering long-lasting performance.', 1, NULL, 8000.00, NULL);
+INSERT INTO `products` (`id`, `name`, `sku`, `short_description`, `price`, `description`, `feature_product`, `old_price`, `manufacturer_id`) VALUES
+(1, 'Aluminum Intercooler', 'ALT-001', 'High-quality car alternator for enhanced performance.', 1350.00, 'High-quality aluminum intercooler designed to provide enhanced cooling efficiency.', 1, 1500.00, 1),
+(2, 'Power Steering Pump', 'PSP-002', 'Reliable power steering pump for smooth steering.', 1620.00, 'This power steering pump ensures smooth and responsive steering.', 1, 1800.00, 2),
+(3, 'Rim and Tire Set', 'RT-003', 'Premium rims and tires for enhanced style and performance.', 3150.00, 'These rims and tires offer superior performance and add a stylish touch to your vehicle.', 1, 4500.00, 4),
+(4, 'Ball Joints', 'BJ-004', 'Heavy-duty ball joints for smoother suspension.', 810.00, 'These ball joints are designed for strength and durability, providing smoother suspension and steering.', 1, 900.00, 8),
+(5, 'Oxygen Sensors', 'OS-005', 'High-quality oxygen sensors for better fuel efficiency.', 1800.00, 'These oxygen sensors ensure better fuel efficiency by monitoring the oxygen levels in the exhaust gases.', 1, 2000.00, 7),
+(6, 'Momo MOD27/C Steering Wheel', 'SW-006', 'High-quality Momo steering wheel for improved control.', 6750.00, 'This Momo steering wheel offers exceptional control and grip for a superior driving experience.', 1, 7600.00, 11),
+(7, 'AutoSky Reverse Backup Camera', 'RC-007', 'High-resolution reverse camera for better visibility.', 4500.00, 'This reverse backup camera offers clear visibility when reversing, improving safety and convenience.', 1, 5000.00, 12),
+(8, 'Bosch Oil Filter', 'OF-008', 'High-performance oil filter by Bosch.', 4500.00, 'This Bosch oil filter ensures clean engine oil for better engine health and longevity.', 1, 5000.00, 9),
+(9, 'Spark Plug Car', 'SP-009', 'High-performance spark plugs for efficient ignition.', 675.00, 'These spark plugs offer efficient ignition for improved engine performance and fuel economy.', 0, 750.00, 2),
+(10, 'Front and Rear Autospecialty Brake Kit', 'BK-010', 'Complete brake kit for superior braking performance.', 9000.00, 'This comprehensive brake kit includes all necessary components for optimal braking performance.', 0, 10000.00, 10),
+(11, 'Car Battery Charger', 'BC-011', 'Portable car battery charger for emergencies.', 13500.00, 'This car battery charger is perfect for keeping your car battery charged during emergencies.', 0, 15000.00, 6),
+(12, 'Catalytic Converters', 'CC-012', 'Advanced catalytic converters for reduced emissions.', 4950.00, 'These catalytic converters help reduce emissions and improve overall engine efficiency.', 0, 5500.00, 8),
+(13, 'Gear Stick', 'GS-013', 'Durable gear stick for smooth shifting.', 1350.00, 'This gear stick is designed for smooth and precise shifting, enhancing your driving experience.', 0, 1500.00, 11),
+(14, 'Momo R1907/33S Steering Wheel', 'SW-014', 'Stylish Momo steering wheel with superior grip.', 1800.00, 'This stylish Momo steering wheel provides excellent grip and adds a sporty touch to your vehicle.', 0, 2000.00, 11),
+(15, 'Recliner Car Seat', 'CS-015', 'Comfortable and ergonomic car seat.', 13500.00, 'This ergonomic car seat provides maximum comfort and support during long drives.', 0, 15000.00, 11),
+(16, 'Engine Piston and Spark Plug Isolated White', 'EP-016', 'Durable piston spark plugs for enhanced performance.', 7200.00, 'These piston spark plugs are designed to improve performance and durability.', 0, 8000.00, 3),
+(17, 'Brake Disc', 'BD-017', 'High-quality brake discs for reliable stopping power.', 4500.00, 'These brake discs provide exceptional braking performance, ensuring reliable stopping power in all conditions.', 0, 5000.00, 10),
+(18, 'Alternator Electrical Wires & Cable Spare Part', 'ALT-018', 'Alternator designed to provide high electrical output.', 18000.00, 'This alternator provides high electrical output for improved engine performance.', 0, 20000.00, 3),
+(19, 'Spark Plugs', 'SP-019', 'Premium spark plugs for improved ignition and fuel efficiency.', 2250.00, 'These premium spark plugs enhance engine performance and fuel efficiency by ensuring reliable ignition.', 0, 2500.00, 2),
+(20, 'Service Tyre', 'ST-020', 'Durable service tyre for long-lasting performance.', 7200.00, 'This service tyre is built to withstand tough conditions, offering long-lasting performance.', 0, 8000.00, 4);
 
 -- --------------------------------------------------------
 
@@ -393,6 +424,13 @@ ALTER TABLE `categories`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `category_images`
+--
+ALTER TABLE `category_images`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `category_id` (`category_id`);
+
+--
 -- Indexes for table `manufacturers`
 --
 ALTER TABLE `manufacturers`
@@ -452,10 +490,16 @@ ALTER TABLE `categories`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
+-- AUTO_INCREMENT for table `category_images`
+--
+ALTER TABLE `category_images`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+
+--
 -- AUTO_INCREMENT for table `manufacturers`
 --
 ALTER TABLE `manufacturers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `products`
@@ -478,6 +522,12 @@ ALTER TABLE `users`
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `category_images`
+--
+ALTER TABLE `category_images`
+  ADD CONSTRAINT `category_images_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `products`

@@ -40,6 +40,10 @@ while ($pc = mysqli_fetch_assoc($product_categories_result)) {
     $product_categories[] = $pc['category_id'];
 }
 
+// Fetch manufacturers for the dropdown
+$manufacturers_query = "SELECT id, name FROM manufacturers";
+$manufacturers_result = mysqli_query($conn, $manufacturers_query);
+
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $name = $_POST['name'];
@@ -50,11 +54,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $description = $_POST['description'];
     $feature_product = isset($_POST['feature_product']) ? 1 : 0;
     $categories = $_POST['categories'];
+    $manufacturer_id = $_POST['manufacturer_id'];
 
     // Update product details
     $update_query = "UPDATE products 
                      SET name = '$name', sku = '$sku', short_description = '$short_description', 
-                         price = $price, old_price = $old_price, description = '$description', feature_product = $feature_product
+                         price = $price, old_price = $old_price, description = '$description', 
+                         feature_product = $feature_product, manufacturer_id = $manufacturer_id
                      WHERE id = $product_id";
 
     if (mysqli_query($conn, $update_query)) {
@@ -89,10 +95,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
 
         // Update product categories
-        // First, delete existing product-category relationships
         mysqli_query($conn, "DELETE FROM product_categories WHERE product_id = $product_id");
 
-        // Insert new product-category relationships
         foreach ($categories as $category_id) {
             $category_insert_query = "INSERT INTO product_categories (product_id, category_id) VALUES ($product_id, $category_id)";
             mysqli_query($conn, $category_insert_query);
@@ -141,7 +145,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <label>Feature Product</label>
         <input type="checkbox" name="feature_product" <?php echo $product['feature_product'] ? 'checked' : ''; ?>><br>
 
-        <!-- Modify to select multiple categories -->
+        <!-- Select multiple categories -->
         <label>Categories</label><br>
             <?php
             $category_query = "SELECT id, name FROM categories";
@@ -152,8 +156,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <input class='form-check-input' type='checkbox' name='categories[]' value='" . $row['id'] . "' $checked>
                         <label class='form-check-label'>" . $row['name'] . "</label>
                     </div>";
-                }
+            }
             ?><br>
+
+        <!-- Manufacturer dropdown -->
+        <label>Manufacturer</label><br>
+        <select name="manufacturer_id" required>
+            <?php while ($manufacturer = mysqli_fetch_assoc($manufacturers_result)): ?>
+                <option value="<?php echo $manufacturer['id']; ?>" <?php echo $manufacturer['id'] == $product['manufacturer_id'] ? 'selected' : ''; ?>>
+                    <?php echo $manufacturer['name']; ?>
+                </option>
+            <?php endwhile; ?>
+        </select><br>
 
         <label>Main Image</label><br>
         <input type="file" name="main_image"><br>

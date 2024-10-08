@@ -1,3 +1,11 @@
+<?php
+require 'web/db_connect.php';
+
+// Fetch categories for the "All Categories" dropdown in the header
+$header_category_query = "SELECT id, name FROM categories";
+$header_category_result = mysqli_query($conn, $header_category_query);
+?>
+
 <!-- Top Bar -->
 <nav class="top-bar bg-dark py-2">
     <div class="container-fluid">
@@ -67,22 +75,20 @@
                         </span>
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item" href="category_page.php">All Products</a></li>
-                        <li><a class="dropdown-item" href="#">Automobile</a></li>
-                        <li><a class="dropdown-item" href="#">Automotive Parts</a></li>
-                        <li><a class="dropdown-item" href="#">Tires and Wheels</a></li>
-                        <li><a class="dropdown-item" href="#">Car Maintenance</a></li>
-                        <li><a class="dropdown-item" href="#">Electronics and Gadgets</a></li>
-                        <li><a class="dropdown-item" href="#">Exterior Upgrades</a></li>
-                        <li><a class="dropdown-item" href="#">Interior Accessories</a></li>
-                        <li><a class="dropdown-item" href="#">Performance Parts</a></li>
-                        <li><a class="dropdown-item" href="#">Safety and Security</a></li>
+                    <li><a class="dropdown-item" href="category_page.php">All Products</a></li>
+                        <?php if (mysqli_num_rows($header_category_result) > 0): ?>
+                            <?php while ($category = mysqli_fetch_assoc($header_category_result)): ?>
+                                <li><a class="dropdown-item" href="category_page.php?category_id=<?= $category['id'] ?>"><?= htmlspecialchars($category['name']) ?></a></li>
+                            <?php endwhile; ?>
+                        <?php else: ?>
+                            <li><a class="dropdown-item" href="#">No Categories Available</a></li>
+                        <?php endif; ?>
                     </ul>
                 </div>
             </div>
             <div class="col-sm-4 col-md-12 col-lg-8 d-flex justify-content-evenly align-items-center ps-3 pe-5">
                 <ul class="navbar-nav d-flex justify-content-between w-100 p-0 m-0">
-                    <li class="nav-item"><a class="nav-link" href="#">HOME</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/e-commerce/homepage.php">HOME</a></li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             GADGETS

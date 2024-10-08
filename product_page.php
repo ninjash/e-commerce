@@ -13,7 +13,10 @@ $product = new Product($conn, $product_id);
 
 $product_details = $product->getProductDetails();
 
-$product_query = "SELECT * FROM products WHERE id = $product_id";
+$product_query = "SELECT p.*, m.logo_path, m.name as manufacturer_name 
+                  FROM products p 
+                  LEFT JOIN manufacturers m ON p.manufacturer_id = m.id 
+                  WHERE p.id = $product_id";
 $product_result = mysqli_query($conn, $product_query);
 
 if (!$product_result || mysqli_num_rows($product_result) == 0) {
@@ -21,6 +24,10 @@ if (!$product_result || mysqli_num_rows($product_result) == 0) {
     exit;
 }
 
+$product_attributes_query = "SELECT a.name, pa.value 
+                             FROM product_attributes pa 
+                             LEFT JOIN attributes a ON pa.attribute_id = a.id 
+                             WHERE pa.product_id = $product_id";
 $product_attributes = $product->getProductAttributes();
 
 $product = mysqli_fetch_assoc($product_result);
@@ -122,7 +129,10 @@ $prev_id = isset($prev_product['id']) ? $prev_product['id'] : null;
                 </div>
                 <!-- Wishlist and Terms -->
                 <div class="brand-logo">
-                    <img src="/e-commerce/assets/brands/brand (5).png" alt="brand logo">
+                    <!-- Display the manufacturer's logo -->
+                    <?php if ($product['logo_path']): ?>
+                        <img src="<?php echo $product['logo_path']; ?>" alt="<?php echo $product['manufacturer_name']; ?> logo" class="img-fluid">
+                    <?php endif; ?>
                 </div>
                 <div class="wishlist-terms d-flex flex-lg-row flex-sm-column justify-content-lg-between justify-content-start align-items-lg-center">
                     <div class="terms">

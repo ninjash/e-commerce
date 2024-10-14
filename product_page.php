@@ -10,9 +10,9 @@ if (!isset($_GET['id'])) {
 $product_id = $_GET['id'];
 
 $product = new Product($conn, $product_id);
-
 $product_details = $product->getProductDetails();
 
+// Fetch the product along with its manufacturer details
 $product_query = "SELECT p.*, m.logo_path, m.name as manufacturer_name 
                   FROM products p 
                   LEFT JOIN manufacturers m ON p.manufacturer_id = m.id 
@@ -24,24 +24,31 @@ if (!$product_result || mysqli_num_rows($product_result) == 0) {
     exit;
 }
 
+$product = mysqli_fetch_assoc($product_result);
+
+// Fetch product attributes
 $product_attributes_query = "SELECT a.name, pa.value 
                              FROM product_attributes pa 
                              LEFT JOIN attributes a ON pa.attribute_id = a.id 
                              WHERE pa.product_id = $product_id";
-$product_attributes = $product->getProductAttributes();
+$product_attributes = mysqli_query($conn, $product_attributes_query);
 
-$product = mysqli_fetch_assoc($product_result);
-
+// Fetch product categories (Main, Second, Third)
+$product_categories_query = "SELECT mc.name AS main_category, sc.name AS second_category, tc.name AS third_category
+                             FROM product_categories pc
+                             LEFT JOIN main_categories mc ON pc.main_category_id = mc.id
+                             LEFT JOIN second_categories sc ON pc.second_category_id = sc.id
+                             LEFT JOIN third_categories tc ON pc.third_category_id = tc.id
+                             WHERE pc.product_id = $product_id";
+$product_categories_result = mysqli_query($conn, $product_categories_query);
 
 $next_query = "SELECT id FROM products WHERE id > $product_id ORDER BY id ASC LIMIT 1";
 $next_result = mysqli_query($conn, $next_query);
 $next_product = mysqli_fetch_assoc($next_result);
 
-
 $prev_query = "SELECT id FROM products WHERE id < $product_id ORDER BY id DESC LIMIT 1";
 $prev_result = mysqli_query($conn, $prev_query);
 $prev_product = mysqli_fetch_assoc($prev_result);
-
 
 $next_id = isset($next_product['id']) ? $next_product['id'] : null;
 $prev_id = isset($prev_product['id']) ? $prev_product['id'] : null;
@@ -127,13 +134,24 @@ $prev_id = isset($prev_product['id']) ? $prev_product['id'] : null;
                     <!-- Add to Wishlist Button -->
                     <a href="#" class="text-muted py-4"><i class="bi bi-heart"></i><span> Add to wishlist</span></a>
                 </div>
-                <!-- Wishlist and Terms -->
+                <!-- Display Manufacturer Logo -->
                 <div class="brand-logo">
-                    <!-- Display the manufacturer's logo -->
                     <?php if ($product['logo_path']): ?>
                         <img src="<?php echo $product['logo_path']; ?>" alt="<?php echo $product['manufacturer_name']; ?> logo" class="img-fluid">
                     <?php endif; ?>
                 </div>
+
+                <!-- Display Categories (Main, Second, Third) -->
+                <div class="product-categories">
+                    <p class="text-muted mb-0">
+                        <strong>Categories:</strong>
+                        <?php while ($category = mysqli_fetch_assoc($product_categories_result)): ?>
+                            <span><?php echo $category['main_category']; ?> > <?php echo $category['second_category']; ?> > <?php echo $category['third_category']; ?></span><br>
+                        <?php endwhile; ?>
+                    </p>
+                </div>
+
+                <!-- Wishlist and Terms -->
                 <div class="wishlist-terms d-flex flex-lg-row flex-sm-column justify-content-lg-between justify-content-start align-items-lg-center">
                     <div class="terms">
                         <p class="text-title mb-0"><u>Terms and Conditions</u></p>
@@ -190,7 +208,7 @@ $prev_id = isset($prev_product['id']) ? $prev_product['id'] : null;
                 <div class="col-3 table-body w-100">
                     <table class="table col-6">
                         <tbody>
-                            <?php while ($attribute = $product_attributes->fetch_assoc()) : ?>
+                            <?php while ($attribute = mysqli_fetch_assoc($product_attributes)) : ?>
                                 <?php if (!empty($attribute['value'])) : // Only display attributes with a value ?>
                                     <tr>
                                         <th><?php echo $attribute['name']; ?></th>
@@ -220,5 +238,6 @@ $prev_id = isset($prev_product['id']) ? $prev_product['id'] : null;
 
 <?php
 mysqli_free_result($product_attributes);
+mysqli_free_result($product_categories_result);
 mysqli_close($conn);
 ?>

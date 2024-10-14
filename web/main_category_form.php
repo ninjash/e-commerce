@@ -4,16 +4,15 @@ require 'db_connect.php';
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $category_name = $_POST['category_name'];
     $description = $_POST['description'];
-    $is_featured = isset($_POST['is_featured']) ? 1 : 0;  // Check if category is featured
-    
+
     // Start transaction
     mysqli_begin_transaction($conn);
 
-    // Insert into the categories table
-    $query = "INSERT INTO categories (name, description, is_featured) VALUES ('$category_name', '$description', $is_featured)";
+    // Insert into the main_categories table (without the is_featured column)
+    $query = "INSERT INTO main_categories (name, description) VALUES ('$category_name', '$description')";
     
     if (mysqli_query($conn, $query)) {
-        $category_id = mysqli_insert_id($conn); // Get the last inserted ID for category
+        $category_id = mysqli_insert_id($conn); // Get the last inserted ID for the category
         
         // Handle the image upload if an image was provided
         if (isset($_FILES['category_image']) && $_FILES['category_image']['error'] == 0) {
@@ -53,14 +52,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Category</title>
+    <title>Add New Category</title>
 </head>
 <body>
 
 <div class="container">
     <h1 class="mt-4">Add New Category</h1>
 
-    <form method="POST" action="category_form.php" enctype="multipart/form-data">
+    <form method="POST" action="main_category_form.php" enctype="multipart/form-data">
         <div class="mb-3">
             <label for="category_name" class="form-label">Category Name</label>
             <input type="text" class="form-control" id="category_name" name="category_name" required>
@@ -72,10 +71,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <div class="mb-3">
             <label for="category_image" class="form-label">Category Image</label>
             <input type="file" class="form-control" id="category_image" name="category_image" accept="image/*">
-        </div>
-        <div class="mb-3">
-            <input type="checkbox" id="is_featured" name="is_featured">
-            <label for="is_featured" class="form-label">Mark as Featured Category</label>
         </div>
         <button type="submit" class="btn btn-primary">Add Category</button>
         <a href="category_list.php" class="btn btn-secondary">Cancel</a>

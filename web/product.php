@@ -24,11 +24,13 @@ if (!$result || mysqli_num_rows($result) == 0) {
 
 $product = mysqli_fetch_assoc($result);
 
-// Fetch categories for this product using the product_categories junction table
+// Fetch categories for this product using the updated category structure
 $category_query = "
-    SELECT c.name
-    FROM categories c
-    INNER JOIN product_categories pc ON c.id = pc.category_id
+    SELECT mc.name AS main_category_name, sc.name AS second_category_name, tc.name AS third_category_name
+    FROM product_categories pc
+    LEFT JOIN main_categories mc ON pc.main_category_id = mc.id
+    LEFT JOIN second_categories sc ON pc.second_category_id = sc.id
+    LEFT JOIN third_categories tc ON pc.third_category_id = tc.id
     WHERE pc.product_id = $product_id
 ";
 $category_result = mysqli_query($conn, $category_query);
@@ -66,7 +68,11 @@ $attribute_result = mysqli_query($conn, $attribute_query);
                 <?php if (mysqli_num_rows($category_result) > 0): ?>
                     <ul>
                         <?php while ($category = mysqli_fetch_assoc($category_result)): ?>
-                            <li><?php echo htmlspecialchars($category['name']); ?></li>
+                            <li>
+                                <strong>Main Category:</strong> <?php echo htmlspecialchars($category['main_category_name']); ?><br>
+                                <strong>Second Category:</strong> <?php echo htmlspecialchars($category['second_category_name']); ?><br>
+                                <strong>Third Category:</strong> <?php echo htmlspecialchars($category['third_category_name']); ?>
+                            </li>
                         <?php endwhile; ?>
                     </ul>
                 <?php else: ?>

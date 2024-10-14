@@ -1,8 +1,8 @@
 <?php
 require 'web/db_connect.php';
 
-// Fetch categories for the "All Categories" dropdown in the header
-$header_category_query = "SELECT id, name FROM categories";
+// Fetch main categories for the "All Categories" dropdown in the header
+$header_category_query = "SELECT id, name FROM main_categories";
 $header_category_result = mysqli_query($conn, $header_category_query);
 ?>
 
@@ -75,10 +75,22 @@ $header_category_result = mysqli_query($conn, $header_category_query);
                         </span>
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    <li><a class="dropdown-item" href="category_page.php">All Products</a></li>
+                        <li><a class="dropdown-item" href="category_page.php">All Products</a></li>
+                        <!-- Fetching main categories -->
                         <?php if (mysqli_num_rows($header_category_result) > 0): ?>
-                            <?php while ($category = mysqli_fetch_assoc($header_category_result)): ?>
-                                <li><a class="dropdown-item" href="category_page.php?category_id=<?= $category['id'] ?>"><?= htmlspecialchars($category['name']) ?></a></li>
+                            <?php while ($main_category = mysqli_fetch_assoc($header_category_result)): ?>
+                                <li class="dropdown-submenu">
+                                    <a class="dropdown-item" href="category_page.php?main_category_id=<?= $main_category['id'] ?>"><?= htmlspecialchars($main_category['name']) ?></a>
+                                    <ul class="dropdown-menu">
+                                        <?php
+                                        // Fetch second categories related to the main category
+                                        $second_category_query = "SELECT id, name FROM second_categories WHERE main_category_id = " . $main_category['id'];
+                                        $second_category_result = mysqli_query($conn, $second_category_query);
+                                        while ($second_category = mysqli_fetch_assoc($second_category_result)): ?>
+                                            <li><a class="dropdown-item" href="category_page.php?second_category_id=<?= $second_category['id'] ?>"><?= htmlspecialchars($second_category['name']) ?></a></li>
+                                        <?php endwhile; ?>
+                                    </ul>
+                                </li>
                             <?php endwhile; ?>
                         <?php else: ?>
                             <li><a class="dropdown-item" href="#">No Categories Available</a></li>

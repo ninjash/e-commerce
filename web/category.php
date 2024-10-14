@@ -9,8 +9,14 @@ if (!isset($_GET['id'])) {
 
 $category_id = $_GET['id'];
 
-// Fetch the category details
-$category_query = "SELECT * FROM categories WHERE id = $category_id";
+// Fetch the main, second, and third category details
+$category_query = "
+    SELECT mc.name AS main_category_name, sc.name AS second_category_name, tc.name AS third_category_name
+    FROM main_categories mc
+    LEFT JOIN second_categories sc ON mc.id = sc.main_category_id
+    LEFT JOIN third_categories tc ON sc.id = tc.second_category_id
+    WHERE mc.id = $category_id OR sc.id = $category_id OR tc.id = $category_id
+";
 $category_result = mysqli_query($conn, $category_query);
 
 if (!$category_result || mysqli_num_rows($category_result) == 0) {
@@ -44,10 +50,12 @@ $product_result = mysqli_query($conn, $product_query);
 
     <div class="card mb-4">
         <div class="card-body">
-            <h2><?php echo htmlspecialchars($category['name']); ?></h2>
+            <h2>
+                Main Category: <?php echo htmlspecialchars($category['main_category_name']); ?><br>
+                Second Category: <?php echo htmlspecialchars($category['second_category_name']); ?><br>
+                Third Category: <?php echo htmlspecialchars($category['third_category_name']); ?>
+            </h2>
 
-            <p><strong>Description:</strong> <?php echo htmlspecialchars($category['description']); ?></p>
-            
             <h3>Products in this Category</h3>
             <?php if (mysqli_num_rows($product_result) > 0): ?>
                 <table class="table table-striped">
@@ -78,8 +86,8 @@ $product_result = mysqli_query($conn, $product_query);
                 <p>No products found in this category.</p>
             <?php endif; ?>
 
-            <a href="edit_category.php?id=<?php echo $category['id']; ?>" class="btn btn-warning">Edit Category</a>
-            <a href="delete_category.php?id=<?php echo $category['id']; ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this category?');">Delete Category</a>
+            <a href="edit_category.php?id=<?php echo $category_id; ?>" class="btn btn-warning">Edit Category</a>
+            <a href="delete_category.php?id=<?php echo $category_id; ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this category?');">Delete Category</a>
             <a href="category_list.php" class="btn btn-secondary">Back to Category List</a>
         </div>
     </div>

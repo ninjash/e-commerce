@@ -32,12 +32,12 @@ while ($pa = mysqli_fetch_assoc($product_attributes_result)) {
     $product_attributes[$pa['attribute_id']] = $pa['value'];
 }
 
-// Fetch existing categories for the product
-$product_categories_query = "SELECT category_id FROM product_categories WHERE product_id = $product_id";
+// Fetch existing third categories for the product
+$product_categories_query = "SELECT third_category_id FROM product_categories WHERE product_id = $product_id";
 $product_categories_result = mysqli_query($conn, $product_categories_query);
-$product_categories = [];
+$product_third_categories = [];
 while ($pc = mysqli_fetch_assoc($product_categories_result)) {
-    $product_categories[] = $pc['category_id'];
+    $product_third_categories[] = $pc['third_category_id'];
 }
 
 // Fetch manufacturers for the dropdown
@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $old_price = $_POST['old_price'];
     $description = $_POST['description'];
     $feature_product = isset($_POST['feature_product']) ? 1 : 0;
-    $categories = $_POST['categories'];
+    $third_categories = $_POST['third_categories']; // This will be an array of selected third categories
     $manufacturer_id = $_POST['manufacturer_id'];
 
     // Update product details
@@ -97,9 +97,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Update product categories
         mysqli_query($conn, "DELETE FROM product_categories WHERE product_id = $product_id");
 
-        foreach ($categories as $category_id) {
-            $category_insert_query = "INSERT INTO product_categories (product_id, category_id) VALUES ($product_id, $category_id)";
-            mysqli_query($conn, $category_insert_query);
+        // Insert the selected third categories for the product
+        foreach ($third_categories as $third_category_id) {
+            // Fetch the second category linked to the third category
+            $second_category_query = "SELECT second_category_id FROM third_categories WHERE id = $third_category_id";
+            $second_category_result = mysqli_query($conn, $second_category_query);
+            if (mysqli_num_rows($second_category_result) > 0) {
+                $second_category_row = mysqli_fetch_assoc($second_category_result);
+                $second_category_id = $second_category_row['second_category_id'];
+        
+                // Fetch the main category linked to the second category
+                $main_category_query = "SELECT main_category_id FROM second_categories WHERE id = $second_category_id";
+                $main_category_result = mysqli_query($conn, $main_category_query);
+                if (mysqli_num_rows($main_category_result) > 0) {
+                    $main_category_row = mysqli_fetch_assoc($main_category_result);
+                    $main_category_id = $main_category_row['main_category_id'];
+        
+                    // Insert into product_categories only if valid data is found
+                    $category_insert_query = "INSERT INTO product_categories (product_id, main_category_id, second_category_id, third_category_id) 
+                                              VALUES ($product_id, $main_category_id, $second_category_id, $third_category_id)";
+                    mysqli_query($conn, $category_insert_query);
+                } else {
+                    echo "Main category not found for second category $second_category_id.";
+                }
+            } else {
+                echo "Second category not found for third category $third_category_id.";
+            }
         }
 
         header("Location: product.php?id=$product_id");
@@ -108,7 +131,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         echo "Error: " . mysqli_error($conn);
     }
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -117,6 +139,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Product</title>
+    <style>
+        .scrollable-checkboxes {
+            max-height: 150px;
+            max-width: 400px;
+            overflow-y: scroll;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+    </style>
 </head>
 <body>
 
@@ -145,19 +176,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <label>Feature Product</label>
         <input type="checkbox" name="feature_product" <?php echo $product['feature_product'] ? 'checked' : ''; ?>><br>
 
-        <!-- Select multiple categories -->
-        <label>Categories</label><br>
+        <!-- Third Category Selection (checkboxes) -->
+        <label>Third Categories</label><br>
+        <div class="scrollable-checkboxes">
             <?php
-            $category_query = "SELECT id, name FROM categories";
-            $category_result = mysqli_query($conn, $category_query);
-            while ($row = mysqli_fetch_assoc($category_result)) {
-                $checked = in_array($row['id'], $product_categories) ? 'checked' : '';
+            $third_category_query = "SELECT id, name FROM third_categories";
+            $third_category_result = mysqli_query($conn, $third_category_query);
+            while ($row = mysqli_fetch_assoc($third_category_result)) {
+                $checked = in_array($row['id'], $product_third_categories) ? 'checked' : '';
                 echo "<div class='form-check'>
-                        <input class='form-check-input' type='checkbox' name='categories[]' value='" . $row['id'] . "' $checked>
+                        <input class='form-check-input' type='checkbox' name='third_categories[]' value='" . $row['id'] . "' $checked>
                         <label class='form-check-label'>" . $row['name'] . "</label>
                     </div>";
             }
-            ?><br>
+            ?>
+        </div><br>
 
         <!-- Manufacturer dropdown -->
         <label>Manufacturer</label><br>
@@ -180,6 +213,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <?php endwhile; ?>
 
         <button type="submit">Update Product</button>
+    </form>
+    <form method="GET" action="product.php" style="margin-top: 20px;">
+        <input type="hidden" name="id" value="<?php echo $product_id; ?>">
+        <button type="submit" class="btn btn-secondary">Back to Product</button>
     </form>
 </div>
 </body>

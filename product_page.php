@@ -33,15 +33,17 @@ $product_attributes_query = "SELECT a.name, pa.value
                              WHERE pa.product_id = $product_id";
 $product_attributes = mysqli_query($conn, $product_attributes_query);
 
-// Fetch product categories (Main, Second, Third)
-$product_categories_query = "SELECT mc.name AS main_category, sc.name AS second_category, tc.name AS third_category
-                             FROM product_categories pc
-                             LEFT JOIN main_categories mc ON pc.main_category_id = mc.id
-                             LEFT JOIN second_categories sc ON pc.second_category_id = sc.id
-                             LEFT JOIN third_categories tc ON pc.third_category_id = tc.id
-                             WHERE pc.product_id = $product_id";
+// Fetch product categories (Main, Second, Third) using the categories table hierarchy
+$product_categories_query = "
+    SELECT c1.name AS main_category, c2.name AS second_category, c3.name AS third_category
+    FROM product_categories pc
+    LEFT JOIN categories c1 ON c1.id = pc.category_id
+    LEFT JOIN categories c2 ON c2.id = c1.parent_id
+    LEFT JOIN categories c3 ON c3.id = c2.parent_id
+    WHERE pc.product_id = $product_id";
 $product_categories_result = mysqli_query($conn, $product_categories_query);
 
+// Get the next and previous products
 $next_query = "SELECT id FROM products WHERE id > $product_id ORDER BY id ASC LIMIT 1";
 $next_result = mysqli_query($conn, $next_query);
 $next_product = mysqli_fetch_assoc($next_result);
@@ -140,17 +142,7 @@ $prev_id = isset($prev_product['id']) ? $prev_product['id'] : null;
                         <img src="<?php echo $product['logo_path']; ?>" alt="<?php echo $product['manufacturer_name']; ?> logo" class="img-fluid">
                     <?php endif; ?>
                 </div>
-
-                <!-- Display Categories (Main, Second, Third) -->
-                <div class="product-categories">
-                    <p class="text-muted mb-0">
-                        <strong>Categories:</strong>
-                        <?php while ($category = mysqli_fetch_assoc($product_categories_result)): ?>
-                            <span><?php echo $category['main_category']; ?> > <?php echo $category['second_category']; ?> > <?php echo $category['third_category']; ?></span><br>
-                        <?php endwhile; ?>
-                    </p>
-                </div>
-
+                
                 <!-- Wishlist and Terms -->
                 <div class="wishlist-terms d-flex flex-lg-row flex-sm-column justify-content-lg-between justify-content-start align-items-lg-center">
                     <div class="terms">

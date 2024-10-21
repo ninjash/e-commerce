@@ -13,8 +13,8 @@ if (!isset($_SESSION['products'])) {
 $attributes_query = "SELECT * FROM attributes";
 $attributes_result = mysqli_query($conn, $attributes_query);
 
-// Fetch all categories
-$category_query = "SELECT id, name FROM categories";
+// Fetch all main categories (you might want to fetch second and third categories similarly)
+$category_query = "SELECT id, name FROM main_categories";
 $category_result = mysqli_query($conn, $category_query);
 
 // Fetch all manufacturers
@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_product'])) {
     $price = $_POST['price'];
     $description = $_POST['description'];
     $feature_product = isset($_POST['feature_product']) ? 1 : 0;
-    $categories = $_POST['categories'];  // Multiple categories
+    $categories = $_POST['categories'];  // Multiple categories (main, second, and third)
     $manufacturer_id = $_POST['manufacturer_id'];  // Manufacturer
 
     // Handle file upload
@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_product'])) {
                 'price' => $price,
                 'description' => $description,
                 'feature_product' => $feature_product,
-                'categories' => $categories,  // Store multiple categories
+                'categories' => $categories,  // Store multiple categories (main, second, and third)
                 'main_image' => $target_file,
                 'manufacturer_id' => $manufacturer_id,  // Store manufacturer ID
                 'attributes' => $attributes
@@ -79,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_products'])) {
         $price = $product['price'];
         $description = $product['description'];
         $feature_product = $product['feature_product'];
-        $categories = $product['categories'];
+        $categories = $product['categories'];  // Multiple categories (main, second, and third)
         $main_image = $product['main_image'];
         $manufacturer_id = $product['manufacturer_id'];
 

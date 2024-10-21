@@ -19,30 +19,22 @@ if (!$product_result || mysqli_num_rows($product_result) == 0) {
 
 $product = mysqli_fetch_assoc($product_result);
 
-// Fetch all attributes
-$attributes_query = "SELECT * FROM attributes";
-$attributes_result = mysqli_query($conn, $attributes_query);
-
-// Fetch existing product attributes
-$product_attributes_query = "SELECT attribute_id, value FROM product_attributes WHERE product_id = $product_id";
-$product_attributes_result = mysqli_query($conn, $product_attributes_query);
-
-$product_attributes = [];
-while ($pa = mysqli_fetch_assoc($product_attributes_result)) {
-    $product_attributes[$pa['attribute_id']] = $pa['value'];
-}
-
-// Fetch existing third categories for the product
-$product_categories_query = "SELECT third_category_id FROM product_categories WHERE product_id = $product_id";
-$product_categories_result = mysqli_query($conn, $product_categories_query);
-$product_third_categories = [];
-while ($pc = mysqli_fetch_assoc($product_categories_result)) {
-    $product_third_categories[] = $pc['third_category_id'];
-}
-
 // Fetch manufacturers for the dropdown
 $manufacturers_query = "SELECT id, name FROM manufacturers";
 $manufacturers_result = mysqli_query($conn, $manufacturers_query);
+
+// Fetch existing product categories
+$product_categories_query = "SELECT category_id FROM product_categories WHERE product_id = $product_id";
+$product_categories_result = mysqli_query($conn, $product_categories_query);
+
+$product_categories = [];
+while ($row = mysqli_fetch_assoc($product_categories_result)) {
+    $product_categories[] = $row['category_id'];
+}
+
+// Fetch all main categories
+$main_category_query = "SELECT * FROM categories WHERE parent_id IS NULL";
+$main_category_result = mysqli_query($conn, $main_category_query);
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -53,8 +45,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $old_price = $_POST['old_price'];
     $description = $_POST['description'];
     $feature_product = isset($_POST['feature_product']) ? 1 : 0;
-    $third_categories = $_POST['third_categories']; // This will be an array of selected third categories
     $manufacturer_id = $_POST['manufacturer_id'];
+    $selected_categories = $_POST['categories'];
 
     // Update product details
     $update_query = "UPDATE products 
@@ -62,67 +54,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                          price = $price, old_price = $old_price, description = '$description', 
                          feature_product = $feature_product, manufacturer_id = $manufacturer_id
                      WHERE id = $product_id";
-
+    
     if (mysqli_query($conn, $update_query)) {
-        // Update product attributes
-        if (isset($_POST['attributes'])) {
-            foreach ($_POST['attributes'] as $attribute_id => $value) {
-                $value = mysqli_real_escape_string($conn, $value);
-
-                if (isset($product_attributes[$attribute_id])) {
-                    $attribute_update_query = "UPDATE product_attributes 
-                                               SET value = '$value' 
-                                               WHERE product_id = $product_id AND attribute_id = $attribute_id";
-                } else {
-                    $attribute_update_query = "INSERT INTO product_attributes (product_id, attribute_id, value) 
-                                               VALUES ($product_id, $attribute_id, '$value')";
-                }
-                mysqli_query($conn, $attribute_update_query);
-            }
-        }
-
-        // Handle product images (if provided)
-        if (isset($_FILES['main_image']) && $_FILES['main_image']['error'] == 0) {
-            $main_image = $_FILES['main_image'];
-            $target_file = "/e-commerce/assets/products/" . basename($main_image["name"]);
-
-            if (move_uploaded_file($main_image["tmp_name"], $_SERVER['DOCUMENT_ROOT'] . $target_file)) {
-                $image_update_query = "UPDATE product_images 
-                                       SET image_path = '$target_file' 
-                                       WHERE product_id = $product_id";
-                mysqli_query($conn, $image_update_query);
-            }
-        }
-
         // Update product categories
         mysqli_query($conn, "DELETE FROM product_categories WHERE product_id = $product_id");
 
-        // Insert the selected third categories for the product
-        foreach ($third_categories as $third_category_id) {
-            // Fetch the second category linked to the third category
-            $second_category_query = "SELECT second_category_id FROM third_categories WHERE id = $third_category_id";
-            $second_category_result = mysqli_query($conn, $second_category_query);
-            if (mysqli_num_rows($second_category_result) > 0) {
-                $second_category_row = mysqli_fetch_assoc($second_category_result);
-                $second_category_id = $second_category_row['second_category_id'];
-        
-                // Fetch the main category linked to the second category
-                $main_category_query = "SELECT main_category_id FROM second_categories WHERE id = $second_category_id";
-                $main_category_result = mysqli_query($conn, $main_category_query);
-                if (mysqli_num_rows($main_category_result) > 0) {
-                    $main_category_row = mysqli_fetch_assoc($main_category_result);
-                    $main_category_id = $main_category_row['main_category_id'];
-        
-                    // Insert into product_categories only if valid data is found
-                    $category_insert_query = "INSERT INTO product_categories (product_id, main_category_id, second_category_id, third_category_id) 
-                                              VALUES ($product_id, $main_category_id, $second_category_id, $third_category_id)";
-                    mysqli_query($conn, $category_insert_query);
-                } else {
-                    echo "Main category not found for second category $second_category_id.";
-                }
-            } else {
-                echo "Second category not found for third category $third_category_id.";
-            }
+        foreach ($selected_categories as $category_id) {
+            $category_insert_query = "INSERT INTO product_categories (product_id, category_id) 
+                                      VALUES ($product_id, $category_id)";
+            mysqli_query($conn, $category_insert_query);
         }
 
         header("Location: product.php?id=$product_id");
@@ -139,15 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Product</title>
-    <style>
-        .scrollable-checkboxes {
-            max-height: 150px;
-            max-width: 400px;
-            overflow-y: scroll;
-            border: 1px solid #ccc;
-            padding: 10px;
-        }
-    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
 
@@ -176,22 +108,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <label>Feature Product</label>
         <input type="checkbox" name="feature_product" <?php echo $product['feature_product'] ? 'checked' : ''; ?>><br>
 
-        <!-- Third Category Selection (checkboxes) -->
-        <label>Third Categories</label><br>
-        <div class="scrollable-checkboxes">
-            <?php
-            $third_category_query = "SELECT id, name FROM third_categories";
-            $third_category_result = mysqli_query($conn, $third_category_query);
-            while ($row = mysqli_fetch_assoc($third_category_result)) {
-                $checked = in_array($row['id'], $product_third_categories) ? 'checked' : '';
-                echo "<div class='form-check'>
-                        <input class='form-check-input' type='checkbox' name='third_categories[]' value='" . $row['id'] . "' $checked>
-                        <label class='form-check-label'>" . $row['name'] . "</label>
-                    </div>";
-            }
-            ?>
-        </div><br>
-
         <!-- Manufacturer dropdown -->
         <label>Manufacturer</label><br>
         <select name="manufacturer_id" required>
@@ -202,15 +118,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <?php endwhile; ?>
         </select><br>
 
+        <!-- Categories Block (repeated for each assignment) -->
+        <div id="categories-container">
+            <div class="category-assignment">
+                <label>Assign Category</label><br>
+
+                <select class="main_category" name="main_category[]">
+                    <option value="">Select Main Category</option>
+                    <?php while ($main_category = mysqli_fetch_assoc($main_category_result)): ?>
+                        <option value="<?php echo $main_category['id']; ?>"><?php echo $main_category['name']; ?></option>
+                    <?php endwhile; ?>
+                </select><br>
+
+                <select class="second_category" name="second_category[]" style="display:none;">
+                    <option value="">Select Second Category</option>
+                </select><br>
+
+                <select class="third_category" name="categories[]" style="display:none;">
+                    <option value="">Select Third Category</option>
+                </select><br>
+            </div>
+        </div>
+
+        <button type="button" id="add-category-assignment">Add Another Category</button><br><br>
+
         <label>Main Image</label><br>
         <input type="file" name="main_image"><br>
-
-        <h3>Product Attributes</h3>
-        <?php while ($attribute = mysqli_fetch_assoc($attributes_result)): ?>
-            <label><?php echo $attribute['name']; ?></label>
-            <input type="text" name="attributes[<?php echo $attribute['id']; ?>]" 
-                   value="<?php echo isset($product_attributes[$attribute['id']]) ? $product_attributes[$attribute['id']] : ''; ?>"><br>
-        <?php endwhile; ?>
 
         <button type="submit">Update Product</button>
     </form>
@@ -219,5 +152,71 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <button type="submit" class="btn btn-secondary">Back to Product</button>
     </form>
 </div>
+
+<script>
+    $(document).ready(function() {
+        function setupCategoryDropdowns(categoryBlock) {
+            $(categoryBlock).find('.main_category').change(function() {
+                var main_category_id = $(this).val();
+                var secondCategoryDropdown = $(this).closest('.category-assignment').find('.second_category');
+                var thirdCategoryDropdown = $(this).closest('.category-assignment').find('.third_category');
+                
+                if(main_category_id) {
+                    $.ajax({
+                        url: 'fetch_categories.php',
+                        method: 'POST',
+                        data: { main_category_id: main_category_id },
+                        success: function(response) {
+                            secondCategoryDropdown.html(response).show();
+                            thirdCategoryDropdown.hide();
+                        },
+                        error: function(xhr, status, error) {
+                            console.error("AJAX Error: " + status + " - " + error);
+                        }
+                    });
+                } else {
+                    secondCategoryDropdown.hide();
+                    thirdCategoryDropdown.hide();
+                }
+            });
+
+            $(categoryBlock).find('.second_category').change(function() {
+                var second_category_id = $(this).val();
+                var thirdCategoryDropdown = $(this).closest('.category-assignment').find('.third_category');
+
+                if(second_category_id) {
+                    $.ajax({
+                        url: 'fetch_categories.php',
+                        method: 'POST',
+                        data: { second_category_id: second_category_id },
+                        success: function(response) {
+                            thirdCategoryDropdown.html(response).show();
+                        },
+                        error: function(xhr, status, error) {
+                            console.error("AJAX Error: " + status + " - " + error);
+                        }
+                    });
+                } else {
+                    thirdCategoryDropdown.hide();
+                }
+            });
+        }
+
+        // Initialize first category assignment
+        setupCategoryDropdowns($('.category-assignment').first());
+
+        // Handle the "Add Another Category" button
+        $('#add-category-assignment').click(function() {
+            var newCategoryBlock = $('.category-assignment').first().clone();
+            newCategoryBlock.find('select').val('');  // Reset the selects
+            newCategoryBlock.find('.second_category, .third_category').hide();  // Hide second and third category initially
+            $('#categories-container').append(newCategoryBlock);
+
+            // Initialize the new block's dropdowns
+            setupCategoryDropdowns(newCategoryBlock);
+        });
+    });
+</script>
+
 </body>
 </html>

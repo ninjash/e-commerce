@@ -1,4 +1,4 @@
-<?php
+<?php 
 require 'db_connect.php';
 
 // Check if category ID is provided
@@ -7,16 +7,22 @@ if (!isset($_GET['id'])) {
     exit;
 }
 
-$category_id = $_GET['id'];
+$category_id = (int)$_GET['id']; // Ensure it's an integer
 
-// Fetch the main, second, and third category details
+// Fetch the category details including parent categories
 $category_query = "
-    SELECT mc.name AS main_category_name, sc.name AS second_category_name, tc.name AS third_category_name
-    FROM main_categories mc
-    LEFT JOIN second_categories sc ON mc.id = sc.main_category_id
-    LEFT JOIN third_categories tc ON sc.id = tc.second_category_id
-    WHERE mc.id = $category_id OR sc.id = $category_id OR tc.id = $category_id
+    WITH RECURSIVE category_hierarchy AS (
+        SELECT id, name, parent_id
+        FROM categories
+        WHERE id = $category_id
+        UNION ALL
+        SELECT c.id, c.name, c.parent_id
+        FROM categories c
+        INNER JOIN category_hierarchy ch ON c.id = ch.parent_id
+    )
+    SELECT id, name, parent_id FROM category_hierarchy ORDER BY parent_id ASC;
 ";
+
 $category_result = mysqli_query($conn, $category_query);
 
 if (!$category_result || mysqli_num_rows($category_result) == 0) {
@@ -24,9 +30,18 @@ if (!$category_result || mysqli_num_rows($category_result) == 0) {
     exit;
 }
 
-$category = mysqli_fetch_assoc($category_result);
+// Fetch the category hierarchy
+$category_hierarchy = [];
+while ($row = mysqli_fetch_assoc($category_result)) {
+    $category_hierarchy[] = $row;
+}
 
-// Fetch products for this category using the product_categories junction table
+// Get the main, second, and third category from the hierarchy if they exist
+$main_category = $category_hierarchy[0] ?? null;
+$second_category = $category_hierarchy[1] ?? null;
+$third_category = $category_hierarchy[2] ?? null;
+
+// Fetch products for this category and its subcategories
 $product_query = "
     SELECT p.*
     FROM products p
@@ -34,6 +49,7 @@ $product_query = "
     WHERE pc.category_id = $category_id
 ";
 $product_result = mysqli_query($conn, $product_query);
+
 ?>
 
 <!DOCTYPE html>
@@ -51,9 +67,9 @@ $product_result = mysqli_query($conn, $product_query);
     <div class="card mb-4">
         <div class="card-body">
             <h2>
-                Main Category: <?php echo htmlspecialchars($category['main_category_name']); ?><br>
-                Second Category: <?php echo htmlspecialchars($category['second_category_name']); ?><br>
-                Third Category: <?php echo htmlspecialchars($category['third_category_name']); ?>
+                Main Category: <?php echo htmlspecialchars($main_category['name'] ?? 'N/A'); ?><br>
+                Second Category: <?php echo htmlspecialchars($second_category['name'] ?? 'N/A'); ?><br>
+                Third Category: <?php echo htmlspecialchars($third_category['name'] ?? 'N/A'); ?>
             </h2>
 
             <h3>Products in this Category</h3>

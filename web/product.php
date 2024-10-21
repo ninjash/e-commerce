@@ -7,14 +7,16 @@ if (!isset($_GET['id'])) {
     exit;
 }
 
-$product_id = $_GET['id'];
+$product_id = (int)$_GET['id']; // Ensure it's an integer
 
 // Fetch product details, including the associated manufacturer
-$query = "SELECT p.id, p.name, p.sku, p.short_description, p.price, p.old_price, p.description, p.feature_product, 
-                 m.name as manufacturer_name, m.logo_path
-          FROM products p
-          LEFT JOIN manufacturers m ON p.manufacturer_id = m.id
-          WHERE p.id = $product_id";
+$query = "
+    SELECT p.id, p.name, p.sku, p.short_description, p.price, p.old_price, p.description, p.feature_product, 
+           m.name as manufacturer_name, m.logo_path
+    FROM products p
+    LEFT JOIN manufacturers m ON p.manufacturer_id = m.id
+    WHERE p.id = $product_id
+";
 $result = mysqli_query($conn, $query);
 
 if (!$result || mysqli_num_rows($result) == 0) {
@@ -26,24 +28,30 @@ $product = mysqli_fetch_assoc($result);
 
 // Fetch categories for this product using the updated category structure
 $category_query = "
-    SELECT mc.name AS main_category_name, sc.name AS second_category_name, tc.name AS third_category_name
+    SELECT c.name, c.id, c.parent_id
     FROM product_categories pc
-    LEFT JOIN main_categories mc ON pc.main_category_id = mc.id
-    LEFT JOIN second_categories sc ON pc.second_category_id = sc.id
-    LEFT JOIN third_categories tc ON pc.third_category_id = tc.id
+    INNER JOIN categories c ON pc.category_id = c.id
     WHERE pc.product_id = $product_id
 ";
 $category_result = mysqli_query($conn, $category_query);
+
+// Recursively fetch category hierarchy (main, second, third)
+$categories = [];
+while ($category = mysqli_fetch_assoc($category_result)) {
+    $categories[] = $category;
+}
 
 // Fetch product images
 $image_query = "SELECT image_path FROM product_images WHERE product_id = $product_id";
 $image_result = mysqli_query($conn, $image_query);
 
 // Fetch product attributes
-$attribute_query = "SELECT a.name, pa.value 
-                    FROM product_attributes pa
-                    JOIN attributes a ON pa.attribute_id = a.id
-                    WHERE pa.product_id = $product_id";
+$attribute_query = "
+    SELECT a.name, pa.value 
+    FROM product_attributes pa
+    JOIN attributes a ON pa.attribute_id = a.id
+    WHERE pa.product_id = $product_id
+";
 $attribute_result = mysqli_query($conn, $attribute_query);
 ?>
 
@@ -65,15 +73,13 @@ $attribute_result = mysqli_query($conn, $attribute_query);
             <p><strong>SKU:</strong> <?php echo htmlspecialchars($product['sku']); ?></p>
 
             <p><strong>Categories:</strong>
-                <?php if (mysqli_num_rows($category_result) > 0): ?>
+                <?php if (!empty($categories)): ?>
                     <ul>
-                        <?php while ($category = mysqli_fetch_assoc($category_result)): ?>
+                        <?php foreach ($categories as $category): ?>
                             <li>
-                                <strong>Main Category:</strong> <?php echo htmlspecialchars($category['main_category_name']); ?><br>
-                                <strong>Second Category:</strong> <?php echo htmlspecialchars($category['second_category_name']); ?><br>
-                                <strong>Third Category:</strong> <?php echo htmlspecialchars($category['third_category_name']); ?>
+                                <strong>Category Name:</strong> <?php echo htmlspecialchars($category['name']); ?>
                             </li>
-                        <?php endwhile; ?>
+                        <?php endforeach; ?>
                     </ul>
                 <?php else: ?>
                     <p>No categories assigned.</p>

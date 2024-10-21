@@ -2,11 +2,20 @@
 require 'web/db_connect.php';
 require 'Product.php';
 
-// Fetch all categories
-$category_query = "SELECT c.id, c.name, c.description, 
-                   (SELECT COUNT(pc.product_id) FROM product_categories pc WHERE pc.category_id = c.id) as product_count
-                   FROM categories c";
-$category_result = mysqli_query($conn, $category_query);
+// Fetch main categories (parent_id is NULL)
+$main_category_query = "SELECT c.id, c.name, 
+                        (SELECT COUNT(p.id) 
+                         FROM product_categories pc
+                         JOIN products p ON pc.product_id = p.id
+                         WHERE pc.category_id = c.id OR pc.category_id IN 
+                             (SELECT id FROM categories WHERE parent_id = c.id)
+                             OR pc.category_id IN 
+                             (SELECT id FROM categories WHERE parent_id IN 
+                                (SELECT id FROM categories WHERE parent_id = c.id))) 
+                         as product_count
+                        FROM categories c 
+                        WHERE c.parent_id IS NULL";
+$main_category_result = mysqli_query($conn, $main_category_query);
 
 // Handle selected category (default to all products)
 $category_id = isset($_GET['category_id']) ? (int)$_GET['category_id'] : 0;
@@ -49,43 +58,62 @@ $product_result = mysqli_query($conn, $product_query);
     <?php include 'global/header.php'; ?>
 </header>
 <main>
-    <!-- Main Content -->
-    <div class="container-fluid category-product-container">
-        <div class="row w-100">
-            <div class="category-header d-flex justify-content-between align-items-center py-4 px-0">
-                <div class="col-6">
-                    <h3 class="m-0"><strong>
-                        <?php if ($category_id > 0 && isset($category)) : ?>
-                            Category: <?php echo $category['name']; ?>
-                        <?php else : ?>
-                            All Products
-                        <?php endif; ?>
-                    </strong></h3>
-                </div>
-                <div class="col-6 d-flex justify-content-end">
-                    <nav aria-label="breadcrumb" class="breadcrumb-tab">
-                        <ol class="breadcrumb ms-auto">
-                            <li class="breadcrumb-item"><a href="#">Home</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Products</li>
-                        </ol>
-                    </nav>
-                </div>
-            </div>
-        </div>
-    </div>
     <!-- Category List -->
     <div class="container-fluid py-lg-5">
         <div class="row w-100">
             <div class="col-3 category-list-column px-0">
                 <div class="category-list-section py-4" id="categoryListSection">
                     <h5 class="category-list-title mb-3">Categories</h5>
-                    <ul class="category-list-menu d-flex flex-column justify-content-start px-3">
+                    <ul class="category-list-menu d-flex flex-column justify-content-start px-3" id="categoryMenu">
                         <li><a href="?category_id=0">All Products</a></li>
-                        <?php while ($category_row = mysqli_fetch_assoc($category_result)): ?>
-                            <li><a href="?category_id=<?= $category_row['id']; ?>">
-                                <?php echo $category_row['name']; ?>
-                                <span>(<?php echo $category_row['product_count']; ?>)</span>
-                            </a></li>
+                        <?php while ($main_category = mysqli_fetch_assoc($main_category_result)): ?>
+                            <li>
+                                <a href="#" class="category-toggle" data-id="<?php echo $main_category['id']; ?>">
+                                    <?php echo $main_category['name']; ?>
+                                    <span>(<?php echo $main_category['product_count']; ?>)</span>
+                                </a>
+                                <ul class="subcategory-list" id="subcategories-<?php echo $main_category['id']; ?>" style="display: none;">
+                                    <?php
+                                    // Fetch second-level categories based on the main category's ID
+                                    $second_category_query = "SELECT c.id, c.name, 
+                                        (SELECT COUNT(p.id) 
+                                         FROM product_categories pc
+                                         JOIN products p ON pc.product_id = p.id
+                                         WHERE pc.category_id = c.id OR pc.category_id IN 
+                                             (SELECT id FROM categories WHERE parent_id = c.id)) 
+                                         as product_count
+                                        FROM categories c WHERE c.parent_id = " . $main_category['id'];
+                                    $second_category_result = mysqli_query($conn, $second_category_query);
+                                    while ($second_category = mysqli_fetch_assoc($second_category_result)): ?>
+                                        <li>
+                                            <a href="#" class="subcategory-toggle" data-id="<?php echo $second_category['id']; ?>">
+                                                <?php echo $second_category['name']; ?>
+                                                <span>(<?php echo $second_category['product_count']; ?>)</span>
+                                            </a>
+                                            <ul class="subcategory-list" id="thirdcategories-<?php echo $second_category['id']; ?>" style="display: none;">
+                                                <?php
+                                                // Fetch third-level categories based on the second category's ID
+                                                $third_category_query = "SELECT c.id, c.name, 
+                                                    (SELECT COUNT(p.id) 
+                                                     FROM product_categories pc
+                                                     JOIN products p ON pc.product_id = p.id
+                                                     WHERE pc.category_id = c.id) 
+                                                     as product_count
+                                                    FROM categories c WHERE c.parent_id = " . $second_category['id'];
+                                                $third_category_result = mysqli_query($conn, $third_category_query);
+                                                while ($third_category = mysqli_fetch_assoc($third_category_result)): ?>
+                                                    <li>
+                                                        <a href="?category_id=<?php echo $third_category['id']; ?>">
+                                                            <?php echo $third_category['name']; ?>
+                                                            <span>(<?php echo $third_category['product_count']; ?>)</span>
+                                                        </a>
+                                                    </li>
+                                                <?php endwhile; ?>
+                                            </ul>
+                                        </li>
+                                    <?php endwhile; ?>
+                                </ul>
+                            </li>
                         <?php endwhile; ?>
                     </ul>
                 </div>
@@ -153,5 +181,28 @@ $product_result = mysqli_query($conn, $product_query);
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle click on main category to toggle subcategories
+            document.querySelectorAll('.category-toggle').forEach(function(mainCategoryLink) {
+                mainCategoryLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var mainCategoryId = this.getAttribute('data-id');
+                    var subcategoriesList = document.getElementById('subcategories-' + mainCategoryId);
+                    subcategoriesList.style.display = subcategoriesList.style.display === 'none' ? 'block' : 'none';
+                });
+            });
+
+            // Handle click on second category to toggle third-level categories
+            document.querySelectorAll('.subcategory-toggle').forEach(function(secondCategoryLink) {
+                secondCategoryLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var secondCategoryId = this.getAttribute('data-id');
+                    var thirdCategoriesList = document.getElementById('thirdcategories-' + secondCategoryId);
+                    thirdCategoriesList.style.display = thirdCategoriesList.style.display === 'none' ? 'block' : 'none';
+                });
+            });
+        });
+    </script>
 </body>
 </html>

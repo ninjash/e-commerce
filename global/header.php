@@ -1,9 +1,13 @@
 <?php
 require 'web/db_connect.php';
 
-// Fetch main categories for the "All Categories" dropdown in the header
-$header_category_query = "SELECT id, name FROM main_categories";
-$header_category_result = mysqli_query($conn, $header_category_query);
+// Fetch main categories (parent_id is NULL)
+$header_main_category_query = "SELECT c.id, c.name, 
+                        (SELECT COUNT(pc.product_id) FROM product_categories pc WHERE pc.category_id = c.id OR pc.category_id IN 
+                             (SELECT id FROM categories WHERE parent_id = c.id)) 
+                         as product_count
+                        FROM categories c WHERE c.parent_id IS NULL";
+$header_main_category_result = mysqli_query($conn, $header_main_category_query);
 ?>
 
 <!-- Top Bar -->
@@ -66,7 +70,7 @@ $header_category_result = mysqli_query($conn, $header_category_query);
     <div class="container-fluid">
         <div class="row w-100" style="height: 100%;">
             <div class="col-sm-4 col-md-4 col-lg-2 d-flex justify-content-start align-items-center ps-0 pe-0">
-                <div class="dropdown d-flex" style="width: 100%; height: 100%;">    
+                <div class="dropdown" style="width: 100%; height: 100%;">    
                     <button class="btn btn-orange category-btn d-flex justify-content-start align-items-center" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-list"></i> 
                         <span>ALL CATEGORIES</span>
@@ -74,20 +78,26 @@ $header_category_result = mysqli_query($conn, $header_category_query);
                             <i class="bi bi-chevron-down d-flex justify-content-end align-items-end"></i>
                         </span>
                     </button>
-                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item" href="category_page.php">All Products</a></li>
+                    <ul class="dropdown-menu w-100" aria-labelledby="navbarDropdown">
+                    <li><a class="dropdown-item" href="category_page.php">All Products</a></li>
                         <!-- Fetching main categories -->
-                        <?php if (mysqli_num_rows($header_category_result) > 0): ?>
-                            <?php while ($main_category = mysqli_fetch_assoc($header_category_result)): ?>
+                        <?php if (mysqli_num_rows($header_main_category_result) > 0): ?>
+                            <?php while ($main_category = mysqli_fetch_assoc($header_main_category_result)): ?>
                                 <li class="dropdown-submenu">
-                                    <a class="dropdown-item" href="category_page.php?main_category_id=<?= $main_category['id'] ?>"><?= htmlspecialchars($main_category['name']) ?></a>
-                                    <ul class="dropdown-menu">
+                                    <a class="dropdown-item header-category-toggle" href="#" data-id="<?= $main_category['id'] ?>">
+                                        <?= htmlspecialchars($main_category['name']) ?>
+                                        <i class="bi bi-chevron-right ms-auto"></i>
+                                    </a>
+                                    <ul class="dropdown-menu header-subcategory-list" id="header-subcategories-<?= $main_category['id'] ?>" style="display: none;">
                                         <?php
-                                        // Fetch second categories related to the main category
-                                        $second_category_query = "SELECT id, name FROM second_categories WHERE main_category_id = " . $main_category['id'];
+                                        // Fetch second-level categories based on the main category's ID
+                                        $second_category_query = "SELECT c.id, c.name, 
+                                                                    (SELECT COUNT(pc.product_id) FROM product_categories pc WHERE pc.category_id = c.id) 
+                                                                    as product_count
+                                                                FROM categories c WHERE c.parent_id = " . $main_category['id'];
                                         $second_category_result = mysqli_query($conn, $second_category_query);
                                         while ($second_category = mysqli_fetch_assoc($second_category_result)): ?>
-                                            <li><a class="dropdown-item" href="category_page.php?second_category_id=<?= $second_category['id'] ?>"><?= htmlspecialchars($second_category['name']) ?></a></li>
+                                            <li><a class="dropdown-item" href="category_page.php?category_id=<?= $second_category['id'] ?>"><?= htmlspecialchars($second_category['name']) ?></a></li>
                                         <?php endwhile; ?>
                                     </ul>
                                 </li>
@@ -138,3 +148,28 @@ $header_category_result = mysqli_query($conn, $header_category_query);
         </div>
     </div>
 </nav>
+
+<!-- Custom CSS for toggling subcategory -->
+<style>
+    .header-subcategory-list {
+        display: none; /* Initially hide subcategories */
+        padding-left: 15px;
+    }
+</style>
+
+<!-- JavaScript to handle toggle functionality -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle main category toggling to show/hide second categories
+        document.querySelectorAll('.header-category-toggle').forEach(function(mainCategoryLink) {
+            mainCategoryLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                var mainCategoryId = this.getAttribute('data-id');
+                var subcategoriesList = document.getElementById('header-subcategories-' + mainCategoryId);
+                if (subcategoriesList) {
+                    subcategoriesList.style.display = (subcategoriesList.style.display === 'none') ? 'block' : 'none';
+                }
+            });
+        });
+    });
+</script>

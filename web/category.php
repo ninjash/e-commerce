@@ -9,20 +9,13 @@ if (!isset($_GET['id'])) {
 
 $category_id = (int)$_GET['id']; // Ensure it's an integer
 
-// Fetch the category details including parent categories
+// Fetch the current category details including parent categories and image
 $category_query = "
-    WITH RECURSIVE category_hierarchy AS (
-        SELECT id, name, parent_id
-        FROM categories
-        WHERE id = $category_id
-        UNION ALL
-        SELECT c.id, c.name, c.parent_id
-        FROM categories c
-        INNER JOIN category_hierarchy ch ON c.id = ch.parent_id
-    )
-    SELECT id, name, parent_id FROM category_hierarchy ORDER BY parent_id ASC;
+    SELECT c.id, c.name, c.parent_id, ci.image_path
+    FROM categories c
+    LEFT JOIN category_images ci ON c.id = ci.category_id
+    WHERE c.id = $category_id
 ";
-
 $category_result = mysqli_query($conn, $category_query);
 
 if (!$category_result || mysqli_num_rows($category_result) == 0) {
@@ -30,26 +23,39 @@ if (!$category_result || mysqli_num_rows($category_result) == 0) {
     exit;
 }
 
-// Fetch the category hierarchy
-$category_hierarchy = [];
-while ($row = mysqli_fetch_assoc($category_result)) {
-    $category_hierarchy[] = $row;
+$category = mysqli_fetch_assoc($category_result);
+
+// Fetch subcategories under this category
+$subcategories_query = "SELECT id, name FROM categories WHERE parent_id = $category_id";
+$subcategories_result = mysqli_query($conn, $subcategories_query);
+$has_subcategories = mysqli_num_rows($subcategories_result) > 0;
+
+// Check if this is a third-level category (no subcategories)
+if (!$has_subcategories) {
+    // Fetch products for this category
+    $product_query = "
+        SELECT p.* FROM products p
+        INNER JOIN product_categories pc ON p.id = pc.product_id
+        WHERE pc.category_id = $category_id
+    ";
+    $product_result = mysqli_query($conn, $product_query);
+    $has_products = mysqli_num_rows($product_result) > 0;
 }
 
-// Get the main, second, and third category from the hierarchy if they exist
-$main_category = $category_hierarchy[0] ?? null;
-$second_category = $category_hierarchy[1] ?? null;
-$third_category = $category_hierarchy[2] ?? null;
-
-// Fetch products for this category and its subcategories
-$product_query = "
-    SELECT p.*
-    FROM products p
-    INNER JOIN product_categories pc ON p.id = pc.product_id
-    WHERE pc.category_id = $category_id
-";
-$product_result = mysqli_query($conn, $product_query);
-
+// Determine category depth for labeling
+$category_level = 'Main Category'; // Default level
+if ($category['parent_id']) {
+    // If the category has a parent, it is either second or third level
+    $parent_query = "SELECT parent_id FROM categories WHERE id = {$category['parent_id']}";
+    $parent_result = mysqli_query($conn, $parent_query);
+    $parent = mysqli_fetch_assoc($parent_result);
+    
+    if ($parent['parent_id']) {
+        $category_level = 'Third Category'; // If the parent also has a parent, this is a third-level category
+    } else {
+        $category_level = 'Second Category'; // Otherwise, it's a second-level category
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -66,21 +72,29 @@ $product_result = mysqli_query($conn, $product_query);
 
     <div class="card mb-4">
         <div class="card-body">
-            <h2>
-                Main Category: <?php echo htmlspecialchars($main_category['name'] ?? 'N/A'); ?><br>
-                Second Category: <?php echo htmlspecialchars($second_category['name'] ?? 'N/A'); ?><br>
-                Third Category: <?php echo htmlspecialchars($third_category['name'] ?? 'N/A'); ?>
-            </h2>
+            <h2>Category: <?php echo htmlspecialchars($category['name']); ?></h2>
+            
+            <!-- Display category image if available -->
+            <?php if (!empty($category['image_path'])): ?>
+                <img src="<?php echo htmlspecialchars($category['image_path']); ?>" alt="Category Image" width="200">
+            <?php endif; ?>
 
-            <h3>Products in this Category</h3>
-            <?php if (mysqli_num_rows($product_result) > 0): ?>
+            <?php if ($has_subcategories): ?>
+                <!-- Dynamically adjust heading based on category level -->
+                <h3><?php echo $category_level === 'Main Category' ? 'Second Categories' : 'Third Categories'; ?></h3>
+                <ul>
+                    <?php while ($subcategory = mysqli_fetch_assoc($subcategories_result)): ?>
+                        <li><a href="category.php?id=<?php echo $subcategory['id']; ?>"><?php echo htmlspecialchars($subcategory['name']); ?></a></li>
+                    <?php endwhile; ?>
+                </ul>
+            <?php elseif ($has_products): ?>
+                <h3>Products in this Category</h3>
                 <table class="table table-striped">
                     <thead>
                         <tr>
                             <th>Name</th>
                             <th>SKU</th>
                             <th>Price</th>
-                            <th>Feature Product</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -90,7 +104,6 @@ $product_result = mysqli_query($conn, $product_query);
                                 <td><?php echo htmlspecialchars($product['name']); ?></td>
                                 <td><?php echo htmlspecialchars($product['sku']); ?></td>
                                 <td>$<?php echo number_format($product['price'], 2); ?></td>
-                                <td><?php echo $product['feature_product'] ? 'Yes' : 'No'; ?></td>
                                 <td>
                                     <a href="product.php?id=<?php echo $product['id']; ?>" class="btn btn-primary">View</a>
                                 </td>
@@ -111,3 +124,7 @@ $product_result = mysqli_query($conn, $product_query);
 
 </body>
 </html>
+
+<?php
+mysqli_close($conn);
+?>

@@ -7,27 +7,30 @@ if (!isset($_GET['id'])) {
     exit;
 }
 
-$category_id = $_GET['id'];
+$category_id = (int)$_GET['id']; // Ensure it's an integer to avoid SQL injection issues
 
 // Fetch category details
 $category_query = "SELECT c.id AS category_id, c.name AS category_name, c.description, c.parent_id, ci.image_path
                    FROM categories c
                    LEFT JOIN category_images ci ON c.id = ci.category_id
-                   WHERE c.id = $category_id";
-$category_result = mysqli_query($conn, $category_query);
+                   WHERE c.id = ?";
+$stmt = $conn->prepare($category_query);
+$stmt->bind_param("i", $category_id);
+$stmt->execute();
+$category_result = $stmt->get_result();
 
-if (!$category_result || mysqli_num_rows($category_result) == 0) {
+if ($category_result->num_rows == 0) {
     echo "Category not found.";
     exit;
 }
 
-$category = mysqli_fetch_assoc($category_result);
+$category = $category_result->fetch_assoc();
 
 // Fetch all main categories (for assigning second categories)
-$main_categories = mysqli_query($conn, "SELECT id, name FROM categories WHERE parent_id IS NULL");
+$main_categories = $conn->query("SELECT id, name FROM categories WHERE parent_id IS NULL");
 
 // Fetch all second categories grouped by their main categories (for assigning third categories)
-$second_categories = mysqli_query($conn, "
+$second_categories = $conn->query("
     SELECT sc.id AS second_id, sc.name AS second_name, mc.id AS main_id, mc.name AS main_name
     FROM categories sc
     JOIN categories mc ON sc.parent_id = mc.id
@@ -36,7 +39,7 @@ $second_categories = mysqli_query($conn, "
 
 // Organize second categories under their respective main categories
 $grouped_second_categories = [];
-while ($row = mysqli_fetch_assoc($second_categories)) {
+while ($row = $second_categories->fetch_assoc()) {
     $grouped_second_categories[$row['main_name']][] = $row;
 }
 
@@ -45,38 +48,71 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $category_type = $_POST['category_type'];
     $category_name = $_POST['name'];
     $description = $_POST['description'];
-    $parent_id = NULL; // Default to NULL for main categories
+    $parent_id = 'NULL'; // Default to NULL for main categories
 
     // Set the parent ID based on the category type
     if ($category_type == 'second') {
-        $parent_id = $_POST['main_category'];  // For second category
+        $parent_id = !empty($_POST['main_category']) ? (int)$_POST['main_category'] : 'NULL';  // For second category
     } elseif ($category_type == 'third') {
-        $parent_id = $_POST['second_category'];  // For third category
+        $parent_id = !empty($_POST['second_category']) ? (int)$_POST['second_category'] : 'NULL';  // For third category
     }
 
-    // Update category details
-    $update_category_query = "UPDATE categories 
-                              SET name = '$category_name', description = '$description', parent_id = $parent_id
-                              WHERE id = $category_id";
-    if (mysqli_query($conn, $update_category_query)) {
-        // Handle the image upload if provided
-        if (isset($_FILES['category_image']) && $_FILES['category_image']['error'] == 0) {
-            $image = $_FILES['category_image'];
-            $target_file = "/e-commerce/assets/category_images/" . basename($image["name"]);
+    // Prepare update category statement
+    $update_category_query = "UPDATE categories SET name = ?, description = ?, parent_id = ? WHERE id = ?";
+    $stmt = $conn->prepare($update_category_query);
+    $stmt->bind_param("ssii", $category_name, $description, $parent_id, $category_id);
 
-            if (move_uploaded_file($image["tmp_name"], $_SERVER['DOCUMENT_ROOT'] . $target_file)) {
-                $image_update_query = "INSERT INTO category_images (category_id, image_path)
-                                       VALUES ($category_id, '$target_file')
-                                       ON DUPLICATE KEY UPDATE image_path = '$target_file'";
-                mysqli_query($conn, $image_update_query);
+    if ($stmt->execute()) {
+        // Check if image was uploaded
+        if (isset($_FILES['category_images']) && $_FILES['category_images']['error'] == 0) {
+            $image = $_FILES['category_images'];
+            $target_dir = "/e-commerce/assets/category_images/";
+            $target_file = $target_dir . basename($image["name"]);
+            $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+            $max_file_size = 2 * 1024 * 1024; // 2MB file size limit
+
+            // Check file size
+            if ($image['size'] > $max_file_size) {
+                echo "Sorry, your file is too large. Maximum size is 2MB.";
+                exit;
+            }
+
+            // Check if image file is a valid format
+            $valid_image_types = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+            if (in_array($imageFileType, $valid_image_types)) {
+
+                // Ensure the directory exists
+                if (!is_dir($_SERVER['DOCUMENT_ROOT'] . $target_dir)) {
+                    mkdir($_SERVER['DOCUMENT_ROOT'] . $target_dir, 0777, true);
+                }
+
+                // Move uploaded file to the target directory
+                if (move_uploaded_file($image["tmp_name"], $_SERVER['DOCUMENT_ROOT'] . $target_file)) {
+                    // Insert or update category image in the database
+                    $image_update_query = "INSERT INTO category_images (category_id, image_path)
+                                           VALUES (?, ?)
+                                           ON DUPLICATE KEY UPDATE image_path = ?";
+                    $stmt = $conn->prepare($image_update_query);
+                    $stmt->bind_param("iss", $category_id, $target_file, $target_file);
+
+                    if ($stmt->execute()) {
+                        echo "Image saved successfully.";
+                    } else {
+                        echo "Error saving image to database: " . $conn->error;
+                    }
+                } else {
+                    echo "Sorry, there was an error uploading your file.";
+                }
+            } else {
+                echo "Invalid file type. Please upload a JPG, JPEG, PNG, or GIF image.";
             }
         }
 
         // Redirect back to the category list or view page
-        header("Location: view_category.php?id=$category_id");
+        header("Location: category.php?id=$category_id");
         exit();
     } else {
-        echo "Error updating category: " . mysqli_error($conn);
+        echo "Error updating category: " . $conn->error;
     }
 }
 ?>
@@ -129,7 +165,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <label for="main_category" class="form-label">Select Main Category</label>
             <select class="form-control" name="main_category">
                 <option value="">Select Main Category</option>
-                <?php while ($main_category = mysqli_fetch_assoc($main_categories)) { ?>
+                <?php while ($main_category = $main_categories->fetch_assoc()) { ?>
                     <option value="<?php echo $main_category['id']; ?>" <?php echo ($category['parent_id'] == $main_category['id']) ? 'selected' : ''; ?>>
                         <?php echo $main_category['name']; ?>
                     </option>
@@ -156,12 +192,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         <!-- Category Image -->
         <div class="mb-3">
-            <label for="category_image" class="form-label">Category Image</label><br>
+            <label for="category_images" class="form-label">Category Image</label><br>
             <?php if (!empty($category['image_path'])) { ?>
                 <img src="<?php echo $category['image_path']; ?>" alt="Category Image" width="100"><br>
                 <small>Current Image</small><br>
             <?php } ?>
-            <input type="file" name="category_image">
+            <input type="file" name="category_images">
         </div>
 
         <!-- Submit Button -->
@@ -179,5 +215,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </html>
 
 <?php
-mysqli_close($conn);
+$conn->close();
 ?>

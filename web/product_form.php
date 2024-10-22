@@ -13,8 +13,8 @@ if (!isset($_SESSION['products'])) {
 $attributes_query = "SELECT * FROM attributes";
 $attributes_result = mysqli_query($conn, $attributes_query);
 
-// Fetch all main categories (you might want to fetch second and third categories similarly)
-$category_query = "SELECT id, name FROM main_categories";
+// Fetch all main categories (where parent_id is NULL to get main categories)
+$category_query = "SELECT id, name FROM categories WHERE parent_id IS NULL";
 $category_result = mysqli_query($conn, $category_query);
 
 // Fetch all manufacturers

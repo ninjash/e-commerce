@@ -9,8 +9,8 @@ if (!isset($_GET['id'])) {
 
 $category_id = (int)$_GET['id']; // Ensure it's an integer to avoid SQL injection issues
 
-// Fetch category details
-$category_query = "SELECT c.id AS category_id, c.name AS category_name, c.description, c.parent_id, ci.image_path
+// Fetch category details including the 'featured' field
+$category_query = "SELECT c.id AS category_id, c.name AS category_name, c.description, c.parent_id, c.featured, ci.image_path
                    FROM categories c
                    LEFT JOIN category_images ci ON c.id = ci.category_id
                    WHERE c.id = ?";
@@ -48,19 +48,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $category_type = $_POST['category_type'];
     $category_name = $_POST['name'];
     $description = $_POST['description'];
-    $parent_id = 'NULL'; // Default to NULL for main categories
+    $parent_id = null; // Default to NULL for main categories
+    $featured = isset($_POST['featured']) ? 1 : 0;  // Check if the "featured" checkbox is checked
 
     // Set the parent ID based on the category type
     if ($category_type == 'second') {
-        $parent_id = !empty($_POST['main_category']) ? (int)$_POST['main_category'] : 'NULL';  // For second category
+        $parent_id = !empty($_POST['main_category']) ? (int)$_POST['main_category'] : null;  // For second category
     } elseif ($category_type == 'third') {
-        $parent_id = !empty($_POST['second_category']) ? (int)$_POST['second_category'] : 'NULL';  // For third category
+        $parent_id = !empty($_POST['second_category']) ? (int)$_POST['second_category'] : null;  // For third category
     }
 
-    // Prepare update category statement
-    $update_category_query = "UPDATE categories SET name = ?, description = ?, parent_id = ? WHERE id = ?";
+    // Prepare the update query and handle NULL parent_id
+    $update_category_query = "UPDATE categories SET name = ?, description = ?, parent_id = ?, featured = ? WHERE id = ?";
     $stmt = $conn->prepare($update_category_query);
-    $stmt->bind_param("ssii", $category_name, $description, $parent_id, $category_id);
+    $stmt->bind_param("ssiii", $category_name, $description, $parent_id, $featured, $category_id);
 
     if ($stmt->execute()) {
         // Check if image was uploaded
@@ -198,6 +199,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <small>Current Image</small><br>
             <?php } ?>
             <input type="file" name="category_images">
+        </div>
+        
+        <!-- Featured Checkbox -->
+        <div class="mb-3">
+            <label for="featured" class="form-label">Featured</label>
+            <input type="checkbox" id="featured" name="featured" <?php echo ($category['featured'] == 1) ? 'checked' : ''; ?>>
         </div>
 
         <!-- Submit Button -->

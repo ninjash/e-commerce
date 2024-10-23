@@ -1,7 +1,7 @@
 <?php
 require 'web/db_connect.php';
 
-// Fetch featured categories and products
+// Fetch featured categories
 $category_query = "
     SELECT c.id, c.name, ci.image_path
     FROM categories c
@@ -70,7 +70,7 @@ $manufacturer_result = mysqli_query($conn, $manufacturer_query);
     <div class="container-fluid category-section">
         <div class="row w-100">
             <div class="col-12 d-flex justify-content-start align-items-center">
-                <h2 class="category-section-title pt-5 pb-4" style="font-size: 50px; font-weight: 800; font-family: 'Roboto', sans-serif;">Featured Categories</h2>
+                <h2 class="category-section-title pt-5 pb-4" style="font-size: 50px; font-weight: 800;">Featured Categories</h2>
             </div>
         </div>
     </div>

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 21, 2024 at 06:18 PM
+-- Generation Time: Oct 23, 2024 at 09:48 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -65,14 +65,14 @@ CREATE TABLE `categories` (
 INSERT INTO `categories` (`id`, `name`, `description`, `parent_id`, `featured`) VALUES
 (1, 'Electric Powertrain', 'Parts related to electric propulsion systems, including components like electric motors, inverters, batteries, and cooling systems essential for electric vehicles (EVs) to function efficiently.', NULL, 0),
 (2, 'ICE Powertrain', 'Components of the internal combustion engine (ICE), including engine structural parts, valvetrain, fuel systems, and other elements responsible for traditional gasoline or diesel engine operation.', NULL, 0),
-(3, 'Driveline Parts', 'Components that transmit power from the engine or motor to the wheels, including differentials, axles, driveshafts, and propeller shafts, ensuring efficient movement and control of the vehicle.', NULL, 0),
+(3, 'Driveline Parts', 'Components that transmit power from the engine or motor to the wheels, including differentials, axles, driveshafts, and propeller shafts, ensuring efficient movement and control of the vehicle.', NULL, 1),
 (4, 'AD / ADAS / Telematics', 'Systems for autonomous driving, driver assistance, and vehicle communication. These include advanced driver assistance systems (ADAS), telematics, cameras, radars, and other sensors that enhance safety and navigation.', NULL, 0),
 (5, 'Electrical / Electronic Parts', 'Components that provide electrical power and control within the vehicle, including ECUs (Electronic Control Units), wiring harnesses, batteries, alternators, sensors, and connectors, ensuring proper function of all electronic systems.', NULL, 0),
 (6, 'Interior Parts', 'Components inside the vehicle cabin, such as seats, dashboards, instrument panels, trim, airbag modules, and various controls that contribute to the vehicle’s aesthetics, functionality, and safety.', NULL, 0),
 (7, 'Exterior Parts', 'The external components of the vehicle, including bumpers, grilles, mirrors, lighting systems, and body moldings, which provide both aesthetic appeal and protection.', NULL, 0),
 (8, 'Chassis Parts', 'The structural framework of the vehicle that supports the body and various mechanical systems, including suspension components, control arms, cross members, and stabilizers, which ensure vehicle stability and handling.', NULL, 0),
 (9, 'Body Parts', 'Panels and structural elements that form the exterior shell of the vehicle, including doors, hoods, trunks, fenders, and other protective reinforcements that provide safety and support to the overall structure.', NULL, 0),
-(10, 'General Parts', 'Miscellaneous components used throughout the vehicle, such as fasteners, bolts, nuts, clips, adhesives, seals, and general commodities that play a crucial role in the assembly and maintenance of various systems.', NULL, 0),
+(10, 'General Parts', 'Miscellaneous components used throughout the vehicle, such as fasteners, bolts, nuts, clips, adhesives, seals, and general commodities that play a crucial role in the assembly and maintenance of various systems.', NULL, 1),
 (11, 'Drive Motor', 'The main electric motor responsible for vehicle propulsion, converting electrical energy into mechanical energy to drive the wheels.', 1, 0),
 (12, 'e-Axle', 'A compact unit that integrates an electric motor, transmission, and power electronics to drive the vehicle’s axle, optimizing power delivery and efficiency.', 1, 0),
 (13, 'Electric Powertrain System', 'The overall system that includes electric components responsible for generating, storing, and distributing power to drive the vehicle.', 1, 0),
@@ -105,7 +105,7 @@ INSERT INTO `categories` (`id`, `name`, `description`, `parent_id`, `featured`) 
 (40, 'AD / ADAS Parts', 'Components that enable AD and ADAS functionalities, such as cameras, radar sensors, ultrasonic sensors, LiDAR, and control units, which gather and process data for real-time vehicle monitoring and assistance.', 4, 0),
 (41, 'Telematics / Car Navigation', 'Systems that provide navigation, communication, and vehicle tracking through GPS, In-Vehicle Infotainment (IVI), and other connectivity technologies. These systems ensure drivers have real-time traffic information and connectivity for seamless travel.', 4, 0),
 (42, 'Entertainment / Audio', 'In-vehicle entertainment systems, including audio systems (radio, speakers, amplifiers) and multimedia units, that enhance the in-car experience with music, video, and interactive media.', 4, 0),
-(43, 'Security', 'Vehicle security systems that include keyless entry, immobilizers, and alarm systems to protect the vehicle from theft or unauthorized access.', 4, 0),
+(43, 'Security', 'Vehicle security systems that include keyless entry, immobilizers, and alarm systems to protect the vehicle from theft or unauthorized access.', 4, 1),
 (44, 'Motor', 'Electric motors that power various vehicle systems, including window motors, wiper motors, radiator fans, and power steering motors, providing mechanical movement using electrical energy.', 5, 0),
 (45, 'Interior Switch', 'Controls located inside the vehicle for various functions, such as the headlamp switch, wiper switch, mirror control switch, and power window switch, allowing the driver and passengers to operate vehicle features.', 5, 0),
 (46, 'Hidden Switch', 'Switches that are not typically visible but play essential roles in vehicle operation, such as the oil pressure switch, brake lamp switch, and hood switch, which monitor and control critical functions behind the scenes.', 5, 0),
@@ -122,7 +122,7 @@ INSERT INTO `categories` (`id`, `name`, `description`, `parent_id`, `featured`) 
 (57, 'Seat Belt', 'A critical safety system designed to restrain occupants during a collision. Components include the seat belt webbing, retractors, buckles, and adjusters, ensuring occupant safety.', 6, 0),
 (58, 'Pedal', 'Controls used by the driver to operate the vehicle, including accelerator, brake, and clutch pedals, essential for vehicle speed regulation and stopping.', 6, 0),
 (59, 'Interior Parts', 'General components within the vehicle cabin, including trim pieces, armrests, cup holders, and other fittings that enhance functionality, comfort, and aesthetics.', 6, 0),
-(60, 'Lighting', 'Exterior lighting components such as headlights, tail lights, fog lamps, and turn signals that ensure visibility for the driver and signal the vehicle\'s movements to other road users.', 7, 0),
+(60, 'Lighting', 'Exterior lighting components such as headlights, tail lights, fog lamps, and turn signals that ensure visibility for the driver and signal the vehicle\'s movements to other road users.', 7, 1),
 (61, 'Bumper', 'Protective components located at the front and rear of the vehicle, designed to absorb minor impacts and reduce damage during low-speed collisions.', 7, 0),
 (62, 'Exterior Parts', 'General exterior components including mirrors, grilles, moldings, and other parts that contribute to both the aesthetic and protective functions of the vehicle.', 7, 0),
 (63, 'Chassis Module', 'The structural frame of the vehicle that supports all mechanical components, including the suspension, engine, and transmission, providing the foundation for vehicle stability and safety.', 8, 0),
@@ -131,7 +131,7 @@ INSERT INTO `categories` (`id`, `name`, `description`, `parent_id`, `featured`) 
 (66, 'ABS / TCS / ESC', 'Electronic systems that enhance vehicle stability and safety, including Anti-lock Braking System (ABS), Traction Control System (TCS), and Electronic Stability Control (ESC), which prevent wheel lockup and skidding.', 8, 0),
 (67, 'Steering', 'The system that enables the driver to control the direction of the vehicle, consisting of components like the steering wheel, steering rack, and power steering systems.', 8, 0),
 (68, 'Suspension', 'Components like control arms, shock absorbers, and springs that support vehicle handling, comfort, and stability by absorbing road impacts and maintaining wheel alignment.', 8, 0),
-(69, 'Tire & Wheel', 'The tires and wheels that provide traction, support the vehicle’s weight, and ensure smooth movement. This includes components like tire valves, steel and alloy wheels, and wheel covers.', 8, 0),
+(69, 'Tire & Wheel', 'The tires and wheels that provide traction, support the vehicle’s weight, and ensure smooth movement. This includes components like tire valves, steel and alloy wheels, and wheel covers.', 8, 1),
 (70, 'Body Panel / Frame', 'Structural components that form the exterior and framework of the vehicle, including roof panels, side panels, and frames that provide rigidity and protection.', 9, 0),
 (71, 'Body Reinforcement and Protector', 'Components that strengthen and protect vulnerable areas of the vehicle body, such as side impact beams, splash guards, and mudguards, enhancing durability and safety.', 9, 0),
 (72, 'Door', 'The panels that provide access to the vehicle interior, including hinges, door locks, handles, and power window mechanisms, ensuring security and ease of use.', 9, 0),
@@ -492,7 +492,7 @@ INSERT INTO `categories` (`id`, `name`, `description`, `parent_id`, `featured`) 
 (426, 'Airbag module', 'The complete airbag system that deploys in the event of a collision.', 55, 0),
 (427, 'Driver airbag module', 'The airbag module located in the steering wheel that protects the driver.', 55, 0),
 (428, 'Passenger airbag module', 'The airbag module located in the dashboard that protects the passenger.', 55, 0),
-(429, 'Seat', 'A component that provides seating for the driver and passengers in the vehicle.', 56, 0),
+(429, 'Seat', 'A component that provides seating for the driver and passengers in the vehicle.', 56, 1),
 (430, 'Seat cushion / Seat back', 'The cushion and backrest of the seat that provide comfort and support.', 56, 0),
 (431, 'Side bolster', 'A component that provides lateral support to the seat, keeping occupants in place during turns.', 56, 0),
 (432, 'Seat fabric', 'The material used to cover the seat, providing comfort and aesthetics.', 56, 0),
@@ -670,6 +670,18 @@ CREATE TABLE `category_images` (
   `image_path` varchar(255) NOT NULL,
   `category_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `category_images`
+--
+
+INSERT INTO `category_images` (`id`, `image_path`, `category_id`) VALUES
+(1, '/e-commerce/assets/category_images/tires_and_wheels.png', 69),
+(2, '/e-commerce/assets/category_images/interior_accessories.png', 429),
+(3, '/e-commerce/assets/category_images/safety_and_security.png', 43),
+(4, '/e-commerce/assets/category_images/performance_parts.png', 3),
+(5, '/e-commerce/assets/category_images/lights_and_electronics.png', 60),
+(6, '/e-commerce/assets/category_images/car_maintenance.png', 10);
 
 -- --------------------------------------------------------
 
@@ -1065,7 +1077,7 @@ ALTER TABLE `categories`
 -- AUTO_INCREMENT for table `category_images`
 --
 ALTER TABLE `category_images`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `manufacturers`

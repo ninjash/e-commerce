@@ -12,6 +12,7 @@ $second_categories = mysqli_query($conn, "
     WHERE sc.parent_id IS NOT NULL
 ");
 
+
 // Organize second categories under their respective main categories
 $grouped_second_categories = [];
 while ($row = mysqli_fetch_assoc($second_categories)) {
@@ -24,6 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $category_name = $_POST['name'];
     $description = $_POST['description'];
     $parent_id = NULL; // Default to NULL for main categories
+    $featured = isset($_POST['featured']) ? 1 : 0;
 
     // Set the parent ID based on the category type
     if ($category_type == 'second') {
@@ -33,9 +35,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     // Use prepared statement to insert the new category into the `categories` table
-    $insert_category_query = "INSERT INTO categories (name, description, parent_id) VALUES (?, ?, ?)";
+    $insert_category_query = "INSERT INTO categories (name, description, parent_id, featured) VALUES (?, ?, ?, ?)";
     $stmt = mysqli_prepare($conn, $insert_category_query);
-    mysqli_stmt_bind_param($stmt, "ssi", $category_name, $description, $parent_id);
+    mysqli_stmt_bind_param($stmt, "ssi", $category_name, $description, $parent_id, $featured);
 
     if (mysqli_stmt_execute($stmt)) {
         $category_id = mysqli_insert_id($conn); // Get the last inserted ID for the category
@@ -144,6 +146,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <div class="mb-3">
             <label for="category_image" class="form-label">Category Image</label>
             <input type="file" class="form-control" id="category_image" name="category_image" accept="image/*">
+        </div>
+
+        <div class="mb-3">
+            <label for="featured" class="form-label">Featured</label>
+            <input type="checkbox" id="featured" name="featured">
         </div>
 
         <button type="submit" class="btn btn-primary">Create Category</button>

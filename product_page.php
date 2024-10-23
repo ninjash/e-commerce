@@ -7,7 +7,7 @@ if (!isset($_GET['id'])) {
     exit;
 }
 
-$product_id = $_GET['id'];
+$product_id = (int)$_GET['id'];
 
 $product = new Product($conn, $product_id);
 $product_details = $product->getProductDetails();
@@ -35,13 +35,15 @@ $product_attributes = mysqli_query($conn, $product_attributes_query);
 
 // Fetch product categories (Main, Second, Third) using the categories table hierarchy
 $product_categories_query = "
-    SELECT c1.name AS main_category, c2.name AS second_category, c3.name AS third_category
+    SELECT c1.name AS third_category, c2.name AS second_category, c3.name AS main_category, 
+           c1.id AS third_category_id, c2.id AS second_category_id, c3.id AS main_category_id
     FROM product_categories pc
     LEFT JOIN categories c1 ON c1.id = pc.category_id
     LEFT JOIN categories c2 ON c2.id = c1.parent_id
     LEFT JOIN categories c3 ON c3.id = c2.parent_id
     WHERE pc.product_id = $product_id";
 $product_categories_result = mysqli_query($conn, $product_categories_query);
+$product_categories = mysqli_fetch_assoc($product_categories_result);
 
 // Get the next and previous products
 $next_query = "SELECT id FROM products WHERE id > $product_id ORDER BY id ASC LIMIT 1";
@@ -83,8 +85,32 @@ $prev_id = isset($prev_product['id']) ? $prev_product['id'] : null;
                 <div class="products-main-info">
                     <nav aria-label="breadcrumb" class="breadcrumb-tab py-4">
                         <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="#">Home</a></li>
-                            <li class="breadcrumb-item"><a href="#">Products</a></li>
+                            <li class="breadcrumb-item"><a href="homepage.php">Home</a></li>
+                            <li class="breadcrumb-item-separator"> | </li> <!-- Add this separator -->
+                            <?php if (!empty($product_categories['main_category'])): ?>
+                                <li class="breadcrumb-item">
+                                    <a href="category_page.php?category_id=<?= $product_categories['main_category_id'] ?>">
+                                        <?= htmlspecialchars($product_categories['main_category']) ?>
+                                    </a>
+                                </li>
+                                <li class="breadcrumb-item-separator"> | </li> <!-- Add this separator -->
+                            <?php endif; ?>
+                            <?php if (!empty($product_categories['second_category'])): ?>
+                                <li class="breadcrumb-item">
+                                    <a href="category_page.php?category_id=<?= $product_categories['second_category_id'] ?>">
+                                        <?= htmlspecialchars($product_categories['second_category']) ?>
+                                    </a>
+                                </li>
+                                <li class="breadcrumb-item-separator"> | </li> <!-- Add this separator -->
+                            <?php endif; ?>
+                            <?php if (!empty($product_categories['third_category'])): ?>
+                                <li class="breadcrumb-item">
+                                    <a href="category_page.php?category_id=<?= $product_categories['third_category_id'] ?>">
+                                        <?= htmlspecialchars($product_categories['third_category']) ?>
+                                    </a>
+                                </li>
+                                <li class="breadcrumb-item-separator"> | </li> <!-- Add this separator -->
+                            <?php endif; ?>
                             <li class="breadcrumb-item active" aria-current="page"><?php echo $product_details['name']; ?></li>
                             <li class="ms-auto">
                                 <?php if ($prev_id): ?>

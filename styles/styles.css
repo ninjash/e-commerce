@@ -1601,6 +1601,12 @@ body {
     color: #333;
 }
 
+.breadcrumb-item + .breadcrumb-item::before {
+    content: " | "; /* Use a custom separator, replace with '|' if desired */
+    color: #6c757d; /* Separator color */
+    padding: 0 10px;
+}
+
 .breadcrumb-item.active {
     color: #f67350;
 }

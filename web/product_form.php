@@ -2,6 +2,9 @@
 session_start();
 require 'db_connect.php';
 
+// Enable detailed MySQLi error reporting
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+
 $target_dir = "/e-commerce/assets/products/";
 
 // Initialize products in session if not set
@@ -13,16 +16,16 @@ if (!isset($_SESSION['products'])) {
 $attributes_query = "SELECT * FROM attributes";
 $attributes_result = mysqli_query($conn, $attributes_query);
 
-// Fetch all main categories (where parent_id is NULL to get main categories)
-$category_query = "SELECT id, name FROM categories WHERE parent_id IS NULL";
-$category_result = mysqli_query($conn, $category_query);
+// Fetch all main categories (where parent_id is NULL)
+$main_category_query = "SELECT id, name FROM categories WHERE parent_id IS NULL";
+$main_category_result = mysqli_query($conn, $main_category_query);
 
 // Fetch all manufacturers
 $manufacturer_query = "SELECT id, name FROM manufacturers";
 $manufacturer_result = mysqli_query($conn, $manufacturer_query);
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_product'])) {
-
+    // Handle product addition logic
     $name = $_POST['name'];
     $sku = $_POST['sku'];
     $short_description = $_POST['short_description'];
@@ -30,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_product'])) {
     $description = $_POST['description'];
     $feature_product = isset($_POST['feature_product']) ? 1 : 0;
     $categories = $_POST['categories'];  // Multiple categories (main, second, and third)
-    $manufacturer_id = $_POST['manufacturer_id'];  // Manufacturer
+    $manufacturer_id = $_POST['manufacturer_id']; // Manufacturer selection
 
     // Handle file upload
     if (isset($_FILES['main_image']) && $_FILES['main_image']['error'] == 0) {
@@ -56,9 +59,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_product'])) {
                 'price' => $price,
                 'description' => $description,
                 'feature_product' => $feature_product,
-                'categories' => $categories,  // Store multiple categories (main, second, and third)
+                'categories' => $categories,  // Store multiple categories
                 'main_image' => $target_file,
-                'manufacturer_id' => $manufacturer_id,  // Store manufacturer ID
+                'manufacturer_id' => $manufacturer_id,
                 'attributes' => $attributes
             ];
 
@@ -71,6 +74,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_product'])) {
     }
 }
 
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['remove_product'])) {
+    $remove_index = $_POST['remove_index'];
+
+    // Remove the product from the session array
+    if (isset($_SESSION['products'][$remove_index])) {
+        array_splice($_SESSION['products'], $remove_index, 1);
+    }
+
+    echo "Product removed successfully.";
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_products'])) {
     foreach ($_SESSION['products'] as $product) {
         $name = $product['name'];
@@ -79,13 +93,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_products'])) {
         $price = $product['price'];
         $description = $product['description'];
         $feature_product = $product['feature_product'];
-        $categories = $product['categories'];  // Multiple categories (main, second, and third)
+        $categories = $product['categories']; // Multiple categories
         $main_image = $product['main_image'];
         $manufacturer_id = $product['manufacturer_id'];
 
         // Insert product into products table with manufacturer ID
         $query = "INSERT INTO products (name, sku, short_description, price, description, feature_product, manufacturer_id) 
                   VALUES ('$name', '$sku', '$short_description', $price, '$description', $feature_product, $manufacturer_id)";
+        
+        // Log query for debugging
+        echo "Product Query: " . $query . "<br>";
+        
         if (mysqli_query($conn, $query)) {
             $product_id = mysqli_insert_id($conn);
 
@@ -104,11 +122,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_products'])) {
             }
 
             // Insert categories into product_categories table
-            foreach ($categories as $category_id) {
-                $category_query = "INSERT INTO product_categories (product_id, category_id) 
-                                   VALUES ($product_id, $category_id)";
-                mysqli_query($conn, $category_query);
+            if (!empty($categories)) {
+                foreach ($categories as $category_id) {
+                    if (!empty($category_id)) { // Ensure category_id is not empty
+                        $category_query = "INSERT INTO product_categories (product_id, category_id) 
+                                           VALUES ($product_id, '$category_id')"; // Wrapped category_id in quotes
+                        
+                        // Log category query for debugging
+                        echo "Category Query: " . $category_query . "<br>";
+
+                        mysqli_query($conn, $category_query);
+                    }
+                }
             }
+        } else {
+            // Log or display query errors for debugging
+            echo "Error: " . mysqli_error($conn);
         }
     }
     $_SESSION['products'] = [];
@@ -120,6 +149,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_products'])) {
 
 <!-- HTML Form to Add Product -->
 <form method="POST" action="product_form.php" enctype="multipart/form-data">
+    <h2>Add New Product</h2>
     <label>Name</label>
     <input type="text" name="name" required><br>
 
@@ -138,27 +168,38 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_products'])) {
     <label>Feature Product</label>
     <input type="checkbox" name="feature_product"><br>
 
-    <!-- Modify Category Section to allow multiple selections -->
-    <label>Categories</label><br>
-    <?php
-    while ($row = mysqli_fetch_assoc($category_result)) {
-        echo "<div class='form-check'>
-                <input class='form-check-input' type='checkbox' name='categories[]' value='" . $row['id'] . "'>
-                <label class='form-check-label'>" . $row['name'] . "</label>
-            </div>";
-    }
-    ?><br>
-
-    <!-- Manufacturer Selection -->
-    <label>Manufacturer</label>
+    <!-- Manufacturer Dropdown -->
+    <label>Manufacturer</label><br>
     <select name="manufacturer_id" required>
-        <option value="">Select a manufacturer</option>
-        <?php
-        while ($row = mysqli_fetch_assoc($manufacturer_result)) {
-            echo "<option value='" . $row['id'] . "'>" . $row['name'] . "</option>";
-        }
-        ?>
+        <option value="">Select Manufacturer</option>
+        <?php while ($manufacturer = mysqli_fetch_assoc($manufacturer_result)): ?>
+            <option value="<?php echo $manufacturer['id']; ?>"><?php echo $manufacturer['name']; ?></option>
+        <?php endwhile; ?>
     </select><br>
+
+    <!-- Categories Block (with dynamic dropdowns for main, second, and third categories) -->
+    <div id="categories-container">
+        <div class="category-assignment">
+            <label>Assign Category</label><br>
+
+            <select class="main_category" name="main_category[]">
+                <option value="">Select Main Category</option>
+                <?php while ($main_category = mysqli_fetch_assoc($main_category_result)): ?>
+                    <option value="<?php echo $main_category['id']; ?>"><?php echo $main_category['name']; ?></option>
+                <?php endwhile; ?>
+            </select><br>
+
+            <select class="second_category" name="second_category[]" style="display:none;">
+                <option value="">Select Second Category</option>
+            </select><br>
+
+            <select class="third_category" name="categories[]" style="display:none;">
+                <option value="">Select Third Category</option>
+            </select><br>
+        </div>
+    </div>
+
+    <button type="button" id="add-category-assignment">Add Another Category</button><br><br>
 
     <label>Main Image</label><br>
     <input type="file" name="main_image" required><br>
@@ -183,8 +224,74 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_products'])) {
 <?php if (!empty($_SESSION['products'])): ?>
     <h2>Products to be Saved</h2>
     <ul>
-        <?php foreach ($_SESSION['products'] as $product): ?>
-            <li><?php echo $product['name']; ?> - <?php echo $product['sku']; ?></li>
+        <?php foreach ($_SESSION['products'] as $index => $product): ?>
+            <li>
+                <?php echo $product['name']; ?> - <?php echo $product['sku']; ?>
+                <form method="POST" action="product_form.php" style="display:inline;">
+                    <input type="hidden" name="remove_index" value="<?php echo $index; ?>">
+                    <button type="submit" name="remove_product">Remove</button>
+                </form>
+            </li>
         <?php endforeach; ?>
     </ul>
 <?php endif; ?>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        function setupCategoryDropdowns(categoryBlock) {
+            $(categoryBlock).find('.main_category').change(function() {
+                var main_category_id = $(this).val();
+                var secondCategoryDropdown = $(this).closest('.category-assignment').find('.second_category');
+                var thirdCategoryDropdown = $(this).closest('.category-assignment').find('.third_category');
+                
+                if(main_category_id) {
+                    $.ajax({
+                        url: 'fetch_categories.php',
+                        method: 'POST',
+                        data: { main_category_id: main_category_id },
+                        success: function(response) {
+                            secondCategoryDropdown.html(response).show();
+                            thirdCategoryDropdown.hide();
+                        }
+                    });
+                } else {
+                    secondCategoryDropdown.hide();
+                    thirdCategoryDropdown.hide();
+                }
+            });
+
+            $(categoryBlock).find('.second_category').change(function() {
+                var second_category_id = $(this).val();
+                var thirdCategoryDropdown = $(this).closest('.category-assignment').find('.third_category');
+
+                if(second_category_id) {
+                    $.ajax({
+                        url: 'fetch_categories.php',
+                        method: 'POST',
+                        data: { second_category_id: second_category_id },
+                        success: function(response) {
+                            thirdCategoryDropdown.html(response).show();
+                        }
+                    });
+                } else {
+                    thirdCategoryDropdown.hide();
+                }
+            });
+        }
+
+        // Initialize first category assignment
+        setupCategoryDropdowns($('.category-assignment').first());
+
+        // Handle the "Add Another Category" button
+        $('#add-category-assignment').click(function() {
+            var newCategoryBlock = $('.category-assignment').first().clone();
+            newCategoryBlock.find('select').val('');  // Reset the selects
+            newCategoryBlock.find('.second_category, .third_category').hide();  // Hide second and third category initially
+            $('#categories-container').append(newCategoryBlock);
+
+            // Initialize the new block's dropdowns
+            setupCategoryDropdowns(newCategoryBlock);
+        });
+    });
+</script>

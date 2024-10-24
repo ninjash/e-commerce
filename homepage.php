@@ -29,6 +29,27 @@ $manufacturer_query = "
 ";
 $manufacturer_result = mysqli_query($conn, $manufacturer_query);
 
+// Fetch categories that have registered trending products for Trending Products section only
+$trending_category_query = "
+    SELECT DISTINCT c.id, c.name
+    FROM categories c
+    JOIN product_categories pc ON c.id = pc.category_id
+    JOIN products p ON pc.product_id = p.id
+    WHERE p.feature_product = 1
+    ORDER BY c.name ASC
+";
+$trending_category_result = mysqli_query($conn, $trending_category_query);
+
+// Fetch trending products initially (default products to show on load)
+$trending_product_query = "
+    SELECT p.id, p.name, p.price, p.old_price, pi.image_path
+    FROM products p
+    LEFT JOIN product_images pi ON p.id = pi.product_id
+    WHERE p.feature_product = 1
+    LIMIT 3
+";
+$trending_product_result = mysqli_query($conn, $trending_product_query);
+
 ?>
 
 <!DOCTYPE html>
@@ -41,6 +62,7 @@ $manufacturer_result = mysqli_query($conn, $manufacturer_query);
     <link rel="stylesheet" href="/e-commerce/styles/styles.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
 <header>
@@ -316,240 +338,75 @@ $manufacturer_result = mysqli_query($conn, $manufacturer_query);
     <div class="container-fluid trending-section">
         <div class="row w-100">
             <div class="col-12 d-flex justify-content-start align-items-center">
-                <h2 class="category-section-title pt-5 pb-4" style="font-size: 50px; font-weight: 800; font-family: 'Roboto', sans-serif;">Trending Products</h2>
+                <h2 class="category-section-title pt-5 pb-4" style="font-size: 50px; font-weight: 800;">Trending Products</h2>
             </div>
         </div>
     </div>
     <div class="container-fluid trending-products">
         <div class="row w-100">
-            <!-- Categories Navigation -->
+            <!-- Categories Navigation for Trending Products -->
             <div class="col-lg-12 col-xl-3 px-0">
                 <div class="category-nav">
                     <ul class="nav flex-nowrap overflow-auto overflow-x-auto flex-xl-column flex-lg-row overflow-hidden" id="categoryTabs">
-                        <li class="nav-item active">
-                            <a class="nav-link" href="#">Automotive Parts<span class="chevron-right"><i class="bi bi-chevron-right"></i></span></a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Tires and Wheels<span class="chevron-right"><i class="bi bi-chevron-right"></i></span></a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Car Maintenance<span class="chevron-right"><i class="bi bi-chevron-right"></i></span></a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Electronics and Gadgets<span class="chevron-right"><i class="bi bi-chevron-right"></i></span></a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Exterior Upgrades<span class="chevron-right"><i class="bi bi-chevron-right"></i></span></a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Interior Accessories<span class="chevron-right"><i class="bi bi-chevron-right"></i></span></a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Performance Parts<span class="chevron-right"><i class="bi bi-chevron-right"></i></span></a>
-                        </li>
+                        <?php if (mysqli_num_rows($trending_category_result) > 0): ?>
+                            <?php while ($category = mysqli_fetch_assoc($trending_category_result)): ?>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#" data-category-id="<?= $category['id'] ?>">
+                                        <?= htmlspecialchars($category['name']) ?>
+                                        <span class="chevron-right"><i class="bi bi-chevron-right"></i></span>
+                                    </a>
+                                </li>
+                            <?php endwhile; ?>
+                        <?php else: ?>
+                            <p>No categories with trending products available.</p>
+                        <?php endif; ?>
                     </ul>
                 </div>
             </div>
-            <!-- Products Display -->
+            <!-- Trending Products Display -->
             <div id="productsCarousel" class="col-lg-12 col-xl-9 d-flex flex-xl-column flex-lg-row carousel slide p-2" style="border: 2px solid #d9d9d9">
                 <div class="carousel-inner w-100 py-4 px-2 m-0">
-                    <div class="carousel-item active">
-                        <div class="row w-100">
-                            <div class="col">
-                                <div class="trending-product-card">
-                                    <img src="/e-commerce/assets/brake-disc.png" alt="Brake Disc" class="img-fluid">
-                                    <div class="product-info text-center py-3">
-                                        <h5 class="product-name">Brake Disc</h5>
-                                        <div class="product-rating">
-                                            <i class="bi bi-star-fill"></i>
-                                            <i class="bi bi-star-fill"></i>
-                                            <i class="bi bi-star-fill"></i>
-                                            <i class="bi bi-star-half"></i>
-                                            <i class="bi bi-star"></i>
-                                        </div>
-                                        <div class="product-price">
-                                            <span class="old-price">$5,000.00</span>
-                                            <span class="new-price">$4,500.00</span>
-                                        </div>
-                                        <div class="row w-100 trending-product-nav">
-                                            <div class="col p-0 text-center">
-                                                <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                                            </div>
-                                            <div class="col p-0 text-center">
-                                                <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
-                                            </div>
-                                            <div class="col p-0 text-center">
-                                                <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="trending-product-card">
-                                    <img src="/e-commerce/assets/car-battery-charger.png" alt="Car Battery" class="img-fluid">
-                                    <div class="product-info text-center py-3">
-                                        <h5 class="product-name">Car Battery</h5>
-                                        <div class="product-rating">
-                                            <i class="bi bi-star-fill"></i>
-                                            <i class="bi bi-star-fill"></i>
-                                            <i class="bi bi-star-fill"></i>
-                                            <i class="bi bi-star-fill"></i>
-                                            <i class="bi bi-star"></i>
-                                        </div>
-                                        <div class="product-price">
-                                            <span class="old-price">$8,000.00</span>
-                                            <span class="new-price">$7,200.00</span>
-                                        </div>
-                                        <div class="row w-100 trending-product-nav">
-                                            <div class="col p-0 text-center">
-                                                <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                                            </div>
-                                            <div class="col p-0 text-center">
-                                                <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
-                                            </div>
-                                            <div class="col p-0 text-center">
-                                                <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
+                    <!-- Initially Display Trending Products -->
+                    <?php if (mysqli_num_rows($trending_product_result) > 0): ?>
+                        <div class="carousel-item active">
+                            <div class="row w-100">
+                                <?php while ($product = mysqli_fetch_assoc($trending_product_result)): ?>
+                                    <div class="col">
+                                        <div class="trending-product-card">
+                                            <img src="<?= htmlspecialchars($product['image_path']) ?>" alt="<?= htmlspecialchars($product['name']) ?>" class="img-fluid">
+                                            <div class="product-info text-center py-3">
+                                                <h5 class="product-name"><?= htmlspecialchars($product['name']) ?></h5>
+                                                <div class="product-rating">
+                                                    <i class="bi bi-star-fill"></i>
+                                                    <i class="bi bi-star-fill"></i>
+                                                    <i class="bi bi-star-fill"></i>
+                                                    <i class="bi bi-star-half"></i>
+                                                    <i class="bi bi-star"></i>
+                                                </div>
+                                                <div class="product-price">
+                                                    <span class="old-price">$<?= number_format($product['old_price'], 2) ?></span>
+                                                    <span class="new-price">$<?= number_format($product['price'], 2) ?></span>
+                                                </div>
+                                                <div class="row w-100 trending-product-nav">
+                                                    <div class="col p-0 text-center">
+                                                        <a href="product_page.php?id=<?= $product['id'] ?>" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
+                                                    </div>
+                                                    <div class="col p-0 text-center">
+                                                        <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
+                                                    </div>
+                                                    <div class="col p-0 text-center">
+                                                        <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="trending-product-card">
-                                    <img src="/e-commerce/assets/power-steering-pump.png" alt="Power Steering Pump" class="img-fluid">
-                                    <div class="product-info text-center py-3">
-                                        <h5 class="product-name">Power Steering Pump</h5>
-                                        <div class="product-rating">
-                                            <i class="bi bi-star-fill"></i>
-                                            <i class="bi bi-star-fill"></i>
-                                            <i class="bi bi-star-fill"></i>
-                                            <i class="bi bi-star-half"></i>
-                                            <i class="bi bi-star"></i>
-                                        </div>
-                                        <div class="product-price">
-                                            <span class="old-price">$10,000.00</span>
-                                            <span class="new-price">$9,000.00</span>
-                                        </div>
-                                        <div class="row w-100 trending-product-nav">
-                                            <div class="col p-0 text-center">
-                                                <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                                            </div>
-                                            <div class="col p-0 text-center">
-                                                <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
-                                            </div>
-                                            <div class="col p-0 text-center">
-                                                <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                <?php endwhile; ?>
                             </div>
                         </div>
-                    </div>
-                    <!--slide 2-->
-                    <div class="carousel-item">
-                        <div class="row w-100">
-                            <div class="col">
-                                <div class="trending-product-card">
-                                    <img src="/e-commerce/assets/oxygen-sensors.png" alt="Oxygen Sensor" class="img-fluid">
-                                    <div class="product-info text-center py-3">
-                                        <h5 class="product-name">Oxygen Sensor Single</h5>
-                                        <div class="product-rating">
-                                            <i class="bi bi-star-fill"></i>
-                                            <i class="bi bi-star-fill"></i>
-                                            <i class="bi bi-star-fill"></i>
-                                            <i class="bi bi-star-fill"></i>
-                                            <i class="bi bi-star-half"></i>
-                                        </div>
-                                        <div class="product-price">
-                                            <span class="old-price">$6,000.00</span>
-                                            <span class="new-price">$5,500.00</span>
-                                        </div>
-                                        <div class="row w-100 trending-product-nav">
-                                            <div class="col p-0 text-center">
-                                                <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                                            </div>
-                                            <div class="col p-0 text-center">
-                                                <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
-                                            </div>
-                                            <div class="col p-0 text-center">
-                                                <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="trending-product-card">
-                                    <img src="/e-commerce/assets/catalytic-converters.png" alt="Catalytic Converter Single" class="img-fluid">
-                                    <div class="product-info text-center py-3">
-                                        <h5 class="product-name">Catalytic Converter Single</h5>
-                                        <div class="product-rating">
-                                            <i class="bi bi-star-fill"></i>
-                                            <i class="bi bi-star-fill"></i>
-                                            <i class="bi bi-star-fill"></i>
-                                            <i class="bi bi-star-fill"></i>
-                                            <i class="bi bi-star"></i>
-                                        </div>
-                                        <div class="product-price">
-                                            <span class="old-price">$9,000.00</span>
-                                            <span class="new-price">$7,000.00</span>
-                                        </div>
-                                        <div class="row w-100 trending-product-nav">
-                                            <div class="col p-0 text-center">
-                                                <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                                            </div>
-                                            <div class="col p-0 text-center">
-                                                <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
-                                            </div>
-                                            <div class="col p-0 text-center">
-                                                <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="trending-product-card">
-                                    <img src="/e-commerce/assets/aluminum-intercooler.png" alt="Aluminum Intercooler" class="img-fluid">
-                                    <div class="product-info text-center py-3">
-                                        <h5 class="product-name">Aluminum Intercooler</h5>
-                                        <div class="product-rating">
-                                            <i class="bi bi-star-fill"></i>
-                                            <i class="bi bi-star-fill"></i>
-                                            <i class="bi bi-star-fill"></i>
-                                            <i class="bi bi-star-fill"></i>
-                                            <i class="bi bi-star-fill"></i>
-                                        </div>
-                                        <div class="product-price">
-                                            <span class="old-price">$15,000.00</span>
-                                            <span class="new-price">$11,000.00</span>
-                                        </div>
-                                        <div class="row w-100 trending-product-nav">
-                                            <div class="col p-0 text-center">
-                                                <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                                            </div>
-                                            <div class="col p-0 text-center">
-                                                <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
-                                            </div>
-                                            <div class="col p-0 text-center">
-                                                <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <button class="carousel-control-prev custom-carousel-control" type="button" data-bs-target="#productsCarousel" data-bs-slide="prev">
-                        <span class="visually-hidden">Previous</span>
-                        <span class="custom-control-icon">&#10094;</span>
-                    </button>
-                    <button class="carousel-control-next custom-carousel-control" type="button" data-bs-target="#productsCarousel" data-bs-slide="next">
-                        <span class="visually-hidden">Next</span>
-                        <span class="custom-control-icon">&#10095;</span>
-                    </button>
+                    <?php else: ?>
+                        <p>No trending products available.</p>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -787,6 +644,35 @@ $manufacturer_result = mysqli_query($conn, $manufacturer_query);
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Handle category click event
+            $('.category-nav .nav-link').click(function(e) {
+                e.preventDefault(); // Prevent default link behavior
+
+                var categoryId = $(this).data('category-id'); // Get the category ID
+
+                // Remove 'active' class from all and add to the clicked category
+                $('.category-nav .nav-link').removeClass('active');
+                $(this).addClass('active');
+
+                // AJAX request to fetch products based on the selected category
+                $.ajax({
+                    url: 'fetch_trending_products.php',  // PHP script to fetch products
+                    type: 'POST',
+                    data: { category_id: categoryId },  // Pass the selected category ID
+                    success: function(response) {
+                        // Replace the product section with the new products
+                        $('#productsCarousel .carousel-inner').html(response);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error fetching products: " + error);
+                    }
+                });
+            });
+        });
+    </script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

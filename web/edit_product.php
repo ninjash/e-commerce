@@ -32,20 +32,24 @@ while ($row = mysqli_fetch_assoc($product_categories_result)) {
     $product_categories[] = $row['category_id'];
 }
 
-// Fetch all main categories
-$main_category_query = "SELECT * FROM categories WHERE parent_id IS NULL";
-$main_category_result = mysqli_query($conn, $main_category_query);
+// Fetch all categories (main, second, third level categories)
+$categories_query = "SELECT * FROM categories ORDER BY parent_id ASC";
+$categories_result = mysqli_query($conn, $categories_query);
+$categories = [];
+while ($row = mysqli_fetch_assoc($categories_result)) {
+    $categories[$row['parent_id']][] = $row;
+}
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $name = $_POST['name'];
-    $sku = $_POST['sku'];
-    $short_description = $_POST['short_description'];
-    $price = $_POST['price'];
-    $old_price = $_POST['old_price'];
-    $description = $_POST['description'];
+    $name = mysqli_real_escape_string($conn, $_POST['name']);
+    $sku = mysqli_real_escape_string($conn, $_POST['sku']);
+    $short_description = mysqli_real_escape_string($conn, $_POST['short_description']);
+    $price = floatval($_POST['price']);
+    $old_price = floatval($_POST['old_price']);
+    $description = mysqli_real_escape_string($conn, $_POST['description']);
     $feature_product = isset($_POST['feature_product']) ? 1 : 0;
-    $manufacturer_id = $_POST['manufacturer_id'];
+    $manufacturer_id = intval($_POST['manufacturer_id']);
     $selected_categories = $_POST['categories'];
 
     // Update product details
@@ -59,10 +63,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Update product categories
         mysqli_query($conn, "DELETE FROM product_categories WHERE product_id = $product_id");
 
-        foreach ($selected_categories as $category_id) {
-            $category_insert_query = "INSERT INTO product_categories (product_id, category_id) 
-                                      VALUES ($product_id, $category_id)";
-            mysqli_query($conn, $category_insert_query);
+        // Ensure that selected_categories is not empty and has valid category_ids
+        if (!empty($selected_categories) && is_array($selected_categories)) {
+            foreach ($selected_categories as $category_id) {
+                if (!empty($category_id) && is_numeric($category_id)) {
+                    $category_insert_query = "INSERT INTO product_categories (product_id, category_id) 
+                                              VALUES ($product_id, $category_id)";
+                    mysqli_query($conn, $category_insert_query);
+                }
+            }
+        }
+
+        // If a new image was uploaded, update the product image
+        if (isset($_FILES['main_image']) && $_FILES['main_image']['error'] == 0) {
+            $main_image = $_FILES['main_image'];
+            $target_file = "/e-commerce/assets/products/" . basename($main_image["name"]);
+
+            if (move_uploaded_file($main_image["tmp_name"], $_SERVER['DOCUMENT_ROOT'] . $target_file)) {
+                $image_query = "UPDATE product_images SET image_path = '$target_file' WHERE product_id = $product_id";
+                mysqli_query($conn, $image_query);
+            }
         }
 
         header("Location: product.php?id=$product_id");
@@ -118,24 +138,41 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <?php endwhile; ?>
         </select><br>
 
-        <!-- Categories Block (repeated for each assignment) -->
+        <!-- Categories Block (pre-selected) -->
         <div id="categories-container">
             <div class="category-assignment">
                 <label>Assign Category</label><br>
 
-                <select class="main_category" name="main_category[]">
+                <!-- Pre-selecting the main, second, and third categories based on product -->
+                <select class="main_category" name="categories[]">
                     <option value="">Select Main Category</option>
-                    <?php while ($main_category = mysqli_fetch_assoc($main_category_result)): ?>
-                        <option value="<?php echo $main_category['id']; ?>"><?php echo $main_category['name']; ?></option>
-                    <?php endwhile; ?>
-                </select><br>
+                    <?php foreach ($categories[''] as $main_category): ?>
+                        <option value="<?php echo $main_category['id']; ?>" <?php echo in_array($main_category['id'], $product_categories) ? 'selected' : ''; ?>>
+                            <?php echo $main_category['name']; ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
 
-                <select class="second_category" name="second_category[]" style="display:none;">
+                <select class="second_category" name="categories[]">
                     <option value="">Select Second Category</option>
+                    <?php if (isset($categories[$main_category['id']])): ?>
+                        <?php foreach ($categories[$main_category['id']] as $second_category): ?>
+                            <option value="<?php echo $second_category['id']; ?>" <?php echo in_array($second_category['id'], $product_categories) ? 'selected' : ''; ?>>
+                                <?php echo $second_category['name']; ?>
+                            </option>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </select><br>
 
-                <select class="third_category" name="categories[]" style="display:none;">
+                <select class="third_category" name="categories[]">
                     <option value="">Select Third Category</option>
+                    <?php if (isset($categories[$second_category['id']])): ?>
+                        <?php foreach ($categories[$second_category['id']] as $third_category): ?>
+                            <option value="<?php echo $third_category['id']; ?>" <?php echo in_array($third_category['id'], $product_categories) ? 'selected' : ''; ?>>
+                                <?php echo $third_category['name']; ?>
+                            </option>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </select><br>
             </div>
         </div>

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 23, 2024 at 09:48 AM
+-- Generation Time: Oct 24, 2024 at 02:49 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -756,7 +756,9 @@ INSERT INTO `products` (`id`, `name`, `sku`, `short_description`, `price`, `desc
 (17, 'Brake Disc', 'BD-017', 'High-quality brake discs for reliable stopping power.', 4500.00, 'These brake discs provide exceptional braking performance, ensuring reliable stopping power in all conditions.', 0, 5000.00, 10),
 (18, 'Alternator Electrical Wires & Cable Spare Part', 'ALT-018', 'Alternator designed to provide high electrical output.', 18000.00, 'This alternator provides high electrical output for improved engine performance.', 0, 20000.00, 3),
 (19, 'Spark Plugs', 'SP-019', 'Premium spark plugs for improved ignition and fuel efficiency.', 2250.00, 'These premium spark plugs enhance engine performance and fuel efficiency by ensuring reliable ignition.', 0, 2500.00, 2),
-(20, 'Service Tyre', 'ST-020', 'Durable service tyre for long-lasting performance.', 7200.00, 'This service tyre is built to withstand tough conditions, offering long-lasting performance.', 0, 8000.00, 4);
+(20, 'Service Tyre', 'ST-020', 'Durable service tyre for long-lasting performance.', 7200.00, 'This service tyre is built to withstand tough conditions, offering long-lasting performance.', 0, 8000.00, 4),
+(21, 'Ctek Battery Charger and Maintainer', 'CTEK-CHRG-001', 'Smart battery charger and maintainer for all types of lead-acid batteries.', 79.99, 'The Ctek Battery Charger and Maintainer is an advanced, fully automatic battery charger designed to prolong battery life and ensure maximum performance. Suitable for all types of lead-acid batteries, including wet, MF, AGM, and gel batteries.', 0, 0.00, 4),
+(22, 'Spy Car Alarm System', 'SPY-ALM-002', 'Advanced car alarm system with remote control and anti-theft features.', 59.99, 'The Spy Car Alarm System offers a complete vehicle security solution with remote control capabilities, anti-theft features, and a loud siren to deter intruders. Comes with wiring harness, control unit, and two key fobs for convenient control.', 0, NULL, 4);
 
 -- --------------------------------------------------------
 
@@ -894,7 +896,19 @@ INSERT INTO `product_attributes` (`product_id`, `attribute_id`, `value`) VALUES
 (20, 3, 'Black'),
 (20, 4, ''),
 (20, 5, 'Rubber and Steel'),
-(20, 6, '');
+(20, 6, ''),
+(21, 1, '0.8'),
+(21, 2, '6.5 x 3.2 x 1.9'),
+(21, 3, 'Black and Silver'),
+(21, 4, '12V'),
+(21, 5, 'ABS Plastic'),
+(21, 6, ''),
+(22, 1, '1.2'),
+(22, 2, '7.5 x 5.0 x 2.0'),
+(22, 3, 'Black'),
+(22, 4, '12V'),
+(22, 5, ''),
+(22, 6, '');
 
 -- --------------------------------------------------------
 
@@ -934,7 +948,10 @@ INSERT INTO `product_categories` (`id`, `product_id`, `category_id`) VALUES
 (25, 16, 199),
 (26, 16, 133),
 (27, 18, 222),
-(28, 18, 224);
+(28, 18, 224),
+(31, 21, 117),
+(32, 21, 554),
+(33, 22, 326);
 
 -- --------------------------------------------------------
 
@@ -972,7 +989,9 @@ INSERT INTO `product_images` (`id`, `product_id`, `image_path`) VALUES
 (17, 17, '/e-commerce/assets/products/brake-disc.png'),
 (18, 18, '/e-commerce/assets/products/alternator.png'),
 (19, 19, '/e-commerce/assets/products/spark-plugs.png'),
-(20, 20, '/e-commerce/assets/products/service-tyre.png');
+(20, 20, '/e-commerce/assets/products/service-tyre.png'),
+(21, 21, '/e-commerce/assets/products/ctek_battery_charger.png'),
+(22, 22, '/e-commerce/assets/products/spy_car_alarm.png');
 
 -- --------------------------------------------------------
 
@@ -1089,19 +1108,19 @@ ALTER TABLE `manufacturers`
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `product_categories`
 --
 ALTER TABLE `product_categories`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --
 -- AUTO_INCREMENT for table `product_images`
 --
 ALTER TABLE `product_images`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `users`

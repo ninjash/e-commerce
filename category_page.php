@@ -17,13 +17,34 @@ $page_main_category_query = "SELECT c.id, c.name,
                         WHERE c.parent_id IS NULL";
 $page_main_category_result = mysqli_query($conn, $page_main_category_query);
 
+// Recursive function to get all child category IDs
+function get_all_child_categories($parent_id, $conn) {
+    $child_categories = [];
+    
+    // Get all direct children of this category
+    $sql = "SELECT id FROM categories WHERE parent_id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $parent_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    // Fetch all child categories
+    while ($row = $result->fetch_assoc()) {
+        $child_categories[] = $row['id'];
+        // Recursively get all children of the current child category
+        $child_categories = array_merge($child_categories, get_all_child_categories($row['id'], $conn));
+    }
+
+    return $child_categories;
+}
+
 // Handle selected category (default to all products)
 $page_category_id = isset($_GET['category_id']) ? (int)$_GET['category_id'] : 0;
 $page_category_name = "All Products"; // Default category name
 
 // Fetch the specific category details if a category is selected
 if ($page_category_id > 0) {
-    // Fetch the details of the selected category, including its parent (if it's a third-level category)
+    // Fetch the details of the selected category
     $page_category_detail_query = "
         SELECT c1.id, c1.name as category_name, c2.name as parent_name, c3.name as grandparent_name
         FROM categories c1
@@ -41,12 +62,19 @@ if ($page_category_id > 0) {
         exit;
     }
 
-    // Filter products by selected category
+    // Fetch all child categories of the selected category
+    $category_ids = [$page_category_id]; // Include the selected category
+    $category_ids = array_merge($category_ids, get_all_child_categories($page_category_id, $conn));
+
+    // Convert category IDs to a comma-separated string for SQL query
+    $category_ids_string = implode(',', $category_ids);
+
+    // Filter products by selected category and its child categories
     $page_product_query = "SELECT p.*, pi.image_path 
                       FROM products p
                       JOIN product_categories pc ON p.id = pc.product_id
                       LEFT JOIN product_images pi ON p.id = pi.product_id
-                      WHERE pc.category_id = $page_category_id";
+                      WHERE pc.category_id IN ($category_ids_string)";
 } else {
     // Fetch all products if no specific category is selected
     $page_product_query = "SELECT p.*, pi.image_path 

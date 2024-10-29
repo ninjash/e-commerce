@@ -1,6 +1,6 @@
 <?php
 require 'web/db_connect.php';
-require 'Product.php';
+require 'classes/Product.php';
 
 if (!isset($_GET['id'])) {
     echo "Product ID is missing.";
@@ -9,53 +9,16 @@ if (!isset($_GET['id'])) {
 
 $product_id = (int)$_GET['id'];
 
+// Create product object
 $product = new Product($conn, $product_id);
+
+// Get product details
 $product_details = $product->getProductDetails();
+$product_attributes = $product->getProductAttributes();
+$product_categories = $product->getProductCategories();
+$next_id = $product->getNextProductId();
+$prev_id = $product->getPreviousProductId();
 
-// Fetch the product along with its manufacturer details
-$product_query = "SELECT p.*, m.logo_path, m.name as manufacturer_name 
-                  FROM products p 
-                  LEFT JOIN manufacturers m ON p.manufacturer_id = m.id 
-                  WHERE p.id = $product_id";
-$product_result = mysqli_query($conn, $product_query);
-
-if (!$product_result || mysqli_num_rows($product_result) == 0) {
-    echo "Product not found.";
-    exit;
-}
-
-$product = mysqli_fetch_assoc($product_result);
-
-// Fetch product attributes
-$product_attributes_query = "SELECT a.name, pa.value 
-                             FROM product_attributes pa 
-                             LEFT JOIN attributes a ON pa.attribute_id = a.id 
-                             WHERE pa.product_id = $product_id";
-$product_attributes = mysqli_query($conn, $product_attributes_query);
-
-// Fetch product categories (Main, Second, Third) using the categories table hierarchy
-$product_categories_query = "
-    SELECT c1.name AS third_category, c2.name AS second_category, c3.name AS main_category, 
-           c1.id AS third_category_id, c2.id AS second_category_id, c3.id AS main_category_id
-    FROM product_categories pc
-    LEFT JOIN categories c1 ON c1.id = pc.category_id
-    LEFT JOIN categories c2 ON c2.id = c1.parent_id
-    LEFT JOIN categories c3 ON c3.id = c2.parent_id
-    WHERE pc.product_id = $product_id";
-$product_categories_result = mysqli_query($conn, $product_categories_query);
-$product_categories = mysqli_fetch_assoc($product_categories_result);
-
-// Get the next and previous products
-$next_query = "SELECT id FROM products WHERE id > $product_id ORDER BY id ASC LIMIT 1";
-$next_result = mysqli_query($conn, $next_query);
-$next_product = mysqli_fetch_assoc($next_result);
-
-$prev_query = "SELECT id FROM products WHERE id < $product_id ORDER BY id DESC LIMIT 1";
-$prev_result = mysqli_query($conn, $prev_query);
-$prev_product = mysqli_fetch_assoc($prev_result);
-
-$next_id = isset($next_product['id']) ? $next_product['id'] : null;
-$prev_id = isset($prev_product['id']) ? $prev_product['id'] : null;
 ?>
 
 <!DOCTYPE html>
@@ -86,14 +49,14 @@ $prev_id = isset($prev_product['id']) ? $prev_product['id'] : null;
                     <nav aria-label="breadcrumb" class="breadcrumb-tab py-4">
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a href="homepage.php">Home</a></li>
-                            <li class="breadcrumb-item-separator"> | </li> <!-- Add this separator -->
+                            <li class="breadcrumb-item-separator"> \ </li>
                             <?php if (!empty($product_categories['main_category'])): ?>
                                 <li class="breadcrumb-item">
                                     <a href="category_page.php?category_id=<?= $product_categories['main_category_id'] ?>">
                                         <?= htmlspecialchars($product_categories['main_category']) ?>
                                     </a>
                                 </li>
-                                <li class="breadcrumb-item-separator"> | </li> <!-- Add this separator -->
+                                <li class="breadcrumb-item-separator"> \ </li>
                             <?php endif; ?>
                             <?php if (!empty($product_categories['second_category'])): ?>
                                 <li class="breadcrumb-item">
@@ -101,7 +64,7 @@ $prev_id = isset($prev_product['id']) ? $prev_product['id'] : null;
                                         <?= htmlspecialchars($product_categories['second_category']) ?>
                                     </a>
                                 </li>
-                                <li class="breadcrumb-item-separator"> | </li> <!-- Add this separator -->
+                                <li class="breadcrumb-item-separator"> \ </li>
                             <?php endif; ?>
                             <?php if (!empty($product_categories['third_category'])): ?>
                                 <li class="breadcrumb-item">
@@ -109,7 +72,7 @@ $prev_id = isset($prev_product['id']) ? $prev_product['id'] : null;
                                         <?= htmlspecialchars($product_categories['third_category']) ?>
                                     </a>
                                 </li>
-                                <li class="breadcrumb-item-separator"> | </li> <!-- Add this separator -->
+                                <li class="breadcrumb-item-separator"> \ </li>
                             <?php endif; ?>
                             <li class="breadcrumb-item active" aria-current="page"><?php echo $product_details['name']; ?></li>
                             <li class="ms-auto">
@@ -162,28 +125,11 @@ $prev_id = isset($prev_product['id']) ? $prev_product['id'] : null;
                     <!-- Add to Wishlist Button -->
                     <a href="#" class="text-muted py-4"><i class="bi bi-heart"></i><span> Add to wishlist</span></a>
                 </div>
-                <!-- Display Manufacturer Logo -->
+                <!-- Display Manufacturer Logo and Name -->
                 <div class="brand-logo">
-                    <?php if ($product['logo_path']): ?>
-                        <img src="<?php echo $product['logo_path']; ?>" alt="<?php echo $product['manufacturer_name']; ?> logo" class="img-fluid">
+                    <?php if (!empty($product->getManufacturerDetails()['logo_path'])): ?>
+                        <img src="<?php echo htmlspecialchars($product->getManufacturerDetails()['logo_path']); ?>" alt="<?php echo htmlspecialchars($product->getManufacturerDetails()['name']); ?> logo" class="img-fluid">
                     <?php endif; ?>
-                </div>
-                
-                <!-- Wishlist and Terms -->
-                <div class="wishlist-terms d-flex flex-lg-row flex-sm-column justify-content-lg-between justify-content-start align-items-lg-center">
-                    <div class="terms">
-                        <p class="text-title mb-0"><u>Terms and Conditions</u></p>
-                        <p class="text-muted mb-0">30-day money-back guarantee</p>
-                        <p class="text-muted">Shipping: 2-3 Business Days</p>
-                    </div>
-                    <!-- Share Buttons -->
-                    <div class="share-section d-flex align-items-center mt-3">
-                        <span class="me-2">Share:</span>
-                        <a href="#" class="me-3"><i class="bi bi-facebook"></i></a>
-                        <a href="#" class="me-3"><i class="bi bi-twitter"></i></a>
-                        <a href="#" class="me-3"><i class="bi bi-pinterest"></i></a>
-                        <a href="#"><i class="bi bi-envelope-fill"></i></a>
-                    </div>
                 </div>
             </div>
         </div>
@@ -226,14 +172,14 @@ $prev_id = isset($prev_product['id']) ? $prev_product['id'] : null;
                 <div class="col-3 table-body w-100">
                     <table class="table col-6">
                         <tbody>
-                            <?php while ($attribute = mysqli_fetch_assoc($product_attributes)) : ?>
-                                <?php if (!empty($attribute['value'])) : // Only display attributes with a value ?>
+                            <?php foreach ($product_attributes as $attribute): ?>
+                                <?php if (!empty($attribute['value'])) : ?>
                                     <tr>
                                         <th><?php echo $attribute['name']; ?></th>
                                         <td><?php echo $attribute['value']; ?></td>
                                     </tr>
                                 <?php endif; ?>
-                            <?php endwhile; ?>
+                            <?php endforeach; ?>
                         </tbody>
                     </table>
                 </div>
@@ -253,9 +199,3 @@ $prev_id = isset($prev_product['id']) ? $prev_product['id'] : null;
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
-<?php
-mysqli_free_result($product_attributes);
-mysqli_free_result($product_categories_result);
-mysqli_close($conn);
-?>

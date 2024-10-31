@@ -42,15 +42,15 @@ class Category {
                   LEFT JOIN categories c3 ON c2.parent_id = c3.id
                   WHERE c1.id = ?";
         $stmt = $this->db->prepare($query);
-        $stmt->bind_param("i", $categoryId); // Bind category ID to the query
+        $stmt->bind_param("i", $categoryId);
         $stmt->execute();
         $result = $stmt->get_result();
-        
+
         if (!$result) {
-            die('Error executing query: ' . $this->db->error); // Add error handling
+            die('Error executing query: ' . $this->db->error);
         }
 
-        return $result; // Return MySQLi result object
+        return $result->fetch_assoc(); // Return associative array for easier handling
     }
 
     // Fetch only child category IDs based on the parent ID
@@ -62,95 +62,62 @@ class Category {
         $result = $stmt->get_result();
 
         if (!$result) {
-            die('Error executing query: ' . $this->db->error); // Add error handling
+            die('Error executing query: ' . $this->db->error);
         }
 
         $categories = $result->fetch_all(MYSQLI_ASSOC);
-        $categoryIds = array_column($categories, 'id');
-        return $categoryIds;
+        return array_column($categories, 'id'); // Return array of category IDs
     }
 
     // Fetch the image for a category, if exists
     public function getCategoryImage($categoryId) {
         $query = "SELECT image_path FROM category_images WHERE category_id = ? LIMIT 1";
         $stmt = $this->db->prepare($query);
-        $stmt->bind_param("i", $categoryId); // "i" for integer
+        $stmt->bind_param("i", $categoryId);
         $stmt->execute();
         $result = $stmt->get_result();
 
         if (!$result) {
-            die('Error executing query: ' . $this->db->error); // Add error handling
+            die('Error executing query: ' . $this->db->error);
         }
 
         $image = $result->fetch_assoc();
-        return $image ? $image['image_path'] : '/e-commerce/assets/category_images/default-category.png'; // Default image if not found
-    }
-
-    // Fetch products by category IDs
-    public static function getProductsByCategory($categoryIds, $db) {
-        $query = "SELECT p.*, pi.image_path 
-                FROM products p
-                JOIN product_categories pc ON p.id = pc.product_id
-                LEFT JOIN product_images pi ON p.id = pi.product_id
-                WHERE pc.category_id IN ($categoryIds)";
-                
-        $result = $db->query($query);
-
-        if (!$result) {
-            die('Error executing query: ' . $db->error);
-        }
-
-        return $result->fetch_all(MYSQLI_ASSOC); // Return array format instead of result object
-    }
-
-    // Fetch all products
-    public static function getAllProducts($db) {
-        $query = "SELECT p.*, pi.image_path 
-                FROM products p
-                LEFT JOIN product_images pi ON p.id = pi.product_id";
-                
-        $result = $db->query($query);
-
-        if (!$result) {
-            die('Error executing query: ' . $db->error);
-        }
-
-        return $result->fetch_all(MYSQLI_ASSOC); // Return array format instead of result object
+        return $image ? $image['image_path'] : '/e-commerce/assets/category_images/default-category.png';
     }
 
     // Fetch main categories (categories without a parent)
     public static function getMainCategories($db) {
         $query = "SELECT c.id, c.name, 
                         (SELECT COUNT(p.id) 
-                        FROM product_categories pc
-                        JOIN products p ON pc.product_id = p.id
-                        WHERE pc.category_id = c.id 
+                         FROM product_categories pc
+                         JOIN products p ON pc.product_id = p.id
+                         WHERE pc.category_id = c.id 
                             OR pc.category_id IN (SELECT id FROM categories WHERE parent_id = c.id)
                             OR pc.category_id IN (SELECT id FROM categories WHERE parent_id IN (SELECT id FROM categories WHERE parent_id = c.id))
                         ) AS product_count
-                FROM categories c 
-                WHERE c.parent_id IS NULL";
-                
+                  FROM categories c 
+                  WHERE c.parent_id IS NULL";
+                  
         $result = $db->query($query);
 
         if (!$result) {
             die('Error executing query: ' . $db->error);
         }
 
-        return $result->fetch_all(MYSQLI_ASSOC); // Return array format instead of result object
+        return $result->fetch_all(MYSQLI_ASSOC); // Return as array
     }
 
-    // Fetch second-level categories
+    // Fetch second-level categories (child categories of a given main category)
     public static function getSecondLevelCategories($db, $parentId) {
         $query = "SELECT c.id, c.name, 
                         (SELECT COUNT(p.id) 
-                        FROM product_categories pc
-                        JOIN products p ON pc.product_id = p.id
-                        WHERE pc.category_id = c.id 
+                         FROM product_categories pc
+                         JOIN products p ON pc.product_id = p.id
+                         WHERE pc.category_id = c.id 
                             OR pc.category_id IN (SELECT id FROM categories WHERE parent_id = c.id)
                         ) AS product_count
-                FROM categories c 
-                WHERE c.parent_id = ?";
+                  FROM categories c 
+                  WHERE c.parent_id = ?";
         $stmt = $db->prepare($query);
         $stmt->bind_param("i", $parentId);
         $stmt->execute();
@@ -160,19 +127,19 @@ class Category {
             die('Error executing query: ' . $db->error);
         }
 
-        return $result->fetch_all(MYSQLI_ASSOC); // Return array format instead of result object
+        return $result->fetch_all(MYSQLI_ASSOC); // Return as array
     }
 
-    // Fetch third-level categories
+    // Fetch third-level categories (child categories of a second-level category)
     public static function getThirdLevelCategories($db, $parentId) {
         $query = "SELECT c.id, c.name, 
                         (SELECT COUNT(p.id) 
-                        FROM product_categories pc
-                        JOIN products p ON pc.product_id = p.id
-                        WHERE pc.category_id = c.id
+                         FROM product_categories pc
+                         JOIN products p ON pc.product_id = p.id
+                         WHERE pc.category_id = c.id
                         ) AS product_count
-                FROM categories c 
-                WHERE c.parent_id = ?";
+                  FROM categories c 
+                  WHERE c.parent_id = ?";
         $stmt = $db->prepare($query);
         $stmt->bind_param("i", $parentId);
         $stmt->execute();
@@ -182,7 +149,7 @@ class Category {
             die('Error executing query: ' . $db->error);
         }
 
-        return $result->fetch_all(MYSQLI_ASSOC); // Return array format instead of result object
+        return $result->fetch_all(MYSQLI_ASSOC); // Return as array
     }
 
     // Recursive function to fetch all child categories
@@ -196,7 +163,7 @@ class Category {
         $result = $stmt->get_result();
 
         if (!$result) {
-            die('Error executing query: ' . $db->error); // Add error handling
+            die('Error executing query: ' . $db->error);
         }
 
         while ($row = $result->fetch_assoc()) {
@@ -208,7 +175,6 @@ class Category {
     }
 
     // Getters and Setters for category details
-
     public function getId() {
         return $this->id;
     }
@@ -281,7 +247,7 @@ class Category {
         $result = $this->db->query($query);
 
         if (!$result) {
-            die('Error executing query: ' . $this->db->error); // Add error handling
+            die('Error executing query: ' . $this->db->error);
         }
 
         return $result->fetch_all(MYSQLI_ASSOC);

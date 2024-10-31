@@ -1,5 +1,7 @@
 <?php
 require 'db_connect.php';
+require '../classes/Product.php';
+require '../classes/Category.php';
 
 // Check if product ID is provided
 if (!isset($_GET['id'])) {
@@ -9,50 +11,23 @@ if (!isset($_GET['id'])) {
 
 $product_id = (int)$_GET['id']; // Ensure it's an integer
 
-// Fetch product details, including the associated manufacturer
-$query = "
-    SELECT p.id, p.name, p.sku, p.short_description, p.price, p.old_price, p.description, p.feature_product, 
-           m.name as manufacturer_name, m.logo_path
-    FROM products p
-    LEFT JOIN manufacturers m ON p.manufacturer_id = m.id
-    WHERE p.id = $product_id
-";
-$result = mysqli_query($conn, $query);
+// Instantiate the Product class and fetch the product details
+$productClass = new Product($conn);
+$product = $productClass->getProductDetailsById($product_id);
 
-if (!$result || mysqli_num_rows($result) == 0) {
+if (!$product) {
     echo "Product not found.";
     exit;
 }
 
-$product = mysqli_fetch_assoc($result);
-
-// Fetch categories for this product using the updated category structure
-$category_query = "
-    SELECT c.name, c.id, c.parent_id
-    FROM product_categories pc
-    INNER JOIN categories c ON pc.category_id = c.id
-    WHERE pc.product_id = $product_id
-";
-$category_result = mysqli_query($conn, $category_query);
-
-// Recursively fetch category hierarchy (main, second, third)
-$categories = [];
-while ($category = mysqli_fetch_assoc($category_result)) {
-    $categories[] = $category;
-}
-
-// Fetch product images
-$image_query = "SELECT image_path FROM product_images WHERE product_id = $product_id";
-$image_result = mysqli_query($conn, $image_query);
+// Fetch categories for this product
+$categories = $productClass->getProductCategoriesById($product_id);
 
 // Fetch product attributes
-$attribute_query = "
-    SELECT a.name, pa.value 
-    FROM product_attributes pa
-    JOIN attributes a ON pa.attribute_id = a.id
-    WHERE pa.product_id = $product_id
-";
-$attribute_result = mysqli_query($conn, $attribute_query);
+$attributes = $productClass->getProductAttributesById($product_id);
+
+// Fetch product images
+$images = $productClass->getProductImages($product_id);
 ?>
 
 <!DOCTYPE html>
@@ -107,24 +82,24 @@ $attribute_result = mysqli_query($conn, $attribute_query);
             <?php endif; ?>
 
             <h3>Product Attributes</h3>
-            <?php if (mysqli_num_rows($attribute_result) > 0): ?>
+            <?php if (!empty($attributes)): ?>
                 <ul>
-                    <?php while ($attribute = mysqli_fetch_assoc($attribute_result)): ?>
+                    <?php foreach ($attributes as $attribute): ?>
                         <li><strong><?php echo htmlspecialchars($attribute['name']); ?>:</strong> <?php echo htmlspecialchars($attribute['value']); ?></li>
-                    <?php endwhile; ?>
+                    <?php endforeach; ?>
                 </ul>
             <?php else: ?>
                 <p>No attributes available for this product.</p>
             <?php endif; ?>
 
             <h3>Product Images</h3>
-            <?php if (mysqli_num_rows($image_result) > 0): ?>
+            <?php if (!empty($images)): ?>
                 <div class="row">
-                    <?php while ($image = mysqli_fetch_assoc($image_result)): ?>
+                    <?php foreach ($images as $image): ?>
                         <div class="col-md-3 mb-3">
                             <img src="<?php echo htmlspecialchars($image['image_path']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>" class="img-fluid">
                         </div>
-                    <?php endwhile; ?>
+                    <?php endforeach; ?>
                 </div>
             <?php else: ?>
                 <p>No images available for this product.</p>

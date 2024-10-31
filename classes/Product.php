@@ -34,6 +34,168 @@ class Product {
         return $manufacturer ? $manufacturer : ['name' => 'Unknown', 'logo_path' => '/e-commerce/images/default-logo.png']; // Default values
     }
 
+    // Static method to fetch all attributes
+    public static function getAllAttributes($db) {
+        $query = "SELECT * FROM attributes";
+        $result = $db->query($query);
+        if (!$result) {
+            die('Error fetching attributes: ' . $db->error);
+        }
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    // Static method to fetch all manufacturers
+    public static function getAllManufacturers($db) {
+        $query = "SELECT id, name FROM manufacturers";
+        $result = $db->query($query);
+        if (!$result) {
+            die('Error fetching manufacturers: ' . $db->error);
+        }
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    // Method to save the product to the database with parameters for connection and product data
+    public function saveProduct($conn, $productData) {
+        $name = $productData['name'];
+        $sku = $productData['sku'];
+        $short_description = $productData['short_description'];
+        $price = $productData['price'];
+        $description = $productData['description'];
+        $feature_product = $productData['feature_product'];
+        $manufacturer_id = $productData['manufacturer_id'];
+        $main_image = $productData['main_image'];
+        $categories = $productData['categories'];
+        $attributes = $productData['attributes'];
+
+        // Insert product into the products table
+        $query = "INSERT INTO products (name, sku, short_description, price, description, feature_product, manufacturer_id) 
+                  VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("sssdssi", $name, $sku, $short_description, $price, $description, $feature_product, $manufacturer_id);
+        
+        if ($stmt->execute()) {
+            $product_id = $conn->insert_id;
+
+            // Insert main image into product_images table
+            $image_query = "INSERT INTO product_images (product_id, image_path) VALUES (?, ?)";
+            $stmt = $conn->prepare($image_query);
+            $stmt->bind_param("is", $product_id, $main_image);
+            $stmt->execute();
+
+            // Insert attributes into product_attributes table
+            foreach ($attributes as $attribute_id => $value) {
+                $attribute_query = "INSERT INTO product_attributes (product_id, attribute_id, value) VALUES (?, ?, ?)";
+                $stmt = $conn->prepare($attribute_query);
+                $stmt->bind_param("iis", $product_id, $attribute_id, $value);
+                $stmt->execute();
+            }
+
+            // Insert categories into product_categories table
+            foreach ($categories as $category_id) {
+                if (!empty($category_id)) { // Ensure category_id is not empty
+                    $category_query = "INSERT INTO product_categories (product_id, category_id) VALUES (?, ?)";
+                    $stmt = $conn->prepare($category_query);
+                    $stmt->bind_param("ii", $product_id, $category_id);
+                    $stmt->execute();
+                }
+            }
+        } else {
+            echo "Error: " . $stmt->error;
+        }
+    }
+
+// Method to fetch all products with their categories and manufacturers
+public function getAllProductsWithDetails() {
+    $query = "
+        SELECT p.id, p.name, p.sku, p.price, p.feature_product, m.name AS manufacturer_name, 
+               GROUP_CONCAT(c.name SEPARATOR ', ') AS category_names
+        FROM products p
+        LEFT JOIN manufacturers m ON p.manufacturer_id = m.id
+        LEFT JOIN product_categories pc ON p.id = pc.product_id
+        LEFT JOIN categories c ON pc.category_id = c.id
+        GROUP BY p.id
+    ";
+    $result = $this->db->query($query);
+
+    if (!$result) {
+        die('Error fetching products: ' . $this->db->error);
+    }
+
+    return $result->fetch_all(MYSQLI_ASSOC);
+}
+
+    // Method to delete a product by ID
+    public function deleteProduct($id) {
+        // First delete from product_categories if necessary
+        $deleteCategories = "DELETE FROM product_categories WHERE product_id = ?";
+        $stmt = $this->db->prepare($deleteCategories);
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+
+        // Now delete the product
+        $deleteProduct = "DELETE FROM products WHERE id = ?";
+        $stmt = $this->db->prepare($deleteProduct);
+        $stmt->bind_param("i", $id);
+        
+        return $stmt->execute();
+    }
+
+    // Method to fetch a product's details by ID
+    public function getProductDetailsById($id) {
+        $query = "
+            SELECT p.id, p.name, p.sku, p.short_description, p.price, p.old_price, p.description, p.feature_product, 
+                   m.name AS manufacturer_name, m.logo_path
+            FROM products p
+            LEFT JOIN manufacturers m ON p.manufacturer_id = m.id
+            WHERE p.id = ?
+        ";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->fetch_assoc();
+    }
+
+    // Method to fetch product images
+    public function getProductImages($productId) {
+        $query = "SELECT image_path FROM product_images WHERE product_id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("i", $productId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    // Method to fetch product categories by product ID
+    public function getProductCategoriesById($productId) {
+        $query = "
+            SELECT c.name, c.id, c.parent_id
+            FROM product_categories pc
+            INNER JOIN categories c ON pc.category_id = c.id
+            WHERE pc.product_id = ?
+        ";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("i", $productId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    // Method to fetch product attributes by product ID
+    public function getProductAttributesById($productId) {
+        $query = "
+            SELECT a.name, pa.value 
+            FROM product_attributes pa
+            JOIN attributes a ON pa.attribute_id = a.id
+            WHERE pa.product_id = ?
+        ";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("i", $productId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
     // Getters and Setters for existing functionality
     public function getId() {
         return $this->id;
@@ -111,11 +273,11 @@ class Product {
         return $this->manufacturerDetails;
     }
 
-    // Fetch a single product by ID
+    // Method to fetch product details by ID
     public function getProductById($id) {
         $query = "SELECT * FROM products WHERE id = ?";
         $stmt = $this->db->prepare($query);
-        $stmt->bind_param("i", $id); // "i" for integer
+        $stmt->bind_param("i", $id);
         $stmt->execute();
         $result = $stmt->get_result();
         $product = $result->fetch_assoc();
@@ -187,34 +349,33 @@ class Product {
         ];
     }
 
-    // Fetch product attributes
-    public function getProductAttributes() {
-        $query = "SELECT a.name, pa.value 
-                  FROM product_attributes pa 
-                  LEFT JOIN attributes a ON pa.attribute_id = a.id 
-                  WHERE pa.product_id = ?";
+    public function getProductCategories() {
+        $query = "
+            SELECT c.name, c.id, c.parent_id
+            FROM product_categories pc
+            INNER JOIN categories c ON pc.category_id = c.id
+            WHERE pc.product_id = ?
+        ";
         $stmt = $this->db->prepare($query);
-        $stmt->bind_param("i", $this->id); // "i" for integer
+        $stmt->bind_param("i", $this->id);
         $stmt->execute();
         $result = $stmt->get_result();
         return $result->fetch_all(MYSQLI_ASSOC);
     }
-
-    // Fetch product categories
-    public function getProductCategories() {
-        $query = "SELECT c1.name AS third_category, c2.name AS second_category, c3.name AS main_category,
-                         c1.id AS third_category_id, c2.id AS second_category_id, c3.id AS main_category_id
-                  FROM product_categories pc
-                  LEFT JOIN categories c1 ON c1.id = pc.category_id
-                  LEFT JOIN categories c2 ON c2.id = c1.parent_id
-                  LEFT JOIN categories c3 ON c3.id = c2.parent_id
-                  WHERE pc.product_id = ?";
+    
+    public function getProductAttributes() {
+        $query = "
+            SELECT a.name, pa.value 
+            FROM product_attributes pa
+            JOIN attributes a ON pa.attribute_id = a.id
+            WHERE pa.product_id = ?
+        ";
         $stmt = $this->db->prepare($query);
-        $stmt->bind_param("i", $this->id); // "i" for integer
+        $stmt->bind_param("i", $this->id);
         $stmt->execute();
         $result = $stmt->get_result();
-        return $result->fetch_assoc();
-    }
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }    
 
     // Get next product ID
     public function getNextProductId() {

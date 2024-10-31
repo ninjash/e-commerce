@@ -1,6 +1,7 @@
 <?php
 session_start();
 require 'db_connect.php';
+require '../classes/Product.php';
 
 // Enable detailed MySQLi error reporting
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
@@ -42,7 +43,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_product'])) {
         $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
 
         if (move_uploaded_file($main_image["tmp_name"], $_SERVER['DOCUMENT_ROOT'] . $target_file)) {
-
             // Collect attributes data
             $attributes = [];
             if (isset($_POST['attributes'])) {
@@ -86,59 +86,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['remove_product'])) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_products'])) {
-    foreach ($_SESSION['products'] as $product) {
-        $name = $product['name'];
-        $sku = $product['sku'];
-        $short_description = $product['short_description'];
-        $price = $product['price'];
-        $description = $product['description'];
-        $feature_product = $product['feature_product'];
-        $categories = $product['categories']; // Multiple categories
-        $main_image = $product['main_image'];
-        $manufacturer_id = $product['manufacturer_id'];
-
-        // Insert product into products table with manufacturer ID
-        $query = "INSERT INTO products (name, sku, short_description, price, description, feature_product, manufacturer_id) 
-                  VALUES ('$name', '$sku', '$short_description', $price, '$description', $feature_product, $manufacturer_id)";
-        
-        // Log query for debugging
-        echo "Product Query: " . $query . "<br>";
-        
-        if (mysqli_query($conn, $query)) {
-            $product_id = mysqli_insert_id($conn);
-
-            // Insert main image into product_images table
-            $image_query = "INSERT INTO product_images (product_id, image_path) 
-                            VALUES ($product_id, '$main_image')";
-            mysqli_query($conn, $image_query);
-
-            // Insert attributes into product_attributes table
-            if (isset($product['attributes'])) {
-                foreach ($product['attributes'] as $attribute_id => $value) {
-                    $attribute_query = "INSERT INTO product_attributes (product_id, attribute_id, value) 
-                                        VALUES ($product_id, $attribute_id, '$value')";
-                    mysqli_query($conn, $attribute_query);
-                }
-            }
-
-            // Insert categories into product_categories table
-            if (!empty($categories)) {
-                foreach ($categories as $category_id) {
-                    if (!empty($category_id)) { // Ensure category_id is not empty
-                        $category_query = "INSERT INTO product_categories (product_id, category_id) 
-                                           VALUES ($product_id, '$category_id')"; // Wrapped category_id in quotes
-                        
-                        // Log category query for debugging
-                        echo "Category Query: " . $category_query . "<br>";
-
-                        mysqli_query($conn, $category_query);
-                    }
-                }
-            }
-        } else {
-            // Log or display query errors for debugging
-            echo "Error: " . mysqli_error($conn);
-        }
+    $productClass = new Product($conn); // Instantiate the Product class
+    foreach ($_SESSION['products'] as $productData) {
+        $productClass->saveProduct($conn, $productData); // Save each product
     }
     $_SESSION['products'] = [];
     echo "All products have been saved!";

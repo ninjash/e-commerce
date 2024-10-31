@@ -1,30 +1,24 @@
 <?php
 require 'db_connect.php';
+require '../classes/Product.php';
+require '../classes/Category.php';
 
-// Update the query to join the manufacturers and category tables
-$query = "
-    SELECT p.id, p.name, p.sku, p.price, p.feature_product, m.name AS manufacturer_name, 
-           GROUP_CONCAT(c.name SEPARATOR ', ') AS category_names
-    FROM products p
-    LEFT JOIN manufacturers m ON p.manufacturer_id = m.id
-    LEFT JOIN product_categories pc ON p.id = pc.product_id
-    LEFT JOIN categories c ON pc.category_id = c.id
-    GROUP BY p.id
-";
-$result = mysqli_query($conn, $query);
+// Instantiate the Product class
+$productClass = new Product($conn);
 
 // Handle product deletion
 if (isset($_GET['delete_id'])) {
     $delete_id = intval($_GET['delete_id']);
-    $delete_query = "DELETE FROM products WHERE id = $delete_id";
-    if (mysqli_query($conn, $delete_query)) {
-        // Optionally, you can delete related entries from other tables, like product_categories, etc.
-        header("Location: products_list.php"); // Redirect after deletion
+    if ($productClass->deleteProduct($delete_id)) {
+        header("Location: product_list.php"); // Redirect after deletion
         exit;
     } else {
-        echo "Error deleting product: " . mysqli_error($conn);
+        echo "Error deleting product: " . $conn->error;
     }
 }
+
+// Fetch all products with associated categories and manufacturers
+$products = $productClass->getAllProductsWithDetails();
 ?>
 
 <!DOCTYPE html>
@@ -49,7 +43,7 @@ if (isset($_GET['delete_id'])) {
         </tr>
     </thead>
     <tbody>
-        <?php while ($product = mysqli_fetch_assoc($result)) { ?>
+        <?php foreach ($products as $product): ?>
             <tr>
                 <td><?php echo htmlspecialchars($product['name']); ?></td>
                 <td><?php echo htmlspecialchars($product['sku']); ?></td>
@@ -60,11 +54,11 @@ if (isset($_GET['delete_id'])) {
                 <td>
                     <a href="product.php?id=<?php echo $product['id']; ?>">View</a>
                     <a href="edit_product.php?id=<?php echo $product['id']; ?>">Edit</a>
-                    <a href="products_list.php?delete_id=<?php echo $product['id']; ?>" 
+                    <a href="product_list.php?delete_id=<?php echo $product['id']; ?>" 
                        onclick="return confirm('Are you sure you want to delete this product?');">Delete</a>
                 </td>
             </tr>
-        <?php } ?>
+        <?php endforeach; ?>
     </tbody>
 </table>
 

@@ -2,6 +2,8 @@
 require 'db_connect.php';
 require '../classes/Product.php';
 require '../classes/Category.php';
+require '../classes/Manufacturer.php';
+require_once '../classes/ProductAttribute.php';
 
 // Check if product ID is provided
 if (!isset($_GET['id'])) {
@@ -15,7 +17,8 @@ $product_id = (int)$_GET['id']; // Ensure it's an integer
 $productClass = new Product($conn);
 $product = $productClass->getProductDetailsById($product_id);
 
-if (!$product) {
+// Check if product details are correctly fetched as an associative array
+if (!is_array($product) || $product === null) {
     echo "Product not found.";
     exit;
 }
@@ -23,8 +26,19 @@ if (!$product) {
 // Fetch categories for this product
 $categories = $productClass->getProductCategoriesById($product_id);
 
-// Fetch product attributes
-$attributes = $productClass->getProductAttributesById($product_id);
+// Ensure $categories is an array
+if (!is_array($categories)) {
+    $categories = []; // Fallback to an empty array if the data structure is incorrect
+}
+
+// Fetch manufacturer details
+$manufacturerClass = new Manufacturer($conn, $product['manufacturer_id']);
+$manufacturerName = $manufacturerClass->getName();
+$manufacturerLogoPath = $manufacturerClass->getLogoPath();
+
+// Instantiate ProductAttribute and fetch attributes
+$productAttribute = new ProductAttribute($conn);
+$attributes = $productAttribute->getProductAttributesById($product_id);
 
 // Fetch product images
 $images = $productClass->getProductImages($product_id);
@@ -44,16 +58,22 @@ $images = $productClass->getProductImages($product_id);
 
     <div class="card mb-4">
         <div class="card-body">
-            <h2><?php echo htmlspecialchars($product['name']); ?></h2>
-            <p><strong>SKU:</strong> <?php echo htmlspecialchars($product['sku']); ?></p>
+            <h2><?php echo htmlspecialchars($product['name'] ?? ''); ?></h2>
+            <p><strong>SKU:</strong> <?php echo htmlspecialchars($product['sku'] ?? ''); ?></p>
 
             <p><strong>Categories:</strong>
-                <?php if (!empty($categories)): ?>
+                <?php if (!empty($categories) && is_array($categories)): ?>
                     <ul>
                         <?php foreach ($categories as $category): ?>
-                            <li>
-                                <strong>Category Name:</strong> <?php echo htmlspecialchars($category['name']); ?>
-                            </li>
+                            <?php if (!empty($category['main_category'])): ?>
+                                <li><strong>Main Category:</strong> <?php echo htmlspecialchars($category['main_category']); ?></li>
+                            <?php endif; ?>
+                            <?php if (!empty($category['second_category'])): ?>
+                                <li><strong>Second Category:</strong> <?php echo htmlspecialchars($category['second_category']); ?></li>
+                            <?php endif; ?>
+                            <?php if (!empty($category['third_category'])): ?>
+                                <li><strong>Third Category:</strong> <?php echo htmlspecialchars($category['third_category']); ?></li>
+                            <?php endif; ?>
                         <?php endforeach; ?>
                     </ul>
                 <?php else: ?>
@@ -62,27 +82,27 @@ $images = $productClass->getProductImages($product_id);
             </p>
 
             <p><strong>Manufacturer:</strong> 
-                <?php if (!empty($product['manufacturer_name'])): ?>
-                    <span><?php echo htmlspecialchars($product['manufacturer_name']); ?></span><br>
-                    <?php if (!empty($product['logo_path'])): ?>
-                        <img src="<?php echo htmlspecialchars($product['logo_path']); ?>" alt="<?php echo htmlspecialchars($product['manufacturer_name']); ?>" style="max-width: 150px;">
+                <?php if (!empty($manufacturerName)): ?>
+                    <span><?php echo htmlspecialchars($manufacturerName); ?></span><br>
+                    <?php if (!empty($manufacturerLogoPath)): ?>
+                        <img src="<?php echo htmlspecialchars($manufacturerLogoPath); ?>" alt="<?php echo htmlspecialchars($manufacturerName); ?>" style="max-width: 150px;">
                     <?php endif; ?>
                 <?php else: ?>
                     <span>No manufacturer assigned.</span>
                 <?php endif; ?>
             </p>
 
-            <p><strong>Short Description:</strong> <?php echo htmlspecialchars($product['short_description']); ?></p>
-            <p><strong>Description:</strong> <?php echo htmlspecialchars($product['description']); ?></p>
+            <p><strong>Short Description:</strong> <?php echo htmlspecialchars($product['short_description'] ?? ''); ?></p>
+            <p><strong>Description:</strong> <?php echo htmlspecialchars($product['description'] ?? ''); ?></p>
             <p><strong>Featured Product:</strong> <?php echo $product['feature_product'] ? 'Yes' : 'No'; ?></p>
-            <p><strong>Price:</strong> $<?php echo number_format($product['price'], 2); ?></p>
+            <p><strong>Price:</strong> $<?php echo number_format($product['price'] ?? 0, 2); ?></p>
             
             <?php if (!empty($product['old_price'])): ?>
                 <p><strong>Old Price:</strong> <span style="text-decoration: line-through;">$<?php echo number_format($product['old_price'], 2); ?></span></p>
             <?php endif; ?>
 
             <h3>Product Attributes</h3>
-            <?php if (!empty($attributes)): ?>
+            <?php if (!empty($attributes) && is_array($attributes)): ?>
                 <ul>
                     <?php foreach ($attributes as $attribute): ?>
                         <li><strong><?php echo htmlspecialchars($attribute['name']); ?>:</strong> <?php echo htmlspecialchars($attribute['value']); ?></li>
@@ -93,7 +113,7 @@ $images = $productClass->getProductImages($product_id);
             <?php endif; ?>
 
             <h3>Product Images</h3>
-            <?php if (!empty($images)): ?>
+            <?php if (!empty($images) && is_array($images)): ?>
                 <div class="row">
                     <?php foreach ($images as $image): ?>
                         <div class="col-md-3 mb-3">

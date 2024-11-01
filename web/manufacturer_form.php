@@ -1,6 +1,7 @@
 <?php
 session_start();
 require 'db_connect.php';
+require '../classes/Manufacturer.php'; // Assuming you have a Manufacturer class
 
 $target_dir = "/e-commerce/assets/brands/";
 
@@ -10,25 +11,23 @@ if (!isset($_SESSION['manufacturers'])) {
 }
 
 // Handle form submission for adding a manufacturer
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_manufacturer'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_manufacturer'])) {
     $manufacturer_name = $_POST['manufacturer_name'];
     $specialty = $_POST['specialty'];
 
     // Handle logo file upload
-    if (isset($_FILES['logo']) && $_FILES['logo']['error'] == 0) {
+    if (isset($_FILES['logo']) && $_FILES['logo']['error'] === 0) {
         $logo = $_FILES['logo'];
         $target_file = $target_dir . basename($logo["name"]);
         $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
 
         if (move_uploaded_file($logo["tmp_name"], $_SERVER['DOCUMENT_ROOT'] . $target_file)) {
-
             // Store manufacturer data in session
             $manufacturer_data = [
                 'name' => $manufacturer_name,
                 'specialty' => $specialty,
                 'logo_path' => $target_file
             ];
-
             $_SESSION['manufacturers'][] = $manufacturer_data;
 
             echo "Manufacturer added successfully. Add another manufacturer or save all.";
@@ -39,19 +38,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_manufacturer'])) {
 }
 
 // Handle form submission to save all manufacturers
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_manufacturers'])) {
-    foreach ($_SESSION['manufacturers'] as $manufacturer) {
-        $name = $manufacturer['name'];
-        $specialty = $manufacturer['specialty'];
-        $logo_path = $manufacturer['logo_path'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_manufacturers'])) {
+    $manufacturerClass = new Manufacturer($conn); // Instantiate Manufacturer class
 
-        // Insert manufacturer into manufacturers table
-        $query = "INSERT INTO manufacturers (name, specialty, logo_path) 
-                  VALUES ('$name', '$specialty', '$logo_path')";
-        if (!mysqli_query($conn, $query)) {
-            echo "Error: " . mysqli_error($conn);
+    foreach ($_SESSION['manufacturers'] as $manufacturer) {
+        $manufacturerClass->setName($manufacturer['name']);
+        $manufacturerClass->setSpecialty($manufacturer['specialty']);
+        $manufacturerClass->setLogoPath($manufacturer['logo_path']);
+
+        if (!$manufacturerClass->save()) {
+            echo "Error saving manufacturer: " . $conn->error;
         }
     }
+
     // Clear session after saving
     $_SESSION['manufacturers'] = [];
     echo "All manufacturers have been saved!";
@@ -85,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_manufacturers']))
     <h2>Manufacturers to be Saved</h2>
     <ul>
         <?php foreach ($_SESSION['manufacturers'] as $manufacturer): ?>
-            <li><?php echo $manufacturer['name']; ?> - <?php echo $manufacturer['specialty']; ?></li>
+            <li><?php echo htmlspecialchars($manufacturer['name']); ?> - <?php echo htmlspecialchars($manufacturer['specialty']); ?></li>
         <?php endforeach; ?>
     </ul>
 <?php endif; ?>

@@ -1,12 +1,10 @@
 <?php
 require 'db_connect.php';
+require '../classes/Manufacturer.php';
 
-// Fetch manufacturers with their associated product counts
-$query = "SELECT m.id, m.name, m.specialty, m.logo_path, COUNT(p.id) as product_count 
-          FROM manufacturers m
-          LEFT JOIN products p ON m.id = p.manufacturer_id
-          GROUP BY m.id";
-$result = mysqli_query($conn, $query);
+// Instantiate the Manufacturer class and fetch all manufacturers
+$manufacturerClass = new Manufacturer($conn);
+$manufacturers = $manufacturerClass->getAllManufacturersWithProductCount();
 ?>
 
 <!DOCTYPE html>
@@ -19,7 +17,7 @@ $result = mysqli_query($conn, $query);
 <body>
 
 <div class="container mt-4">
-    <h1>Manufacturers List</h1>
+    <h1 class="mb-4">Manufacturers List</h1>
 
     <table class="table table-striped">
         <thead>
@@ -33,26 +31,34 @@ $result = mysqli_query($conn, $query);
             </tr>
         </thead>
         <tbody>
-            <?php while ($manufacturer = mysqli_fetch_assoc($result)) { ?>
+            <?php foreach ($manufacturers as $manufacturer): ?>
                 <tr>
-                    <td><?php echo $manufacturer['id']; ?></td>
-                    <td><?php echo $manufacturer['name']; ?></td>
-                    <td><?php echo $manufacturer['specialty']; ?></td>
+                    <td><?php echo htmlspecialchars($manufacturer['id']); ?></td>
+                    <td><?php echo htmlspecialchars($manufacturer['name']); ?></td>
+                    <td><?php echo htmlspecialchars($manufacturer['specialty']); ?></td>
                     <td>
-                        <img src="<?php echo $manufacturer['logo_path']; ?>" alt="<?php echo $manufacturer['name']; ?> Logo" style="max-width: 100px;">
+                        <?php if (!empty($manufacturer['logo_path'])): ?>
+                            <img src="<?php echo htmlspecialchars($manufacturer['logo_path']); ?>" 
+                                 alt="<?php echo htmlspecialchars($manufacturer['name']); ?> Logo" 
+                                 style="max-width: 100px;">
+                        <?php else: ?>
+                            <span>No Logo</span>
+                        <?php endif; ?>
                     </td>
-                    <td><?php echo $manufacturer['product_count']; ?></td>
+                    <td><?php echo htmlspecialchars($manufacturer['product_count']); ?></td>
                     <td>
-                        <a href="manufacturer.php?id=<?php echo $manufacturer['id']; ?>" class="btn btn-primary btn-sm">View</a>
+                        <a href="manufacturer.php?id=<?php echo htmlspecialchars($manufacturer['id']); ?>" 
+                           class="btn btn-primary btn-sm">View</a>
                     </td>
                 </tr>
-            <?php } ?>
+            <?php endforeach; ?>
         </tbody>
     </table>
 
     <a href="manufacturer_form.php" class="btn btn-success">Add New Manufacturer</a>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
 

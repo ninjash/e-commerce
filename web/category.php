@@ -1,5 +1,7 @@
-<?php 
+<?php
 require 'db_connect.php';
+require_once '../classes/Category.php';
+require_once '../classes/Product.php';
 
 // Check if category ID is provided
 if (!isset($_GET['id'])) {
@@ -9,52 +11,41 @@ if (!isset($_GET['id'])) {
 
 $category_id = (int)$_GET['id']; // Ensure it's an integer
 
-// Fetch the current category details including parent categories and image
-$category_query = "
-    SELECT c.id, c.name, c.parent_id, ci.image_path
-    FROM categories c
-    LEFT JOIN category_images ci ON c.id = ci.category_id
-    WHERE c.id = $category_id
-";
-$category_result = mysqli_query($conn, $category_query);
+// Instantiate the Category class and fetch details
+$categoryClass = new Category($conn);
+$categoryDetails = $categoryClass->getCategoryDetails($category_id);
 
-if (!$category_result || mysqli_num_rows($category_result) == 0) {
+// Check if the category exists
+if (empty($categoryDetails)) {
     echo "Category not found.";
     exit;
 }
 
-$category = mysqli_fetch_assoc($category_result);
+// Set category details
+$category_name = $categoryDetails['category_name'];
+$parent_name = $categoryDetails['parent_name'] ?? 'N/A';
+$grandparent_name = $categoryDetails['grandparent_name'] ?? 'N/A';
+$image_path = $categoryClass->getCategoryImage($category_id); // Get the image path
 
 // Fetch subcategories under this category
-$subcategories_query = "SELECT id, name FROM categories WHERE parent_id = $category_id";
-$subcategories_result = mysqli_query($conn, $subcategories_query);
-$has_subcategories = mysqli_num_rows($subcategories_result) > 0;
+$subcategories = $categoryClass->getChildCategories($category_id);
+$has_subcategories = !empty($subcategories);
 
 // Check if this is a third-level category (no subcategories)
+$has_products = false;
+$product_result = [];
+
 if (!$has_subcategories) {
     // Fetch products for this category
-    $product_query = "
-        SELECT p.* FROM products p
-        INNER JOIN product_categories pc ON p.id = pc.product_id
-        WHERE pc.category_id = $category_id
-    ";
-    $product_result = mysqli_query($conn, $product_query);
-    $has_products = mysqli_num_rows($product_result) > 0;
+    $productClass = new Product($conn);
+    $product_result = $productClass->getProductsByCategory($category_id, $conn); // Pass $conn to the method
+    $has_products = !empty($product_result);
 }
 
 // Determine category depth for labeling
 $category_level = 'Main Category'; // Default level
-if ($category['parent_id']) {
-    // If the category has a parent, it is either second or third level
-    $parent_query = "SELECT parent_id FROM categories WHERE id = {$category['parent_id']}";
-    $parent_result = mysqli_query($conn, $parent_query);
-    $parent = mysqli_fetch_assoc($parent_result);
-    
-    if ($parent['parent_id']) {
-        $category_level = 'Third Category'; // If the parent also has a parent, this is a third-level category
-    } else {
-        $category_level = 'Second Category'; // Otherwise, it's a second-level category
-    }
+if ($parent_name !== 'N/A') {
+    $category_level = $grandparent_name !== 'N/A' ? 'Third Category' : 'Second Category';
 }
 ?>
 
@@ -63,7 +54,7 @@ if ($category['parent_id']) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Category Details</title>
+    <title>Category Details - <?php echo htmlspecialchars($category_name); ?></title>
 </head>
 <body>
 
@@ -72,20 +63,25 @@ if ($category['parent_id']) {
 
     <div class="card mb-4">
         <div class="card-body">
-            <h2>Category: <?php echo htmlspecialchars($category['name']); ?></h2>
+            <h2>Category: <?php echo htmlspecialchars($category_name); ?></h2>
             
-            <!-- Display category image if available -->
-            <?php if (!empty($category['image_path'])): ?>
-                <img src="<?php echo htmlspecialchars($category['image_path']); ?>" alt="Category Image" width="200">
-            <?php endif; ?>
+            <!-- Display category image or "No Image" placeholder -->
+            <img src="<?php echo htmlspecialchars($image_path); ?>" alt="Category Image" width="200">
 
             <?php if ($has_subcategories): ?>
-                <!-- Dynamically adjust heading based on category level -->
                 <h3><?php echo $category_level === 'Main Category' ? 'Second Categories' : 'Third Categories'; ?></h3>
                 <ul>
-                    <?php while ($subcategory = mysqli_fetch_assoc($subcategories_result)): ?>
-                        <li><a href="category.php?id=<?php echo $subcategory['id']; ?>"><?php echo htmlspecialchars($subcategory['name']); ?></a></li>
-                    <?php endwhile; ?>
+                    <?php foreach ($subcategories as $subcategory_id): ?>
+                        <?php
+                        $subcategoryDetails = $categoryClass->getCategoryDetails($subcategory_id);
+                        $subcategory_name = $subcategoryDetails['category_name'];
+                        ?>
+                        <li>
+                            <a href="category.php?id=<?php echo $subcategory_id; ?>">
+                                <?php echo htmlspecialchars($subcategory_name); ?>
+                            </a>
+                        </li>
+                    <?php endforeach; ?>
                 </ul>
             <?php elseif ($has_products): ?>
                 <h3>Products in this Category</h3>
@@ -99,7 +95,7 @@ if ($category['parent_id']) {
                         </tr>
                     </thead>
                     <tbody>
-                        <?php while ($product = mysqli_fetch_assoc($product_result)): ?>
+                        <?php foreach ($product_result as $product): ?>
                             <tr>
                                 <td><?php echo htmlspecialchars($product['name']); ?></td>
                                 <td><?php echo htmlspecialchars($product['sku']); ?></td>
@@ -108,7 +104,7 @@ if ($category['parent_id']) {
                                     <a href="product.php?id=<?php echo $product['id']; ?>" class="btn btn-primary">View</a>
                                 </td>
                             </tr>
-                        <?php endwhile; ?>
+                        <?php endforeach; ?>
                     </tbody>
                 </table>
             <?php else: ?>

@@ -1,21 +1,33 @@
 <?php
-require 'web/db_connect.php';
-require 'classes/Product.php';
+require_once 'web/db_connect.php';
+require_once 'classes/Product.php';
+require_once 'classes/ProductAttribute.php';
+require_once 'classes/Manufacturer.php';
 
 if (!isset($_GET['id'])) {
     echo "Product ID is missing.";
     exit;
 }
 
-$product_id = (int)$_GET['id'];
-
 // Create product object
+$product_id = (int)$_GET['id'];
 $product = new Product($conn, $product_id);
 
-// Get product details
-$product_details = $product->getProductDetails();
-$product_attributes = $product->getProductAttributes();
-$product_categories = $product->getProductCategories();
+// Get product details and categories
+$product_details = $product->getProductDetailsById($product_id);
+$product_categories = $product->getProductCategoriesById($product_id);
+
+// Create Attribute and Manufacturer objects
+$productAttribute = new ProductAttribute($conn);
+$product_attributes = $productAttribute->getProductAttributesById($product_id);
+
+$manufacturer = new Manufacturer($conn, $product_details['manufacturer_id']);
+$manufacturer_details = [
+    'name' => $manufacturer->getName(),
+    'logo_path' => $manufacturer->getLogoPath()
+];
+
+// Get next and previous product IDs
 $next_id = $product->getNextProductId();
 $prev_id = $product->getPreviousProductId();
 
@@ -50,39 +62,43 @@ $prev_id = $product->getPreviousProductId();
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a href="homepage.php">Home</a></li>
                             <li class="breadcrumb-item-separator"> \ </li>
-                            <?php if (!empty($product_categories['main_category'])): ?>
-                                <li class="breadcrumb-item">
-                                    <a href="category_page.php?category_id=<?= $product_categories['main_category_id'] ?>">
-                                        <?= htmlspecialchars($product_categories['main_category']) ?>
-                                    </a>
-                                </li>
-                                <li class="breadcrumb-item-separator"> \ </li>
+                            <?php if (!empty($product_categories) && is_array($product_categories)): ?>
+                                <?php foreach ($product_categories as $category): ?>
+                                    <?php if (!empty($category['main_category'])): ?>
+                                        <li class="breadcrumb-item">
+                                            <a href="category_page.php?category_id=<?= htmlspecialchars($category['main_category_id']) ?>">
+                                                <?= htmlspecialchars($category['main_category']) ?>
+                                            </a>
+                                        </li>
+                                        <li class="breadcrumb-item-separator"> \ </li>
+                                    <?php endif; ?>
+                                    <?php if (!empty($category['second_category'])): ?>
+                                        <li class="breadcrumb-item">
+                                            <a href="category_page.php?category_id=<?= htmlspecialchars($category['second_category_id']) ?>">
+                                                <?= htmlspecialchars($category['second_category']) ?>
+                                            </a>
+                                        </li>
+                                        <li class="breadcrumb-item-separator"> \ </li>
+                                    <?php endif; ?>
+                                    <?php if (!empty($category['third_category'])): ?>
+                                        <li class="breadcrumb-item">
+                                            <a href="category_page.php?category_id=<?= htmlspecialchars($category['third_category_id']) ?>">
+                                                <?= htmlspecialchars($category['third_category']) ?>
+                                            </a>
+                                        </li>
+                                        <li class="breadcrumb-item-separator"> \ </li>
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
                             <?php endif; ?>
-                            <?php if (!empty($product_categories['second_category'])): ?>
-                                <li class="breadcrumb-item">
-                                    <a href="category_page.php?category_id=<?= $product_categories['second_category_id'] ?>">
-                                        <?= htmlspecialchars($product_categories['second_category']) ?>
-                                    </a>
-                                </li>
-                                <li class="breadcrumb-item-separator"> \ </li>
-                            <?php endif; ?>
-                            <?php if (!empty($product_categories['third_category'])): ?>
-                                <li class="breadcrumb-item">
-                                    <a href="category_page.php?category_id=<?= $product_categories['third_category_id'] ?>">
-                                        <?= htmlspecialchars($product_categories['third_category']) ?>
-                                    </a>
-                                </li>
-                                <li class="breadcrumb-item-separator"> \ </li>
-                            <?php endif; ?>
-                            <li class="breadcrumb-item active" aria-current="page"><?php echo $product_details['name']; ?></li>
+                            <li class="breadcrumb-item active" aria-current="page"><?php echo htmlspecialchars($product_details['name']); ?></li>
                             <li class="ms-auto">
                                 <?php if ($prev_id): ?>
-                                    <a href="product_page.php?id=<?php echo $prev_id; ?>" class="text-muted">
+                                    <a href="product_page.php?id=<?php echo htmlspecialchars($prev_id); ?>" class="text-muted">
                                         <i class="bi bi-chevron-left"></i> prev
                                     </a>
                                 <?php endif; ?>
                                 <?php if ($next_id): ?>
-                                    <a href="product_page.php?id=<?php echo $next_id; ?>" class="text-muted">
+                                    <a href="product_page.php?id=<?php echo htmlspecialchars($next_id); ?>" class="text-muted">
                                         next <i class="bi bi-chevron-right"></i>
                                     </a>
                                 <?php endif; ?>
@@ -127,8 +143,8 @@ $prev_id = $product->getPreviousProductId();
                 </div>
                 <!-- Display Manufacturer Logo and Name -->
                 <div class="brand-logo">
-                    <?php if (!empty($product->getManufacturerDetails()['logo_path'])): ?>
-                        <img src="<?php echo htmlspecialchars($product->getManufacturerDetails()['logo_path']); ?>" alt="<?php echo htmlspecialchars($product->getManufacturerDetails()['name']); ?> logo" class="img-fluid">
+                    <?php if (!empty($manufacturer_details['logo_path'])): ?>
+                        <img src="<?php echo htmlspecialchars($manufacturer_details['logo_path']); ?>" alt="<?php echo htmlspecialchars($manufacturer_details['name']); ?> logo" class="img-fluid">
                     <?php endif; ?>
                 </div>
             </div>

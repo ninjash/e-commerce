@@ -1,8 +1,12 @@
 <?php
 require 'db_connect.php';
+require_once 'ProductAttribute.php'; // Include the ProductAttribute class
 
-$query = "SELECT * FROM attributes";
-$result = mysqli_query($conn, $query);
+// Instantiate the ProductAttribute class
+$productAttribute = new ProductAttribute($conn);
+
+// Fetch all attributes using the ProductAttribute class
+$attributes = $productAttribute->getAllAttributes($conn);
 
 ?>
 
@@ -20,7 +24,7 @@ $result = mysqli_query($conn, $query);
 
     <a href="attributes_form.php" class="btn btn-primary mb-4">Add New Attribute</a>
 
-    <?php if (mysqli_num_rows($result) > 0): ?>
+    <?php if (count($attributes) > 0): ?>
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -29,12 +33,12 @@ $result = mysqli_query($conn, $query);
                 </tr>
             </thead>
             <tbody>
-                <?php while ($row = mysqli_fetch_assoc($result)): ?>
+                <?php foreach ($attributes as $attribute): ?>
                     <tr>
-                        <td><?php echo $row['id']; ?></td>
-                        <td><?php echo $row['name']; ?></td>
+                        <td><?php echo htmlspecialchars($attribute['id']); ?></td>
+                        <td><?php echo htmlspecialchars($attribute['name']); ?></td>
                     </tr>
-                <?php endwhile; ?>
+                <?php endforeach; ?>
             </tbody>
         </table>
     <?php else: ?>
@@ -46,6 +50,5 @@ $result = mysqli_query($conn, $query);
 </html>
 
 <?php
-mysqli_free_result($result);
-mysqli_close($conn);
+$conn->close(); // Close the database connection
 ?>

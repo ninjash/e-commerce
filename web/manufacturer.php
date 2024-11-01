@@ -1,5 +1,7 @@
 <?php
 require 'db_connect.php';
+require '../classes/Manufacturer.php';
+require '../classes/Product.php';
 
 // Check if manufacturer ID is provided
 if (!isset($_GET['id'])) {
@@ -7,26 +9,24 @@ if (!isset($_GET['id'])) {
     exit;
 }
 
-$manufacturer_id = $_GET['id'];
+$manufacturer_id = (int)$_GET['id']; // Ensure it's an integer
 
-// Fetch the manufacturer details
-$manufacturer_query = "SELECT * FROM manufacturers WHERE id = $manufacturer_id";
-$manufacturer_result = mysqli_query($conn, $manufacturer_query);
+// Instantiate the Manufacturer class and fetch the manufacturer details
+$manufacturerClass = new Manufacturer($conn, $manufacturer_id);
+$manufacturer = [
+    'name' => $manufacturerClass->getName(),
+    'specialty' => $manufacturerClass->getSpecialty(),
+    'logo_path' => $manufacturerClass->getLogoPath()
+];
 
-if (!$manufacturer_result || mysqli_num_rows($manufacturer_result) == 0) {
+if (empty($manufacturer['name'])) {
     echo "Manufacturer not found.";
     exit;
 }
 
-$manufacturer = mysqli_fetch_assoc($manufacturer_result);
-
-// Fetch products for this manufacturer
-$product_query = "
-    SELECT p.*
-    FROM products p
-    WHERE p.manufacturer_id = $manufacturer_id
-";
-$product_result = mysqli_query($conn, $product_query);
+// Instantiate the Product class and fetch products for this manufacturer
+$productClass = new Product($conn);
+$products = $productClass->getProductsByManufacturerId($manufacturer_id);
 ?>
 
 <!DOCTYPE html>
@@ -50,7 +50,7 @@ $product_result = mysqli_query($conn, $product_query);
             <img src="<?php echo htmlspecialchars($manufacturer['logo_path']); ?>" alt="<?php echo htmlspecialchars($manufacturer['name']); ?> Logo" style="max-width: 150px;">
 
             <h3>Products by this Manufacturer</h3>
-            <?php if (mysqli_num_rows($product_result) > 0): ?>
+            <?php if (!empty($products)): ?>
                 <table class="table table-striped">
                     <thead>
                         <tr>
@@ -62,7 +62,7 @@ $product_result = mysqli_query($conn, $product_query);
                         </tr>
                     </thead>
                     <tbody>
-                        <?php while ($product = mysqli_fetch_assoc($product_result)): ?>
+                        <?php foreach ($products as $product): ?>
                             <tr>
                                 <td><?php echo htmlspecialchars($product['name']); ?></td>
                                 <td><?php echo htmlspecialchars($product['sku']); ?></td>
@@ -72,20 +72,21 @@ $product_result = mysqli_query($conn, $product_query);
                                     <a href="product.php?id=<?php echo $product['id']; ?>" class="btn btn-primary">View</a>
                                 </td>
                             </tr>
-                        <?php endwhile; ?>
+                        <?php endforeach; ?>
                     </tbody>
                 </table>
             <?php else: ?>
                 <p>No products found for this manufacturer.</p>
             <?php endif; ?>
 
-            <a href="edit_manufacturer.php?id=<?php echo $manufacturer['id']; ?>" class="btn btn-warning">Edit Manufacturer</a>
-            <a href="delete_manufacturer.php?id=<?php echo $manufacturer['id']; ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this manufacturer?');">Delete Manufacturer</a>
+            <a href="edit_manufacturer.php?id=<?php echo $manufacturer_id; ?>" class="btn btn-warning">Edit Manufacturer</a>
+            <a href="delete_manufacturer.php?id=<?php echo $manufacturer_id; ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this manufacturer?');">Delete Manufacturer</a>
             <a href="manufacturer_list.php" class="btn btn-secondary">Back to Manufacturer List</a>
         </div>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
 

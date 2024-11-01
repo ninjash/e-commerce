@@ -7,8 +7,8 @@ require 'classes/Category.php';
 $categoryClass = new Category($conn);
 $productClass = new Product($conn);
 
-// Fetch main categories (parent_id is NULL) - Pass the $conn (DB connection)
-$page_main_category_result = $categoryClass->getMainCategories($conn);
+// Fetch main categories (parent_id is NULL)
+$page_main_category_result = Category::getMainCategories($conn); // Pass $conn
 
 // Handle selected category (default to all products)
 $page_category_id = isset($_GET['category_id']) ? (int)$_GET['category_id'] : 0;
@@ -18,26 +18,27 @@ $page_category_name = "All Products"; // Default category name
 if ($page_category_id > 0) {
     $page_category_detail_result = $categoryClass->getCategoryDetails($page_category_id);
 
-    if ($page_category_detail_result && mysqli_num_rows($page_category_detail_result) > 0) {
-        $page_category = mysqli_fetch_assoc($page_category_detail_result);
-        $page_category_name = $page_category['category_name']; // Set the category name for display
-    } else {
+    // Check if the result is empty or null
+    if (empty($page_category_detail_result)) {
         echo "Category not found.";
         exit;
     }
 
+    // Set the category name for display
+    $page_category_name = $page_category_detail_result['category_name'];
+    
     // Fetch all child categories of the selected category
     $category_ids = [$page_category_id];
-    $child_categories = $categoryClass->getAllChildCategories($conn, $page_category_id); // Fetch all child categories as IDs
+    $child_categories = Category::getAllChildCategories($conn, $page_category_id); // Pass $conn
     $category_ids = array_merge($category_ids, $child_categories); // Combine selected category with its children
     $category_ids_string = implode(',', $category_ids);
 
-    // Filter products by selected category - pass $category_ids_string and $conn
-    $page_product_result = $productClass->getProductsByCategory($category_ids_string, $conn);
+    // Filter products by selected category
+    $page_product_result = Product::getProductsByCategory($category_ids_string, $conn); // Pass $conn
 
 } else {
-    // Fetch all products if no specific category is selected - pass $conn
-    $page_product_result = $productClass->getAllProducts($conn);
+    // Fetch all products if no specific category is selected
+    $page_product_result = Product::getAllProducts($conn); // Pass $conn
 }
 
 ?>
@@ -76,7 +77,7 @@ if ($page_category_id > 0) {
                                 </a>
                                 <ul class="subcategory-list" id="subcategories-<?php echo $page_main_category['id']; ?>" style="display: none;">
                                     <?php
-                                    $page_second_category_result = $categoryClass->getSecondLevelCategories($conn, $page_main_category['id']);
+                                    $page_second_category_result = Category::getSecondLevelCategories($conn, $page_main_category['id']);
                                     foreach ($page_second_category_result as $page_second_category): ?>
                                         <li>
                                             <a href="#" class="subcategory-toggle" data-id="<?php echo $page_second_category['id']; ?>">
@@ -85,7 +86,7 @@ if ($page_category_id > 0) {
                                             </a>
                                             <ul class="subcategory-list" id="thirdcategories-<?php echo $page_second_category['id']; ?>" style="display: none;">
                                                 <?php
-                                                $page_third_category_result = $categoryClass->getThirdLevelCategories($conn, $page_second_category['id']);
+                                                $page_third_category_result = Category::getThirdLevelCategories($conn, $page_second_category['id']);
                                                 foreach ($page_third_category_result as $page_third_category): ?>
                                                     <li>
                                                         <a href="?category_id=<?php echo $page_third_category['id']; ?>">

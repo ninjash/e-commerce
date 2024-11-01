@@ -1,18 +1,27 @@
 <?php
 require 'db_connect.php';
+require_once '../classes/ProductAttribute.php'; // Include the ProductAttribute class
+
+// Instantiate the ProductAttribute class
+$productAttribute = new ProductAttribute($conn);
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-
     $attribute_name = $_POST['attribute_name'];
 
-    $query = "INSERT INTO attributes (name) VALUES ('$attribute_name')";
-    
-    if (mysqli_query($conn, $query)) {
+    // Use a prepared statement to prevent SQL injection
+    $query = "INSERT INTO attributes (name) VALUES (?)";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("s", $attribute_name);
+
+    if ($stmt->execute()) {
+        // Redirect to the attributes list page upon successful insertion
         header("Location: attributes_list.php");
         exit();
     } else {
-        echo "Error: " . mysqli_error($conn);
+        echo "Error: " . $conn->error;
     }
+
+    $stmt->close(); // Close the statement
 }
 
 ?>
@@ -44,5 +53,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </html>
 
 <?php
-mysqli_close($conn);
+$conn->close(); // Close the database connection
 ?>

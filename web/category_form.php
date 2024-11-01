@@ -1,46 +1,47 @@
 <?php
 require 'db_connect.php';
+require_once '../classes/Category.php';
+
+// Instantiate the Category class
+$categoryClass = new Category($conn);
 
 // Fetch all main categories
-$main_categories = mysqli_query($conn, "SELECT id, name FROM categories WHERE parent_id IS NULL");
+$main_categories = $categoryClass::getMainCategories($conn);
 
 // Fetch all second categories along with their parent main categories
-$second_categories = mysqli_query($conn, "
-    SELECT sc.id AS second_id, sc.name AS second_name, mc.id AS main_id, mc.name AS main_name
-    FROM categories sc
-    JOIN categories mc ON sc.parent_id = mc.id
-    WHERE sc.parent_id IS NOT NULL
-");
-
+$second_categories = $categoryClass::getSecondLevelCategoriesWithParentNames($conn);
 
 // Organize second categories under their respective main categories
 $grouped_second_categories = [];
-while ($row = mysqli_fetch_assoc($second_categories)) {
-    $grouped_second_categories[$row['main_name']][] = $row;
+foreach ($second_categories as $second_category) {
+    $grouped_second_categories[$second_category['parent_name']][] = $second_category;
 }
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $category_type = $_POST['category_type'];
     $category_name = $_POST['name'];
     $description = $_POST['description'];
+    $category_type = $_POST['category_type'];
     $parent_id = NULL; // Default to NULL for main categories
     $featured = isset($_POST['featured']) ? 1 : 0;
 
     // Set the parent ID based on the category type
     if ($category_type == 'second') {
-        $parent_id = !empty($_POST['main_category']) ? $_POST['main_category'] : NULL;  // For second category
+        $parent_id = !empty($_POST['main_category']) ? $_POST['main_category'] : NULL; // For second category
     } elseif ($category_type == 'third') {
-        $parent_id = !empty($_POST['second_category']) ? $_POST['second_category'] : NULL;  // For third category
+        $parent_id = !empty($_POST['second_category']) ? $_POST['second_category'] : NULL; // For third category
     }
 
-    // Use prepared statement to insert the new category into the `categories` table
-    $insert_category_query = "INSERT INTO categories (name, description, parent_id, featured) VALUES (?, ?, ?, ?)";
-    $stmt = mysqli_prepare($conn, $insert_category_query);
-    mysqli_stmt_bind_param($stmt, "ssi", $category_name, $description, $parent_id, $featured);
+    // Create a new Category object and set its properties
+    $newCategory = new Category($conn);
+    $newCategory->setName($category_name);
+    $newCategory->setDescription($description);
+    $newCategory->setParentId($parent_id);
+    $newCategory->setFeatured($featured);
 
-    if (mysqli_stmt_execute($stmt)) {
-        $category_id = mysqli_insert_id($conn); // Get the last inserted ID for the category
+    // Save the category
+    if ($newCategory->save()) {
+        $category_id = $conn->insert_id; // Get the last inserted ID for the category
 
         // Handle the image upload if an image was provided
         if (isset($_FILES['category_image']) && $_FILES['category_image']['error'] == 0) {
@@ -49,13 +50,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             // Move the uploaded image to the target directory
             if (move_uploaded_file($image["tmp_name"], $_SERVER['DOCUMENT_ROOT'] . $target_file)) {
-                // Insert image path into the category_images table using prepared statements
-                $image_query = "INSERT INTO category_images (category_id, image_path) VALUES (?, ?)";
-                $stmt_image = mysqli_prepare($conn, $image_query);
-                mysqli_stmt_bind_param($stmt_image, "is", $category_id, $target_file);
+                // Insert image path into the category_images table
+                $query = "INSERT INTO category_images (category_id, image_path) VALUES (?, ?)";
+                $stmt = $conn->prepare($query);
+                $stmt->bind_param("is", $category_id, $target_file);
 
-                if (!mysqli_stmt_execute($stmt_image)) {
-                    echo "Error inserting image: " . mysqli_error($conn);
+                if (!$stmt->execute()) {
+                    echo "Error inserting image: " . $conn->error;
                     exit();
                 }
             } else {
@@ -64,14 +65,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
         }
 
-        // Redirect to the category list or success page
+        // Redirect to the category list
         header("Location: category_list.php");
         exit();
     } else {
-        echo "Error: " . mysqli_error($conn);
+        echo "Error: " . $conn->error;
     }
-
-    mysqli_stmt_close($stmt);  // Close the statement
 }
 ?>
 
@@ -82,7 +81,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Category</title>
     <script>
-        // JavaScript function to toggle category dropdowns based on category type
         function toggleCategoryType() {
             var categoryType = document.getElementById('category_type').value;
             document.getElementById('main_category_select').style.display = (categoryType === 'second') ? 'block' : 'none';
@@ -120,9 +118,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <label for="main_category" class="form-label">Select Main Category</label>
             <select class="form-control" name="main_category">
                 <option value="">Select Main Category</option>
-                <?php while ($main_category = mysqli_fetch_assoc($main_categories)) { ?>
-                    <option value="<?php echo $main_category['id']; ?>"><?php echo $main_category['name']; ?></option>
-                <?php } ?>
+                <?php foreach ($main_categories as $main_category): ?>
+                    <option value="<?php echo $main_category['id']; ?>"><?php echo htmlspecialchars($main_category['name']); ?></option>
+                <?php endforeach; ?>
             </select>
         </div>
 
@@ -131,15 +129,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <label for="second_category" class="form-label">Select Second Category</label>
             <select class="form-control" name="second_category">
                 <option value="">Select Second Category</option>
-                <?php foreach ($grouped_second_categories as $main_category_name => $second_category_list) { ?>
-                    <optgroup label="<?php echo $main_category_name; ?>"> <!-- Grouped by main category -->
-                        <?php foreach ($second_category_list as $second_category) { ?>
-                            <option value="<?php echo $second_category['second_id']; ?>">
-                                <?php echo $second_category['second_name']; ?>
+                <?php foreach ($grouped_second_categories as $main_category_name => $second_category_list): ?>
+                    <optgroup label="<?php echo htmlspecialchars($main_category_name); ?>">
+                        <?php foreach ($second_category_list as $second_category): ?>
+                            <option value="<?php echo $second_category['id']; ?>">
+                                <?php echo htmlspecialchars($second_category['name']); ?>
                             </option>
-                        <?php } ?>
+                        <?php endforeach; ?>
                     </optgroup>
-                <?php } ?>
+                <?php endforeach; ?>
             </select>
         </div>
 
@@ -159,7 +157,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </div>
 
 <script>
-    // Initial call to set the form state correctly
     toggleCategoryType();
 </script>
 
@@ -167,5 +164,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </html>
 
 <?php
-mysqli_close($conn);
+$conn->close();
 ?>

@@ -1,5 +1,6 @@
 <?php
 require 'db_connect.php';
+require_once '../classes/Category.php';
 
 // Set the number of categories per page
 $categories_per_page = 15;
@@ -13,43 +14,35 @@ $offset = ($page - 1) * $categories_per_page;
 // Get the filter option from the URL, default to 'all' if not present
 $filter = isset($_GET['filter']) ? $_GET['filter'] : 'all';
 
-// Adjust the query based on the filter
-$where_clause = '';
-if ($filter == 'main') {
-    $where_clause = 'WHERE c1.parent_id IS NULL'; // Main categories
-} elseif ($filter == 'second') {
-    $where_clause = 'WHERE c1.parent_id IS NOT NULL AND c2.parent_id IS NULL'; // Second categories
-} elseif ($filter == 'third') {
-    $where_clause = 'WHERE c2.parent_id IS NOT NULL'; // Third categories
+// Instantiate the Category class
+$categoryClass = new Category($conn);
+
+// Adjust the categories to fetch based on the filter
+$categories = [];
+switch ($filter) {
+    case 'main':
+        $categories = $categoryClass->getMainCategories($conn);
+        break;
+    case 'second':
+        $categories = $categoryClass->getSecondLevelCategoriesWithParentNames($conn); // Updated method
+        break;
+    case 'third':
+        $categories = $categoryClass->getThirdLevelCategoriesWithParentNames($conn); // Updated method
+        break;
+    default:
+        $categories = $categoryClass->getCategoriesWithParentNames(); // Updated method to get all categories with parent names
+        break;
 }
 
-// Query to count total categories for pagination
-$total_categories_query = "SELECT COUNT(*) as total FROM categories c1 LEFT JOIN categories c2 ON c1.parent_id = c2.id $where_clause";
-$total_result = mysqli_query($conn, $total_categories_query);
-$total_categories = mysqli_fetch_assoc($total_result)['total'];
-
-// Query to fetch categories with pagination and filtering
-$category_query = "
-    SELECT c1.id AS category_id, c1.name AS category_name, c1.description, 
-           c2.name AS parent_category_name,
-           CASE 
-             WHEN c1.parent_id IS NULL THEN 'Main Category'
-             WHEN c2.parent_id IS NULL THEN 'Second Category'
-             ELSE 'Third Category'
-           END AS category_level
-    FROM categories c1
-    LEFT JOIN categories c2 ON c1.parent_id = c2.id
-    $where_clause
-    ORDER BY category_level, c1.name
-    LIMIT $categories_per_page OFFSET $offset";
-
-$categories_result = mysqli_query($conn, $category_query);
-
-// Calculate total number of pages
+// Calculate total number of pages for pagination
+$total_categories = count($categories);
 $total_pages = ceil($total_categories / $categories_per_page);
 
+// Slice the categories array to implement pagination
+$categories_to_display = array_slice($categories, $offset, $categories_per_page);
+
 // Set the range of pages to display
-$pages_to_show = 5;  // Show 5 page links at a time
+$pages_to_show = 5; // Show 5 page links at a time
 $start_page = max(1, $page - floor($pages_to_show / 2));
 $end_page = min($total_pages, $start_page + $pages_to_show - 1);
 
@@ -90,25 +83,23 @@ if ($end_page - $start_page < $pages_to_show - 1) {
                 <th>Category Name</th>
                 <th>Description</th>
                 <th>Parent Category</th>
-                <th>Level</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>
-            <?php while ($category = mysqli_fetch_assoc($categories_result)) { ?>
+            <?php foreach ($categories_to_display as $category): ?>
                 <tr>
-                    <td><?php echo htmlspecialchars($category['category_name']); ?></td>
-                    <td><?php echo htmlspecialchars($category['description']); ?></td>
-                    <td><?php echo htmlspecialchars($category['parent_category_name'] ?? 'N/A'); ?></td>
-                    <td><?php echo htmlspecialchars($category['category_level']); ?></td>
+                    <td><?php echo htmlspecialchars($category['name']); ?></td>
+                    <td><?php echo htmlspecialchars($category['description'] ?? 'No description available'); ?></td>
+                    <td><?php echo htmlspecialchars($category['parent_name'] ?? 'N/A'); ?></td>
                     <td>
-                        <a href="category.php?id=<?php echo $category['category_id']; ?>" class="btn btn-info">View</a>
-                        <a href="edit_category.php?id=<?php echo $category['category_id']; ?>" class="btn btn-warning">Edit</a>
-                        <a href="delete_category.php?id=<?php echo $category['category_id']; ?>" class="btn btn-danger" 
-                           onclick="return confirm('Are you sure you want to delete this category?')">Delete</a>
+                        <a href="category.php?id=<?php echo $category['id']; ?>" class="btn btn-info">View</a>
+                        <a href="edit_category.php?id=<?php echo $category['id']; ?>" class="btn btn-warning">Edit</a>
+                        <a href="delete_category.php?id=<?php echo $category['id']; ?>" class="btn btn-danger"
+                        onclick="return confirm('Are you sure you want to delete this category?')">Delete</a>
                     </td>
                 </tr>
-            <?php } ?>
+            <?php endforeach; ?>
         </tbody>
     </table>
 

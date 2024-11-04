@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 24, 2024 at 02:49 PM
+-- Generation Time: Nov 04, 2024 at 11:26 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -43,6 +43,20 @@ INSERT INTO `attributes` (`id`, `name`) VALUES
 (4, 'Voltage'),
 (5, 'Material'),
 (6, 'Engine Type Compatibility');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `cart`
+--
+
+CREATE TABLE `cart` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL DEFAULT 1,
+  `added_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -144,7 +158,7 @@ INSERT INTO `categories` (`id`, `name`, `description`, `parent_id`, `featured`) 
 (79, 'Adhesive / Tape', 'Materials used for bonding and securing components, including adhesives, tapes, and films, which provide structural integrity and protection during vehicle assembly and repair.', 10, 0),
 (80, 'Paint', 'Coatings applied to the vehicle’s surface for aesthetic appeal and protection against corrosion, including primers, base coats, and clear coats to ensure a durable finish.', 10, 0),
 (81, 'General Commodity', 'Miscellaneous parts and tools used in vehicle maintenance and operation, such as jacks, tool sets, child seats, and battery chargers, essential for various tasks and safety.', 10, 0),
-(82, 'Drive motor <Permanent magnet synchronous motor>', 'Permanent magnet synchronous motors for electric drive motors, providing efficient and reliable operation.', 11, 0),
+(82, 'Drive motor', 'Permanent magnet synchronous motors for electric drive motors, providing efficient and reliable operation.', 11, 0),
 (83, 'Motor core for drive motor', 'Core components of the drive motor, responsible for the conversion of electrical energy into mechanical power.', 11, 0),
 (84, 'Rotor for drive motor', 'The rotating part of the drive motor that interacts with the stator to generate torque.', 11, 0),
 (85, 'Rotor parts for drive motor', 'Various parts that make up the rotor, including laminations, shaft, and end rings.', 11, 0),
@@ -681,7 +695,10 @@ INSERT INTO `category_images` (`id`, `image_path`, `category_id`) VALUES
 (3, '/e-commerce/assets/category_images/safety_and_security.png', 43),
 (4, '/e-commerce/assets/category_images/performance_parts.png', 3),
 (5, '/e-commerce/assets/category_images/lights_and_electronics.png', 60),
-(6, '/e-commerce/assets/category_images/car_maintenance.png', 10);
+(6, '/e-commerce/assets/category_images/car_maintenance.png', 10),
+(7, '/e-commerce/assets/category_images/bumper_cover.png', 61),
+(8, '/e-commerce/assets/category_images/bumper_cover.png', 466),
+(9, '/e-commerce/assets/category_images/grille_assembly_bundles_images.png', 470);
 
 -- --------------------------------------------------------
 
@@ -1019,6 +1036,14 @@ ALTER TABLE `attributes`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `cart`
+--
+ALTER TABLE `cart`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `product_id` (`product_id`);
+
+--
 -- Indexes for table `categories`
 --
 ALTER TABLE `categories`
@@ -1087,6 +1112,12 @@ ALTER TABLE `attributes`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
+-- AUTO_INCREMENT for table `cart`
+--
+ALTER TABLE `cart`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `categories`
 --
 ALTER TABLE `categories`
@@ -1096,7 +1127,7 @@ ALTER TABLE `categories`
 -- AUTO_INCREMENT for table `category_images`
 --
 ALTER TABLE `category_images`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `manufacturers`
@@ -1131,6 +1162,13 @@ ALTER TABLE `users`
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `cart`
+--
+ALTER TABLE `cart`
+  ADD CONSTRAINT `cart_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `cart_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `categories`

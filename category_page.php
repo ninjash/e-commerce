@@ -152,6 +152,17 @@ if ($page_category_id > 0) {
                                     </div>
                                 </div>
                             </a>
+                            <div class="row w-100 product-nav-category px-0">
+                                <div class="col p-0 text-center">
+                                    <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
+                                </div>
+                                <div class="col p-0 text-center">
+                                    <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
+                                </div>
+                                <div class="col p-0 text-center">
+                                    <a href="#" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
+                                </div>
+                            </div>
                         </div>
                     <?php endforeach; ?>
                 </div>

@@ -53,6 +53,45 @@ class Category {
         return $result->fetch_assoc(); // Return associative array
     }
 
+     // Fetch featured categories
+     public function getFeaturedCategories($limit) {
+        $query = "SELECT c.id, c.name, ci.image_path
+                  FROM categories c
+                  LEFT JOIN category_images ci ON c.id = ci.category_id
+                  WHERE c.featured = 1
+                  LIMIT ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("i", $limit);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if (!$result) {
+            die('Error executing query: ' . $this->db->error);
+        }
+
+        return $result->fetch_all(MYSQLI_ASSOC); // Return array of featured categories
+    }
+
+    // Method to fetch trending categories
+    public function getTrendingCategories() {
+        $query = "
+            SELECT DISTINCT c.id, c.name
+            FROM categories c
+            JOIN product_categories pc ON c.id = pc.category_id
+            JOIN products p ON pc.product_id = p.id
+            WHERE p.feature_product = 1
+            ORDER BY c.name ASC
+        ";
+
+        $result = $this->db->query($query);
+
+        if (!$result) {
+            throw new Exception('Error fetching trending categories: ' . $this->db->error);
+        }
+
+        return $result->fetch_all(MYSQLI_ASSOC); // Return as an associative array
+    }
+    
     // Fetch only child category IDs based on the parent ID
     public function getChildCategories($parentId) {
         $query = "SELECT id FROM categories WHERE parent_id = ?";

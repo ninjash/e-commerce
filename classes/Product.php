@@ -34,6 +34,66 @@ class Product {
         }
     }
 
+    // Method to fetch featured products
+    public function getFeaturedProducts() {
+        $query = "
+            SELECT p.id, p.name, p.price, p.old_price, pi.image_path
+            FROM products p
+            LEFT JOIN product_images pi ON p.id = pi.product_id
+            WHERE p.feature_product = 1
+            GROUP BY p.id
+        ";
+        $result = $this->db->query($query);
+
+        if (!$result) {
+            die('Error fetching featured products: ' . $this->db->error);
+        }
+
+        return $result->fetch_all(MYSQLI_ASSOC); // Return array of featured products
+    }
+
+    // Method to get trending products
+    public function getTrendingProducts($limit = 3) {
+        $query = "
+            SELECT p.id, p.name, p.price, p.old_price, pi.image_path
+            FROM products p
+            LEFT JOIN product_images pi ON p.id = pi.product_id
+            WHERE p.feature_product = 1
+            LIMIT ?
+        ";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("i", $limit);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if (!$result) {
+            throw new Exception('Error fetching trending products: ' . $this->db->error);
+        }
+
+        return $result->fetch_all(MYSQLI_ASSOC); // Return array of trending products
+    }
+
+    public function getTrendingProductsByCategory($categoryId, $limit) {
+        $query = "
+            SELECT p.id, p.name, p.price, p.old_price, pi.image_path
+            FROM products p
+            LEFT JOIN product_images pi ON p.id = pi.product_id
+            JOIN product_categories pc ON pc.product_id = p.id
+            WHERE pc.category_id = ?
+            LIMIT ?
+        ";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("ii", $categoryId, $limit);
+        $stmt->execute();
+        $result = $stmt->get_result();
+    
+        if (!$result) {
+            throw new Exception('Error fetching trending products: ' . $this->db->error);
+        }
+    
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+    
     // Method to save the product to the database
     public function saveProduct($productData) {
         try {

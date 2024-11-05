@@ -30,6 +30,21 @@ class Manufacturer {
         }
     }
 
+    // Method to fetch top manufacturers with a limit
+    public function getTopManufacturers($limit) {
+        $query = "SELECT id, name, logo_path FROM manufacturers LIMIT ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("i", $limit);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if (!$result) {
+            throw new Exception('Error fetching top manufacturers: ' . $this->db->error);
+        }
+
+        return $result->fetch_all(MYSQLI_ASSOC); // Return array of top manufacturers
+    }
+
     // Method to fetch all manufacturers with product count
     public function getAllManufacturersWithProductCount() {
         $query = "SELECT m.id, m.name, m.specialty, m.logo_path, COUNT(p.id) AS product_count 

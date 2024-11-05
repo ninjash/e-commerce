@@ -1,55 +1,28 @@
 <?php
 require 'web/db_connect.php';
+require 'classes/Category.php';
+require 'classes/Product.php';
+require 'classes/Manufacturer.php';
 
-// Fetch featured categories
-$category_query = "
-    SELECT c.id, c.name, ci.image_path
-    FROM categories c
-    LEFT JOIN category_images ci ON c.id = ci.category_id
-    WHERE c.featured = 1
-    LIMIT 6
-";
-$category_result = mysqli_query($conn, $category_query);
+// Initialize objects
+$categoryObj = new Category($conn);
+$productObj = new Product($conn);
+$manufacturerObj = new Manufacturer($conn);
 
-// Update product query to fetch images from product_images table
-$product_query = "
-    SELECT p.id, p.name, p.price, p.old_price, pi.image_path, p.feature_product 
-    FROM products p
-    LEFT JOIN product_images pi ON p.id = pi.product_id
-    WHERE p.feature_product = 1
-    GROUP BY p.id
-";
-$product_result = mysqli_query($conn, $product_query);
+// Fetch featured categories using the Category class
+$featuredCategories = $categoryObj->getFeaturedCategories(6);
 
-// Fetch manufacturers
-$manufacturer_query = "
-    SELECT id, name, logo_path 
-    FROM manufacturers
-    LIMIT 6
-";
-$manufacturer_result = mysqli_query($conn, $manufacturer_query);
+// Fetch featured products using the Product class
+$featuredProducts = $productObj->getFeaturedProducts();
 
-// Fetch categories that have registered trending products for Trending Products section only
-$trending_category_query = "
-    SELECT DISTINCT c.id, c.name
-    FROM categories c
-    JOIN product_categories pc ON c.id = pc.category_id
-    JOIN products p ON pc.product_id = p.id
-    WHERE p.feature_product = 1
-    ORDER BY c.name ASC
-";
-$trending_category_result = mysqli_query($conn, $trending_category_query);
+// Fetch manufacturers using the Manufacturer class
+$manufacturers = $manufacturerObj->getTopManufacturers(6);
 
-// Fetch trending products initially (default products to show on load)
-$trending_product_query = "
-    SELECT p.id, p.name, p.price, p.old_price, pi.image_path
-    FROM products p
-    LEFT JOIN product_images pi ON p.id = pi.product_id
-    WHERE p.feature_product = 1
-    LIMIT 3
-";
-$trending_product_result = mysqli_query($conn, $trending_product_query);
+// Fetch trending categories using the Category class
+$trendingCategories = $categoryObj->getTrendingCategories();
 
+// Fetch trending products using the Product class
+$trendingProducts = $productObj->getTrendingProducts(3);
 ?>
 
 <!DOCTYPE html>
@@ -98,15 +71,15 @@ $trending_product_result = mysqli_query($conn, $trending_product_query);
     </div>
     <div class="container-fluid category-menu d-flex justify-content-between d-none d-lg-block">
         <div class="row d-flex justify-content-between w-100 p-0 m-0">
-            <?php if (mysqli_num_rows($category_result) > 0): ?>
-                <?php while ($category = mysqli_fetch_assoc($category_result)): ?>
+            <?php if (!empty($featuredCategories)): ?>
+                <?php foreach ($featuredCategories as $category): ?>
                     <div class="col-sm-6 col-md-4 col-lg-2 category-card">
-                        <a href="category_page.php?category_id=<?= $category['id'] ?>" class="category-link" style="text-decoration: none;">
+                        <a href="category_page.php?category_id=<?= htmlspecialchars($category['id']) ?>" class="category-link" style="text-decoration: none;">
                             <img src="<?= htmlspecialchars($category['image_path']) ?>" alt="<?= htmlspecialchars($category['name']) ?>" class="img-fluid">
                             <h5 class="category-title mt-3"><?= htmlspecialchars($category['name']) ?></h5>
                         </a>
                     </div>
-                <?php endwhile; ?>
+                <?php endforeach; ?>
             <?php else: ?>
                 <p>No featured categories available.</p>
             <?php endif; ?>
@@ -116,34 +89,36 @@ $trending_product_result = mysqli_query($conn, $trending_product_query);
     <!-- Carousel for Mobile View -->
     <div id="categoryCarousel" class="carousel slide d-lg-none" data-bs-ride="carousel">
         <div class="carousel-inner w-100 p-0 m-0">
-            <?php 
-            // Reset the result set pointer back to the beginning
-            mysqli_data_seek($category_result, 0); 
+            <?php
             $active = true; // This will be used to mark the first item as active
             $counter = 0; // Counter to manage items per slide
 
-            while ($category = mysqli_fetch_assoc($category_result)): 
-                if ($counter % 2 == 0): // Start a new carousel-item every 2 categories
+            if (!empty($featuredCategories)):
+                foreach ($featuredCategories as $category):
+                    if ($counter % 2 == 0): // Start a new carousel-item every 2 categories
             ?>
                 <div class="carousel-item <?= $active ? 'active' : '' ?>">
                     <div class="row w-100">
             <?php $active = false; endif; ?>
                         <div class="col-6">
-                            <a href="category_page.php?id=<?= $category['id'] ?>" class="category-link" style="text-decoration: none;">
+                            <a href="category_page.php?id=<?= htmlspecialchars($category['id']) ?>" class="category-link" style="text-decoration: none;">
                                 <img src="<?= htmlspecialchars($category['image_path']) ?>" alt="<?= htmlspecialchars($category['name']) ?>" class="img-fluid">
                                 <h5 class="category-title mt-3"><?= htmlspecialchars($category['name']) ?></h5>
                             </a>
                         </div>
-            <?php 
-                $counter++;
-                if ($counter % 2 == 0): // Close the carousel-item every 2 categories
+            <?php
+                    $counter++;
+                    if ($counter % 2 == 0): // Close the carousel-item every 2 categories
             ?>
                     </div>
                 </div>
-            <?php endif; endwhile; ?>
+            <?php endif; endforeach; ?>
             <?php if ($counter % 2 != 0): ?>
+                    </div>
                 </div>
-            </div>
+            <?php endif; ?>
+            <?php else: ?>
+                <p class="text-center">No featured categories available.</p>
             <?php endif; ?>
         </div>
 
@@ -202,16 +177,16 @@ $trending_product_result = mysqli_query($conn, $trending_product_query);
     </div>
     <div class="container-fluid">
         <div class="row w-100">
-            <?php if (mysqli_num_rows($product_result) > 0): ?>
-                <?php while ($product = mysqli_fetch_assoc($product_result)): ?>
+            <?php if (!empty($featuredProducts)): ?>
+                <?php foreach ($featuredProducts as $product): ?>
                     <div class="col-sm-6 col-md-6 col-lg-3 mb-4">
                         <!-- Wrap the entire product card with an anchor tag -->
-                        <a href="product_page.php?id=<?= $product['id'] ?>" class="product-link" style="text-decoration: none;">
+                        <a href="product_page.php?id=<?= htmlspecialchars($product['id']) ?>" class="product-link" style="text-decoration: none;">
                             <div class="featured-product-card">
                                 <img src="<?= htmlspecialchars($product['image_path']) ?>" alt="<?= htmlspecialchars($product['name']) ?>" class="img-fluid">
                                 <div class="row w-100 product-nav py-2 px-0">
                                     <div class="col p-0 text-center">
-                                        <a href="product_page.php?id=<?= $product['id'] ?>" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
+                                        <a href="product_page.php?id=<?= htmlspecialchars($product['id']) ?>" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
                                     </div>
                                     <div class="col p-0 text-center">
                                         <a href="#" class="btn pnav-icon"><i class="bi bi-heart-fill"></i></a>
@@ -237,7 +212,7 @@ $trending_product_result = mysqli_query($conn, $trending_product_query);
                             </div>
                         </a>
                     </div>
-                <?php endwhile; ?>
+                <?php endforeach; ?>
             <?php else: ?>
                 <p>No featured products available.</p>
             <?php endif; ?>
@@ -348,15 +323,15 @@ $trending_product_result = mysqli_query($conn, $trending_product_query);
             <div class="col-lg-12 col-xl-3 px-0">
                 <div class="category-nav">
                     <ul class="nav flex-nowrap overflow-auto overflow-x-auto flex-xl-column flex-lg-row overflow-hidden" id="categoryTabs">
-                        <?php if (mysqli_num_rows($trending_category_result) > 0): ?>
-                            <?php while ($category = mysqli_fetch_assoc($trending_category_result)): ?>
+                        <?php if (!empty($trendingCategories)): ?>
+                            <?php foreach ($trendingCategories as $category): ?>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="#" data-category-id="<?= $category['id'] ?>">
+                                    <a class="nav-link" href="#" data-category-id="<?= htmlspecialchars($category['id']) ?>">
                                         <?= htmlspecialchars($category['name']) ?>
                                         <span class="chevron-right"><i class="bi bi-chevron-right"></i></span>
                                     </a>
                                 </li>
-                            <?php endwhile; ?>
+                            <?php endforeach; ?>
                         <?php else: ?>
                             <p>No categories with trending products available.</p>
                         <?php endif; ?>
@@ -367,10 +342,10 @@ $trending_product_result = mysqli_query($conn, $trending_product_query);
             <div id="productsCarousel" class="col-lg-12 col-xl-9 d-flex flex-xl-column flex-lg-row carousel slide p-2" style="border: 2px solid #d9d9d9">
                 <div class="carousel-inner w-100 py-4 px-2 m-0">
                     <!-- Initially Display Trending Products -->
-                    <?php if (mysqli_num_rows($trending_product_result) > 0): ?>
+                    <?php if (!empty($trendingProducts)): ?>
                         <div class="carousel-item active">
                             <div class="row w-100">
-                                <?php while ($product = mysqli_fetch_assoc($trending_product_result)): ?>
+                                <?php foreach ($trendingProducts as $product): ?>
                                     <div class="col">
                                         <div class="trending-product-card">
                                             <img src="<?= htmlspecialchars($product['image_path']) ?>" alt="<?= htmlspecialchars($product['name']) ?>" class="img-fluid">
@@ -401,7 +376,7 @@ $trending_product_result = mysqli_query($conn, $trending_product_query);
                                             </div>
                                         </div>
                                     </div>
-                                <?php endwhile; ?>
+                                <?php endforeach; ?>
                             </div>
                         </div>
                     <?php else: ?>
@@ -573,14 +548,14 @@ $trending_product_result = mysqli_query($conn, $trending_product_query);
     </div>
     <div class="container-fluid brands-section pb-5">
         <div class="row d-flex justify-content-between">
-            <?php if (mysqli_num_rows($manufacturer_result) > 0): ?>
-                <?php while ($manufacturer = mysqli_fetch_assoc($manufacturer_result)): ?>
+            <?php if (!empty($manufacturers)): ?>
+                <?php foreach ($manufacturers as $manufacturer): ?>
                     <div class="col-sm-4 col-md-4 col-lg-4 col-xl-2 px-2 text-center brand-container">
-                        <a href="manufacturer_page.php?id=<?= $manufacturer['id'] ?>">
+                        <a href="manufacturer_page.php?id=<?= htmlspecialchars($manufacturer['id']) ?>">
                             <img src="<?= htmlspecialchars($manufacturer['logo_path']) ?>" alt="<?= htmlspecialchars($manufacturer['name']) ?>" class="img-fluid brand-logo">
                         </a>
                     </div>
-                <?php endwhile; ?>
+                <?php endforeach; ?>
             <?php else: ?>
                 <p>No manufacturers available.</p>
             <?php endif; ?>
@@ -656,7 +631,7 @@ $trending_product_result = mysqli_query($conn, $trending_product_query);
                 $('.category-nav .nav-link').removeClass('active');
                 $(this).addClass('active');
 
-                // AJAX request to fetch products based on the selected category
+                // AJAX request to fetch trending products using the selected category ID
                 $.ajax({
                     url: 'fetch_trending_products.php',  // PHP script to fetch products
                     type: 'POST',

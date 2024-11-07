@@ -3,11 +3,16 @@ require_once 'web/db_connect.php';
 require_once 'classes/Product.php';
 require_once 'classes/ProductAttribute.php';
 require_once 'classes/Manufacturer.php';
+require_once 'classes/Cart.php';
 
 if (!isset($_GET['id'])) {
     echo "Product ID is missing.";
     exit;
 }
+
+// Check if user is logged in; if not, use guest session
+$userId = $_SESSION['user_id'] ?? null;
+$cart = new Cart($conn, $userId);
 
 // Create product object
 $product_id = (int)$_GET['id'];
@@ -132,7 +137,7 @@ $prev_id = $product->getPreviousProductId();
                         <!-- Quantity Selector -->
                         <div class="quantity-wrapper">
                             <button class="quantity-btn minus">-</button>
-                            <input type="text" class="quantity-input" value="1" aria-label="Quantity" readonly>
+                                <input type="number" class="quantity-input" value="1" aria-label="Quantity" min="1">
                             <button class="quantity-btn plus">+</button>
                         </div>
                         <!-- Add to Cart Button -->
@@ -213,5 +218,58 @@ $prev_id = $product->getPreviousProductId();
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const addToCartButton = document.querySelector('.btn-orange-cart');
+        const quantityInput = document.querySelector('.quantity-input');
+        const productId = <?php echo (int)$product_id; ?>; // Cast PHP variable to integer
+
+        // Log product ID and quantity for debugging
+        console.log('Product ID:', productId);
+
+        addToCartButton.addEventListener('click', function () {
+        const quantity = parseInt(quantityInput.value);
+
+        if (!productId || isNaN(quantity) || quantity < 1) {
+            alert('Product ID and quantity are required');
+            return;
+        }
+
+        // Proceed with fetch request
+        fetch('add_to_cart.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                product_id: productId,
+                quantity: quantity
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Response from add_to_cart.php:', data);
+            alert(data.message);
+        })
+        .catch(error => {
+            console.error('Error during fetch request:', error);
+            alert('There was an error adding the product to the cart.');
+        });
+    });
+
+        // Quantity increment and decrement functionality
+        document.querySelector('.quantity-btn.plus').addEventListener('click', function () {
+            quantityInput.value = parseInt(quantityInput.value) + 1;
+        });
+
+        document.querySelector('.quantity-btn.minus').addEventListener('click', function () {
+            if (parseInt(quantityInput.value) > 1) {
+                quantityInput.value = parseInt(quantityInput.value) - 1;
+            }
+        });
+    });
+</script>
+
 </body>
 </html>

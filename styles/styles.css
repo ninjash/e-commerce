@@ -2313,3 +2313,131 @@ body {
         background-color: rgb(223, 67, 87, 0.2);
     }
 }
+
+/*SHOPPING CART*/
+
+/* Container for the progress bar */
+.progress-bar-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+/* Each step container */
+.progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    z-index: 1;
+}
+
+/* Circle for each step */
+.circle {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #fff;
+    border: 2px solid #bbb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #bbb;
+    font-size: 14px;
+    position: relative;
+    z-index: 2;
+}
+
+/* Completed step styles */
+.completed .circle {
+    background-color: #0d6efd; /* Primary color for active */
+    color: #fff;
+    border-color: #0d6efd;
+}
+
+/* Line connecting the circles */
+.progress-line {
+    flex-grow: 1;
+    height: 2px;
+    background-color: #bbb;
+    position: relative;
+    top: -15px;
+    z-index: 0;
+}
+
+/* Label for each step */
+.step-label {
+    margin-top: 8px;
+    font-size: 14px;
+    color: #6c757d;
+}
+
+.completed .step-label {
+    color: #0d6efd; /* Color for active label */
+}
+
+/* Styles for the Continue Shopping button */
+.btn-continue-shopping {
+    background-color: #6c757d; /* Gray color for secondary button */
+    color: #ffffff;
+    font-weight: bold;
+    border-radius: 4px;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.btn-continue-shopping:hover {
+    background-color: #5a6268; /* Slightly darker gray on hover */
+    color: #ffffff;
+}
+
+/* Styles for the Process Checkout button */
+.btn-process-checkout {
+    background-color: #007bff; /* Primary blue color */
+    color: #ffffff;
+    font-weight: bold;
+    border-radius: 4px;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.btn-process-checkout:hover {
+    background-color: #0069d9; /* Slightly darker blue on hover */
+    color: #ffffff;
+}
+
+/* Icon spacing */
+.btn-continue-shopping i,
+.btn-process-checkout i {
+    margin-right: 5px;
+}
+
+.btn-process-checkout i:last-child {
+    margin-left: 5px;
+    margin-right: 0;
+}
+
+.btn-success {
+    background-color: #007bff; /* Primary blue color */
+    color: #ffffff;
+    font-weight: bold;
+    border-radius: 4px;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.btn-success:hover {
+    background-color: #0069d9; /* Slightly darker blue on hover */
+    color: #ffffff;
+}

@@ -1,4 +1,5 @@
 <?php
+session_start();
 require 'web/db_connect.php';
 
 // Fetch main categories (parent_id is NULL) for the header
@@ -48,8 +49,8 @@ $header_main_category_result_header = mysqli_query($conn, $header_main_category_
             </div>
             <!-- Icons -->
             <div class="col-sm-2 col-md-2 col-lg-2 d-flex justify-content-end align-items-center pe-0">
-                <a href="#" class="btn btn-light icon-buttons"><i class="bi bi-person"></i></a>
-                <a href="#" class="btn btn-light"><i class="bi bi-cart"></i></a>
+                <a href="login.php" class="btn btn-light icon-buttons"><i class="bi bi-person"></i></a>
+                <a href="shop_cart.php" class="btn btn-light"><i class="bi bi-cart"></i></a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>

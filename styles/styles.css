@@ -2441,3 +2441,122 @@ body {
     background-color: #0069d9; /* Slightly darker blue on hover */
     color: #ffffff;
 }
+
+/* General table styling */
+.table {
+    width: 100%;
+    margin-bottom: 1rem;
+    color: #212529;
+}
+
+.table thead th {
+    vertical-align: bottom;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.table tbody + tbody {
+    border-top: 2px solid #dee2e6;
+}
+
+.table-sm td,
+.table-sm th {
+    padding: 0.3rem;
+}
+
+/* Product image styling */
+.td-img {
+    width: 80px;
+    text-align: center;
+}
+
+.td-img img {
+    max-width: 60px;
+    border-radius: 4px;
+}
+
+/* Product name styling */
+.td-product_name {
+    font-weight: bold;
+    color: #333;
+}
+
+.td-product_name a {
+    text-decoration: none;
+    color: #333;
+}
+
+.td-product_name a:hover {
+    color: #007bff;
+}
+
+.td-product_name .js_delete_product {
+    font-size: 0.85rem;
+    color: #007bff;
+    font-weight: normal;
+}
+
+.td-product_name .js_delete_product:hover {
+    color: #0056b3;
+}
+
+/* Quantity column styling */
+.td-qty {
+    width: 120px;
+    text-align: center;
+}
+
+.css_quantity {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.css_quantity .btn {
+    display: inline-flex; /* Ensure buttons are inline */
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+    margin: 0 5px; /* Optional spacing between buttons */
+}
+
+.css_quantity .btn-link {
+    padding: 0;
+    color: #333;
+    font-size: 1rem;
+}
+
+.quantity {
+    max-width: 60px; /* Limit width to fit the buttons neatly */
+}
+
+.css_quantity .btn-link:hover {
+    color: #007bff;
+}
+
+.quantity-input,
+.js_quantity {
+    width: 50px;
+    text-align: center;
+}
+
+/* Price styling */
+.td-price {
+    text-align: center;
+}
+
+.td-price .oe_currency_value {
+    font-weight: bold;
+}
+
+/* Action column styling */
+.td-action {
+    text-align: center;
+}
+
+.td-action .js_delete_product {
+    color: #ff4d4d;
+}
+
+.td-action .js_delete_product:hover {
+    color: #d63333;
+}

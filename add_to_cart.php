@@ -5,22 +5,22 @@ require_once 'classes/Cart.php';
 
 header('Content-Type: application/json');
 
-// Use file_get_contents for JSON payload
+// Decode JSON payload
 $input = file_get_contents('php://input');
 $data = json_decode($input, true);
 
-// Debugging output for received data
+// Debugging: Log received data
 error_log("Received data: " . print_r($data, true));
 
 // Check if required fields are provided
-if (!isset($data['product_id']) || !isset($data['quantity'])) {
-    error_log("Product ID or quantity missing in request.");
-    echo json_encode(['status' => 'error', 'message' => 'Product ID and quantity are required']);
+if (!isset($data['product_id'])) {
+    error_log("Product ID missing in request.");
+    echo json_encode(['status' => 'error', 'message' => 'Product ID is required']);
     exit;
 }
 
 $productId = (int)$data['product_id'];
-$quantity = (int)$data['quantity'];
+$quantity = isset($data['quantity']) ? (int)$data['quantity'] : 1; // Default to 1 for overlay buttons
 
 // Validate product ID and quantity
 if ($productId <= 0 || $quantity <= 0) {
@@ -41,8 +41,6 @@ if (!$conn) {
     error_log("Database connection is null or not established.");
     echo json_encode(['status' => 'error', 'message' => 'Database connection failed']);
     exit;
-} else {
-    error_log("Database connection is established.");
 }
 
 // Instantiate the Cart object
@@ -70,5 +68,4 @@ try {
 } catch (Exception $e) {
     error_log("Error in addToCart: " . $e->getMessage());
     echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
-    exit;
 }

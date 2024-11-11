@@ -1052,7 +1052,6 @@ body, html {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    
 }
 
 .trending-products .category-nav .nav-link {
@@ -1079,6 +1078,9 @@ body, html {
     text-decoration: none;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     font-size: 20px;
+    position: relative; /* For overlay buttons positioning */
+    overflow: hidden; /* Ensures buttons stay within the card */
+    z-index: 1; /* Prevent other elements from affecting overlay buttons */
 }
 
 .trending-product-card:hover {
@@ -1091,6 +1093,7 @@ body, html {
     height: auto;
     margin: 0;
     display: block;
+    z-index: 1; /* Ensure image is below overlay buttons */
 }
 
 .trending-product-card .product-info {
@@ -1125,7 +1128,7 @@ body, html {
 }
 
 .trending-product-card .product-rating {
-    margin-bottom: 10px; /* Add some space below the rating */
+    margin-bottom: 10px;
 }
 
 .trending-product-card .product-rating i {
@@ -1137,30 +1140,53 @@ body, html {
     color: #ccc;
 }
 
-.trending-products .category-nav .nav-link:hover {
+/* Overlay Buttons for Product Cards */
+.trending-product-card .overlay-buttons {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0; /* Hidden by default */
+    visibility: hidden; /* Ensures it's not clickable when hidden */
+    z-index: 2;
+    display: flex;
+    gap: 10px; /* Adds spacing between buttons */
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.trending-product-card:hover .overlay-buttons {
+    opacity: 1;
+    visibility: visible;
+}
+
+.button-overlay {
+    background-color: #404040;
     color: #f7f7f7;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
-.trending-products .category-nav .nav-link.active {
-    color: #f7f7f7;
-    font-weight: 800;
+.button-overlay:hover {
+    background-color: #f67350; /* Highlight on hover */
+    transform: scale(1.1); /* Slight zoom effect on hover */
 }
 
-.trending-products .category-nav .chevron-right {
-    float: right;
-    font-size: 18px;
+/* Active Category Styles */
+.trending-products .category-nav .nav-link.active ~ .trending-product-card .overlay-buttons {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto;
 }
 
-.trending-products .category-nav .nav-item:last-child .nav-link {
-    border-bottom: none;
-}
-
-.trending-product-card .trending-product-nav {
-    display: none;
-}
-
+/* Responsive Adjustments */
 @media (max-width: 992px) {
-    /* Category navigation tab - stacked horizontally with scrollable options */
     .trending-products .category-nav {
         padding: 0;
         border-bottom: 2px solid #ddd;
@@ -1205,7 +1231,6 @@ body, html {
         color: #ddd;
     }
 
-    /* Trending products cards - displayed as a single column carousel */
     .trending-product-card {
         width: 100%;
         margin-bottom: 20px;
@@ -1250,36 +1275,8 @@ body, html {
         font-weight: 800;
     }
 
-    .trending-product-card .trending-product-nav {
-        display: flex;
-    }
-
-    .trending-product-card .trending-product-nav .col {
-        position: relative; /* Ensure the dividers stay within the columns */
-        padding: 0;
-    }
-    
-    .trending-product-card .trending-product-nav .col:not(:last-child) {
-        border-right: 1px solid #9e9e9e; /* White divider between the icons */
-    }
-
-    .trending-product-card .trending-product-nav .pnav-icon {
-        color: #000;
-        font-size: 20px;
-        height: 100%;
-        padding: 0;
-    }
-
-    .trending-product-card .trending-product-nav .pnav-icon i {
-        transition: color 0.3s ease;
-    }
-    
-    .trending-product-card .trending-product-nav .pnav-icon:hover i {
-        color: #f67350; /* Change icon color on hover */
-    }
-
-    /* Carousel Controls */
-    .carousel-control-prev, .carousel-control-next {
+    .carousel-control-prev,
+    .carousel-control-next {
         position: absolute;
         top: 50%;
         transform: translateY(-50%);
@@ -1298,7 +1295,8 @@ body, html {
         right: -20px;
     }
 
-    .carousel-control-prev:hover, .carousel-control-next:hover {
+    .carousel-control-prev:hover,
+    .carousel-control-next:hover {
         background-color: #f67350;
         color: #fff;
         border-color: #f67350;

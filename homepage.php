@@ -326,7 +326,7 @@ $trendingProducts = $productObj->getTrendingProducts(3);
                         <?php if (!empty($trendingCategories)): ?>
                             <?php foreach ($trendingCategories as $category): ?>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="#" data-category-id="<?= htmlspecialchars($category['id']) ?>">
+                                    <a class="nav-link" href="#" data-category-id="<?= htmlspecialchars($category['id']) ?>" data-category-active="false">
                                         <?= htmlspecialchars($category['name']) ?>
                                         <span class="chevron-right"><i class="bi bi-chevron-right"></i></span>
                                     </a>
@@ -348,7 +348,22 @@ $trendingProducts = $productObj->getTrendingProducts(3);
                                 <?php foreach ($trendingProducts as $product): ?>
                                     <div class="col">
                                         <div class="trending-product-card">
-                                            <img src="<?= htmlspecialchars($product['image_path']) ?>" alt="<?= htmlspecialchars($product['name']) ?>" class="img-fluid">
+                                            <div class="overlay-container">
+                                                <img src="<?= htmlspecialchars($product['image_path']) ?>" alt="<?= htmlspecialchars($product['name']) ?>" class="img-fluid">
+                                                <!-- Overlay Buttons -->
+                                                <div class="overlay-buttons">
+                                                    <a href="product_page.php?id=<?= $product['id'] ?>" class="button-overlay" title="View Product">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                    <a href="#" class="button-overlay" title="Add to Wishlist">
+                                                        <i class="bi bi-heart"></i>
+                                                    </a>
+                                                    <a href="#" class="button-overlay add-to-cart" data-product-id="<?= $product['id'] ?>" title="Add to Cart">
+                                                        <i class="bi bi-cart"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                            <!-- Product Info -->
                                             <div class="product-info text-center py-3">
                                                 <h5 class="product-name"><?= htmlspecialchars($product['name']) ?></h5>
                                                 <div class="product-rating">
@@ -362,17 +377,6 @@ $trendingProducts = $productObj->getTrendingProducts(3);
                                                     <span class="old-price">$<?= number_format($product['old_price'], 2) ?></span>
                                                     <span class="new-price">$<?= number_format($product['price'], 2) ?></span>
                                                 </div>
-                                                <div class="row w-100 trending-product-nav">
-                                                    <div class="col p-0 text-center">
-                                                        <a href="product_page.php?id=<?= $product['id'] ?>" class="btn pnav-icon"><i class="bi bi-eye"></i></a>
-                                                    </div>
-                                                    <div class="col p-0 text-center">
-                                                        <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
-                                                    </div>
-                                                    <div class="col p-0 text-center">
-                                                        <a href="#" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
-                                                    </div>
-                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -380,7 +384,7 @@ $trendingProducts = $productObj->getTrendingProducts(3);
                             </div>
                         </div>
                     <?php else: ?>
-                        <p>No trending products available.</p>
+                        <p>No products available for this category.</p>
                     <?php endif; ?>
                 </div>
             </div>
@@ -620,9 +624,9 @@ $trendingProducts = $productObj->getTrendingProducts(3);
     </div>
 
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             // Handle category click event
-            $('.category-nav .nav-link').click(function(e) {
+            $('.category-nav .nav-link').click(function (e) {
                 e.preventDefault(); // Prevent default link behavior
 
                 var categoryId = $(this).data('category-id'); // Get the category ID
@@ -633,18 +637,44 @@ $trendingProducts = $productObj->getTrendingProducts(3);
 
                 // AJAX request to fetch trending products using the selected category ID
                 $.ajax({
-                    url: 'fetch_trending_products.php',  // PHP script to fetch products
+                    url: 'fetch_trending_products.php', // PHP script to fetch products
                     type: 'POST',
-                    data: { category_id: categoryId },  // Pass the selected category ID
-                    success: function(response) {
+                    data: { category_id: categoryId }, // Pass the selected category ID
+                    success: function (response) {
                         // Replace the product section with the new products
                         $('#productsCarousel .carousel-inner').html(response);
+
+                        // Reinitialize hover effects for dynamically loaded content
+                        initializeOverlayHoverEffects();
                     },
-                    error: function(xhr, status, error) {
+                    error: function (xhr, status, error) {
                         console.error("Error fetching products: " + error);
                     }
                 });
             });
+
+            // Function to initialize hover effects for dynamically loaded content
+            function initializeOverlayHoverEffects() {
+                $('.trending-product-card').hover(
+                    function () {
+                        // On hover, show overlay buttons
+                        $(this).find('.overlay-buttons').css({
+                            opacity: 1,
+                            visibility: 'visible',
+                        });
+                    },
+                    function () {
+                        // On hover out, hide overlay buttons
+                        $(this).find('.overlay-buttons').css({
+                            opacity: 0,
+                            visibility: 'hidden',
+                        });
+                    }
+                );
+            }
+
+            // Initial call to setup hover effects for existing content
+            initializeOverlayHoverEffects();
         });
     </script>
 

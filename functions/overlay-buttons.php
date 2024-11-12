@@ -21,28 +21,25 @@ $cart = new Cart($conn, $userId);
     </button>
     <button 
         type="button" 
-        class="btn button-overlay rounded-circle add-to-wishlist" 
-        data-product-id="<?= htmlspecialchars($product['id'] ?? '') ?>">
+        class="btn button-overlay rounded-circle add-to-wishlist">
         <i class="bi bi-heart"></i>
     </button>
     <button 
         type="button" 
-        class="btn button-overlay rounded-circle add-to-compare" 
-        data-product-id="<?= htmlspecialchars($product['id'] ?? '') ?>">
+        class="btn button-overlay rounded-circle add-to-compare">
         <i class="bi bi-arrow-left-right"></i>
     </button>
     <button 
         type="button" 
-        class="btn button-overlay rounded-circle view-product" 
-        data-product-id="<?= htmlspecialchars($product['id'] ?? '') ?>">
+        class="btn button-overlay rounded-circle view-product">
         <i class="bi bi-eye"></i>
     </button>
 </div>
 
 <script>
     $(document).ready(function () {
-        // Add to cart button functionality
-        $(document).on('click', '.add-to-cart', function () {
+        // Remove any existing handlers and attach a new one
+        $(document).off('click', '.add-to-cart').on('click', '.add-to-cart', function () {
             const productId = $(this).data('product-id');
             const quantity = 1; // Automatically add 1 item to the cart
 
@@ -72,58 +69,6 @@ $cart = new Cart($conn, $userId);
                     alert('Error processing the request.');
                 }
             });
-        });
-
-        // Add to wishlist functionality
-        $(document).on('click', '.add-to-wishlist', function () {
-            const productId = $(this).data('product-id');
-
-            if (!productId) {
-                alert('Product ID is missing for the wishlist.');
-                return;
-            }
-
-            $.post('add_to_wishlist.php', { product_id: productId }, function (response) {
-                if (response.status === 'success') {
-                    alert('Product added to wishlist successfully!');
-                } else {
-                    alert(response.message || 'Failed to add product to wishlist.');
-                }
-            }, 'json').fail(function () {
-                alert('Error processing the request.');
-            });
-        });
-
-        // Add to compare functionality
-        $(document).on('click', '.add-to-compare', function () {
-            const productId = $(this).data('product-id');
-
-            if (!productId) {
-                alert('Product ID is missing for compare.');
-                return;
-            }
-
-            $.post('add_to_compare.php', { product_id: productId }, function (response) {
-                if (response.status === 'success') {
-                    alert('Product added to compare successfully!');
-                } else {
-                    alert(response.message || 'Failed to add product to compare.');
-                }
-            }, 'json').fail(function () {
-                alert('Error processing the request.');
-            });
-        });
-
-        // View product functionality
-        $(document).on('click', '.view-product', function () {
-            const productId = $(this).data('product-id');
-
-            if (!productId) {
-                alert('Product ID is missing for viewing.');
-                return;
-            }
-
-            window.location.href = `product_page.php?id=${productId}`;
         });
     });
 </script>

@@ -349,19 +349,8 @@ $trendingProducts = $productObj->getTrendingProducts(3);
                                     <div class="col">
                                         <div class="trending-product-card">
                                             <div class="overlay-container">
+                                            <?php include 'functions/overlay-buttons.php'; ?>
                                                 <img src="<?= htmlspecialchars($product['image_path']) ?>" alt="<?= htmlspecialchars($product['name']) ?>" class="img-fluid">
-                                                <!-- Overlay Buttons -->
-                                                <div class="overlay-buttons">
-                                                    <a href="product_page.php?id=<?= $product['id'] ?>" class="button-overlay" title="View Product">
-                                                        <i class="bi bi-eye"></i>
-                                                    </a>
-                                                    <a href="#" class="button-overlay" title="Add to Wishlist">
-                                                        <i class="bi bi-heart"></i>
-                                                    </a>
-                                                    <a href="#" class="button-overlay add-to-cart" data-product-id="<?= $product['id'] ?>" title="Add to Cart">
-                                                        <i class="bi bi-cart"></i>
-                                                    </a>
-                                                </div>
                                             </div>
                                             <!-- Product Info -->
                                             <div class="product-info text-center py-3">

@@ -50,6 +50,13 @@ $cartItems = $cart->getCartItems();
 $subtotal = array_sum(array_map(fn($item) => $item['price'] * $item['quantity'], $cartItems));
 $taxes = $subtotal * 0.00; // Assuming no tax
 $total = $subtotal + $taxes;
+
+// Store the order summary in the session
+$_SESSION['order_summary'] = [
+    'subtotal' => $subtotal,
+    'taxes' => $taxes,
+    'total' => $total,
+];
 ?>
 
 <!DOCTYPE html>
@@ -72,6 +79,33 @@ $total = $subtotal + $taxes;
     <div class="container-fluid oe_website_sale py-4 mb-3">
         <div class="row w-100">
             <div class="col-12 col-xl-8 oe_cart">
+                <!-- Progress Indicator -->
+                <div class="container my-4">
+                    <div class="progress-bar-wrapper d-flex justify-content-between align-items-center">
+                        <div class="progress-step completed">
+                            <div class="circle">
+                                <i class="bi bi-check-lg"></i>
+                            </div>
+                            <span class="step-label">Review Order</span>
+                        </div>
+                        <div class="progress-line"></div>
+                        <div class="progress-step">
+                            <div class="circle"></div>
+                            <span class="step-label">Billing & Shipping</span>
+                        </div>
+                        <div class="progress-line"></div>
+                        <div class="progress-step">
+                            <div class="circle"></div>
+                            <span class="step-label">Payment</span>
+                        </div>
+                        <div class="progress-line"></div>
+                        <div class="progress-step">
+                            <div class="circle"></div>
+                            <span class="step-label">Confirmation</span>
+                        </div>
+                    </div>
+                </div>
+                
                 <h2>Shopping Cart</h2>
                 <table class="mb-4 table table-striped table-sm js_cart_lines" id="cart_products">
                     <thead>
@@ -91,7 +125,7 @@ $total = $subtotal + $taxes;
                     <a href="/shop" class="btn btn-continue-shopping">
                         <i class="fa fa-chevron-left"></i> Continue Shopping
                     </a>
-                    <a href="/checkout" class="btn btn-process-checkout">
+                    <a href="shop_address.php" class="btn btn-process-checkout">
                         Process Checkout <i class="fa fa-chevron-right"></i>
                     </a>
                 </div>
@@ -117,7 +151,7 @@ $total = $subtotal + $taxes;
                                 <strong id="total">$<?= number_format($total, 2); ?></strong>
                             </li>
                         </ul>
-                        <a href="/checkout" class="btn btn-success mt-4 w-100">Proceed to Checkout</a>
+                        <a href="shop_address.php" class="btn btn-success mt-4 w-100">Proceed to Checkout</a>
                     </div>
                 </div>
             </div>
@@ -241,9 +275,40 @@ $total = $subtotal + $taxes;
             }
         });
 
-        // Optionally, handle quantity increase/decrease and update the summary dynamically
+        // Handle quantity increase/decrease and update the summary dynamically
         $(document).on('click', '.js_decrease_quantity, .js_increase_quantity', function () {
             updateOrderSummary(); // Update totals whenever quantities are changed
+        });
+
+        // Handle "Process Checkout" button click
+        $(document).on('click', '.btn-process-checkout', function (e) {
+            e.preventDefault();
+
+            // Get the order summary data
+            const orderSummary = {
+                subtotal: parseFloat($('#subtotal').text().replace('$', '')) || 0,
+                taxes: parseFloat($('#taxes').text().replace('$', '')) || 0,
+                total: parseFloat($('#total').text().replace('$', '')) || 0,
+            };
+
+            // Send order summary to the server
+            $.ajax({
+                url: 'save_order_summary.php', // Backend script to save order summary
+                type: 'POST',
+                data: orderSummary,
+                dataType: 'json',
+                success: function (response) {
+                    if (response.status === 'success') {
+                        // Redirect to shop_address.php if data is saved successfully
+                        window.location.href = 'shop_address.php';
+                    } else {
+                        alert(response.message || 'Failed to save order summary. Please try again.');
+                    }
+                },
+                error: function () {
+                    alert('An error occurred while processing your request.');
+                },
+            });
         });
     });
 </script>

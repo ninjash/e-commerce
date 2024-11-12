@@ -18,6 +18,7 @@ if (!empty($trendingProducts)) {
     foreach ($trendingProducts as $product) {
         echo '<div class="col-sm-12 col-md-4 col-lg-4">';
         echo '    <div class="trending-product-card">';
+        include 'functions/overlay-buttons.php';
         echo '        <img src="' . htmlspecialchars($product['image_path']) . '" alt="' . htmlspecialchars($product['name']) . '" class="img-fluid">';
         echo '        <div class="product-info text-center py-3">';
         echo '            <h5 class="product-name">' . htmlspecialchars($product['name']) . '</h5>';

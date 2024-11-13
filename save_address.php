@@ -9,8 +9,8 @@ error_reporting(E_ALL);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Initialize variables and validate inputs
-    $userId = $_SESSION['user_id'] ?? null; // Check if user is logged in
-    $cartId = $_SESSION['cart_id'] ?? null; // Retrieve cart ID
+    $userId = $_SESSION['user_id'] ?? null;
+    $cartId = $_SESSION['cart_id'] ?? null;
     $street1 = trim($_POST['street1'] ?? '');
     $street2 = trim($_POST['street2'] ?? '');
     $city = trim($_POST['city'] ?? '');
@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $zip = trim($_POST['zip'] ?? '');
     $country = trim($_POST['country'] ?? '');
     $phone = trim($_POST['phone'] ?? '');
-    
+
     // Validate mandatory fields
     if (empty($street1) || empty($city) || empty($state) || empty($zip) || empty($country) || empty($phone)) {
         $_SESSION['error_message'] = 'All required fields must be filled in.';
@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Validate phone number format (example: basic check for numeric)
+    // Validate phone number format
     if (!preg_match('/^\+?[0-9\s\-]+$/', $phone)) {
         $_SESSION['error_message'] = 'Invalid phone number format.';
         header('Location: /address');
@@ -44,34 +44,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'postal_code' => htmlspecialchars($zip, ENT_QUOTES, 'UTF-8'),
         'country' => htmlspecialchars($country, ENT_QUOTES, 'UTF-8'),
         'phone_number' => htmlspecialchars($phone, ENT_QUOTES, 'UTF-8'),
-        'address_type' => 'shipping', // Default to 'shipping'
+        'address_type' => 'shipping',
     ];
 
     try {
-        // Instantiate the Address class and save the address
-        $address = new Address($pdo);
+        // Pass $conn to the Address class
+        $address = new Address($conn);
+
+        // Save the address
         $addressId = $address->createAddress($data);
 
         if ($addressId) {
-            // Address saved successfully
-            $_SESSION['address_id'] = $addressId; // Store address ID in session
+            $_SESSION['address_id'] = $addressId;
             $_SESSION['success_message'] = 'Address saved successfully.';
-            header('Location: /checkout'); // Redirect to the checkout page
+            header('Location: /checkout');
             exit;
         } else {
             throw new Exception('Failed to save the address. Please try again.');
         }
     } catch (Exception $e) {
-        // Log error for debugging
         error_log('Error saving address: ' . $e->getMessage());
-
-        // Redirect back to the address form with an error message
         $_SESSION['error_message'] = 'An error occurred while saving your address. Please try again later.';
         header('Location: /address');
         exit;
     }
 } else {
-    // If request method is not POST, redirect to the address form
     $_SESSION['error_message'] = 'Invalid request method.';
     header('Location: /address');
     exit;

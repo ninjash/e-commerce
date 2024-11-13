@@ -198,13 +198,14 @@ $_SESSION['order_summary'] = [
                                         </a>
                                     </td>
                                     <td class="text-center td-qty">
-                                        <div class="css_quantity input-group mx-auto justify-content-center">
-                                            <button class="btn btn-outline-secondary js_decrease_quantity" data-product-id="${item.product_id}">
-                                                <i class="fa fa-minus"></i>
+                                        <div class="input-group mx-auto justify-content-center align-items-center" style="width: auto; background-color: #122a3c; border-radius: 4px;">
+                                            <button class="btn btn-sm btn-light js_decrease_quantity" data-product-id="${item.product_id}" style="border: none; color: white; font-weight: bold;">
+                                                -
                                             </button>
-                                            <input type="text" class="js_quantity form-control text-center quantity" value="${item.quantity}" style="width: 50px;" readonly>
-                                            <button class="btn btn-outline-secondary js_increase_quantity" data-product-id="${item.product_id}">
-                                                <i class="fa fa-plus"></i>
+                                            <input type="text" class="js_quantity form-control text-center quantity" value="${item.quantity}" 
+                                                style="width: 25px; border: none; background-color: #122a3c; color: white; font-weight: bold;" readonly>
+                                            <button class="btn btn-sm btn-light js_increase_quantity" data-product-id="${item.product_id}" style="border: none; color: white; font-weight: bold;">
+                                                +
                                             </button>
                                         </div>
                                     </td>
@@ -253,6 +254,68 @@ $_SESSION['order_summary'] = [
             $('#total').text(`$${total.toFixed(2)}`);
         }
 
+        function updateCartQuantity(productId, action) {
+            $.ajax({
+                url: 'update_cart_quantity.php',
+                type: 'POST',
+                data: { product_id: productId, action: action },
+                dataType: 'json',
+                success: function (response) {
+                    if (response.status === 'success') {
+                        const { cartItems, subtotal, taxes, total } = response;
+
+                        // Update the cart items
+                        let cartHtml = '';
+                        cartItems.forEach(item => {
+                            cartHtml += `
+                                <tr data-product-id="${item.product_id}">
+                                    <td align="center" class="td-img d-block">
+                                        <img src="${item.image_url}" class="img rounded o_image_64_max" alt="${item.name}" style="max-width: 80px;">
+                                    </td>
+                                    <td class="td-product_name">
+                                        <a href="product_page.php?id=${item.product_id}">
+                                            <strong>${item.name}</strong>
+                                        </a>
+                                    </td>
+                                    <td class="text-center td-qty">
+                                        <div class="input-group mx-auto justify-content-center align-items-center" style="width: auto; background-color: #122a3c; border-radius: 4px;">
+                                            <button class="btn btn-sm btn-light js_decrease_quantity" data-product-id="${item.product_id}" style="border: none; color: white; font-weight: bold;">
+                                                -
+                                            </button>
+                                            <input type="text" class="js_quantity form-control text-center quantity" value="${item.quantity}" 
+                                                style="width: 25px; border: none; background-color: #122a3c; color: white; font-weight: bold;" readonly>
+                                            <button class="btn btn-sm btn-light js_increase_quantity" data-product-id="${item.product_id}" style="border: none; color: white; font-weight: bold;">
+                                                +
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td class="text-center td-price">$${(item.price * item.quantity).toFixed(2)}</td>
+                                    <td class="td-action">
+                                        <a href="#" class="js_delete_product no-decoration" data-product-id="${item.product_id}">
+                                            <small><i class="fa fa-trash-o"></i></small>
+                                        </a>
+                                    </td>
+                                </tr>`;
+                        });
+
+                        $('#cartItemsBody').html(cartHtml);
+
+                        // Update order summary
+                        $('#subtotal').text(`$${subtotal}`);
+                        $('#taxes').text(`$${taxes}`);
+                        $('#total').text(`$${total}`);
+                    } else {
+                        alert(response.message || 'Failed to update cart quantity.');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error(`AJAX Error: ${error}`);
+                    console.error(xhr.responseText);
+                    alert('Error processing the request.');
+                },
+            });
+        }
+
         // Load cart items on page load
         loadCartItems();
 
@@ -273,6 +336,17 @@ $_SESSION['order_summary'] = [
                     alert('Error processing the request.');
                 });
             }
+        });
+
+        // Event listeners for quantity buttons
+        $(document).on('click', '.js_increase_quantity', function () {
+            const productId = $(this).data('product-id');
+            updateCartQuantity(productId, 'increase');
+        });
+
+        $(document).on('click', '.js_decrease_quantity', function () {
+            const productId = $(this).data('product-id');
+            updateCartQuantity(productId, 'decrease');
         });
 
         // Handle quantity increase/decrease and update the summary dynamically

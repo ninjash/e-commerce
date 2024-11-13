@@ -1,10 +1,16 @@
 <?php
 session_start();
 require 'web/db_connect.php';
+require_once 'classes/Cart.php';
 
 // Fetch main categories (parent_id is NULL) for the header
 $header_main_category_query = "SELECT id, name FROM categories WHERE parent_id IS NULL";
 $header_main_category_result_header = mysqli_query($conn, $header_main_category_query); // Renamed result variable to avoid conflict
+
+// Fetch the total cart item count for the header
+$userId = $_SESSION['user_id'] ?? null;
+$cart = new Cart($conn, $userId);
+$totalCartItems = $cart->getTotalCartItemCount();
 ?>
 
 <!-- Top Bar -->
@@ -50,7 +56,12 @@ $header_main_category_result_header = mysqli_query($conn, $header_main_category_
             <!-- Icons -->
             <div class="col-sm-2 col-md-2 col-lg-2 d-flex justify-content-end align-items-center pe-0">
                 <a href="login.php" class="btn btn-light icon-buttons"><i class="bi bi-person"></i></a>
-                <a href="shop_cart.php" class="btn btn-light"><i class="bi bi-cart"></i></a>
+                <a href="shop_cart.php" class="btn btn-light position-relative">
+                    <i class="bi bi-cart"></i>
+                    <span id="cartItemCount" class="position-absolute top-50 start-100 translate-middle badge rounded-pill bg-danger">
+                        <?= $totalCartItems > 0 ? $totalCartItems : ''; ?>
+                    </span>
+                </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -218,6 +229,46 @@ $header_main_category_result_header = mysqli_query($conn, $header_main_category_
             });
         });
 
+        $(document).ready(function () {
+            // Function to update the cart item count dynamically
+            function updateCartItemCount() {
+                $.ajax({
+                    url: 'fetch_cart_item_count.php',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (response) {
+                        if (response.status === 'success') {
+                            const count = response.count || 0;
+                            const badge = $('#cartItemCount');
+                            if (count > 0) {
+                                badge.text(count).show(); // Display the count
+                            } else {
+                                badge.text('').hide(); // Hide badge if count is zero
+                            }
+                        } else {
+                            console.error('Failed to fetch cart item count:', response.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error fetching cart item count:', error);
+                    }
+                });
+            }
+
+            // Call the function on page load
+            updateCartItemCount();
+
+            // Update the cart count whenever cart items are modified
+            $(document).on('click', '.js_increase_quantity, .js_decrease_quantity, .js_delete_product', function () {
+                updateCartItemCount();
+            });
+
+            // Update cart item count after any page reload or refresh
+            $(window).on('load', function () {
+                updateCartItemCount();
+            });
+        });
+        
         // Handle second category toggle for third categories
         document.querySelectorAll('.dropdown-submenu > a').forEach(function(subcategoryLink) {
             subcategoryLink.addEventListener('click', function(e) {

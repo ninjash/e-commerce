@@ -150,6 +150,65 @@ class Cart {
         }
     }
 
+    public function getTotalCartItemCount() {
+        try {
+            if ($this->isGuest) {
+                // For guest users, count items in the session cart
+                if (!empty($_SESSION['cart'])) {
+                    return array_sum($_SESSION['cart']); // Total quantity of items
+                }
+                return 0; // No items in the cart
+            } else {
+                // For logged-in users, count items from the database
+                $stmt = $this->db->prepare("SELECT SUM(quantity) as total_items FROM cart WHERE user_id = ?");
+                $stmt->bind_param("i", $this->userId);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $row = $result->fetch_assoc();
+                return $row['total_items'] ?? 0; // Return total or 0 if null
+            }
+        } catch (Exception $e) {
+            error_log('Error fetching total cart item count: ' . $e->getMessage());
+            return 0; // Return 0 in case of an error
+        }
+    }
+
+     // Add the updateQuantity method
+     public function updateQuantity($productId, $quantityChange) {
+        try {
+            if ($this->isGuest) {
+                // Update session cart for guest users
+                if (isset($_SESSION['cart'][$productId])) {
+                    $_SESSION['cart'][$productId] += $quantityChange;
+                    if ($_SESSION['cart'][$productId] <= 0) {
+                        unset($_SESSION['cart'][$productId]);
+                    }
+                }
+                return true;
+            } else {
+                // Update quantity in the database for logged-in users
+                $stmt = $this->db->prepare("
+                    UPDATE cart 
+                    SET quantity = GREATEST(quantity + ?, 0) 
+                    WHERE user_id = ? AND product_id = ?
+                ");
+                $stmt->execute([$quantityChange, $this->userId, $productId]);
+    
+                // Check if product needs to be removed
+                $deleteStmt = $this->db->prepare("
+                    DELETE FROM cart 
+                    WHERE user_id = ? AND product_id = ? AND quantity <= 0
+                ");
+                $deleteStmt->execute([$this->userId, $productId]);
+    
+                return true;
+            }
+        } catch (Exception $e) {
+            error_log("Error in updateQuantity: " . $e->getMessage());
+            return false;
+        }
+    }
+    
     public function mergeCart() {
         try {
             if (!$this->isGuest && isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {

@@ -6,7 +6,7 @@ class Address
 
     public function __construct($dbConnection)
     {
-        $this->db = $dbConnection; // Accepts a database connection
+        $this->db = $dbConnection; // Accepts a mysqli database connection
     }
 
     /**
@@ -17,24 +17,34 @@ class Address
     public function createAddress($data)
     {
         $sql = "INSERT INTO addresses (user_id, cart_id, address_line_1, address_line_2, city, state, postal_code, country, phone_number, address_type, created_at, updated_at)
-                VALUES (:user_id, :cart_id, :address_line_1, :address_line_2, :city, :state, :postal_code, :country, :phone_number, :address_type, NOW(), NOW())";
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
 
         $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':user_id', $data['user_id']);
-        $stmt->bindParam(':cart_id', $data['cart_id']);
-        $stmt->bindParam(':address_line_1', $data['address_line_1']);
-        $stmt->bindParam(':address_line_2', $data['address_line_2']);
-        $stmt->bindParam(':city', $data['city']);
-        $stmt->bindParam(':state', $data['state']);
-        $stmt->bindParam(':postal_code', $data['postal_code']);
-        $stmt->bindParam(':country', $data['country']);
-        $stmt->bindParam(':phone_number', $data['phone_number']);
-        $stmt->bindParam(':address_type', $data['address_type']);
+        if (!$stmt) {
+            error_log('Prepare failed: ' . $this->db->error);
+            return false;
+        }
+
+        $stmt->bind_param(
+            'iissssssss',
+            $data['user_id'],
+            $data['cart_id'],
+            $data['address_line_1'],
+            $data['address_line_2'],
+            $data['city'],
+            $data['state'],
+            $data['postal_code'],
+            $data['country'],
+            $data['phone_number'],
+            $data['address_type']
+        );
 
         if ($stmt->execute()) {
-            return $this->db->lastInsertId(); // Return the inserted address ID
+            return $stmt->insert_id; // Return the inserted address ID
+        } else {
+            error_log('Execute failed: ' . $stmt->error);
+            return false;
         }
-        return false;
     }
 
     /**
@@ -44,12 +54,18 @@ class Address
      */
     public function getAddressById($id)
     {
-        $sql = "SELECT * FROM addresses WHERE id = :id";
+        $sql = "SELECT * FROM addresses WHERE id = ?";
         $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':id', $id);
-        $stmt->execute();
+        if (!$stmt) {
+            error_log('Prepare failed: ' . $this->db->error);
+            return false;
+        }
 
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        return $result->fetch_assoc(); // Fetch associative array
     }
 
     /**
@@ -61,23 +77,31 @@ class Address
     public function updateAddress($id, $data)
     {
         $sql = "UPDATE addresses 
-                SET user_id = :user_id, cart_id = :cart_id, address_line_1 = :address_line_1, address_line_2 = :address_line_2, 
-                    city = :city, state = :state, postal_code = :postal_code, country = :country, 
-                    phone_number = :phone_number, address_type = :address_type, updated_at = NOW() 
-                WHERE id = :id";
+                SET user_id = ?, cart_id = ?, address_line_1 = ?, address_line_2 = ?, 
+                    city = ?, state = ?, postal_code = ?, country = ?, 
+                    phone_number = ?, address_type = ?, updated_at = NOW() 
+                WHERE id = ?";
 
         $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':id', $id);
-        $stmt->bindParam(':user_id', $data['user_id']);
-        $stmt->bindParam(':cart_id', $data['cart_id']);
-        $stmt->bindParam(':address_line_1', $data['address_line_1']);
-        $stmt->bindParam(':address_line_2', $data['address_line_2']);
-        $stmt->bindParam(':city', $data['city']);
-        $stmt->bindParam(':state', $data['state']);
-        $stmt->bindParam(':postal_code', $data['postal_code']);
-        $stmt->bindParam(':country', $data['country']);
-        $stmt->bindParam(':phone_number', $data['phone_number']);
-        $stmt->bindParam(':address_type', $data['address_type']);
+        if (!$stmt) {
+            error_log('Prepare failed: ' . $this->db->error);
+            return false;
+        }
+
+        $stmt->bind_param(
+            'iissssssssi',
+            $data['user_id'],
+            $data['cart_id'],
+            $data['address_line_1'],
+            $data['address_line_2'],
+            $data['city'],
+            $data['state'],
+            $data['postal_code'],
+            $data['country'],
+            $data['phone_number'],
+            $data['address_type'],
+            $id
+        );
 
         return $stmt->execute();
     }
@@ -89,10 +113,14 @@ class Address
      */
     public function deleteAddress($id)
     {
-        $sql = "DELETE FROM addresses WHERE id = :id";
+        $sql = "DELETE FROM addresses WHERE id = ?";
         $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':id', $id);
+        if (!$stmt) {
+            error_log('Prepare failed: ' . $this->db->error);
+            return false;
+        }
 
+        $stmt->bind_param('i', $id);
         return $stmt->execute();
     }
 
@@ -103,12 +131,18 @@ class Address
      */
     public function getAddressesByUserId($userId)
     {
-        $sql = "SELECT * FROM addresses WHERE user_id = :user_id";
+        $sql = "SELECT * FROM addresses WHERE user_id = ?";
         $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':user_id', $userId);
-        $stmt->execute();
+        if (!$stmt) {
+            error_log('Prepare failed: ' . $this->db->error);
+            return [];
+        }
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        return $result->fetch_all(MYSQLI_ASSOC); // Fetch all rows as associative array
     }
 
     /**
@@ -118,12 +152,18 @@ class Address
      */
     public function getAddressesByCartId($cartId)
     {
-        $sql = "SELECT * FROM addresses WHERE cart_id = :cart_id";
+        $sql = "SELECT * FROM addresses WHERE cart_id = ?";
         $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':cart_id', $cartId);
-        $stmt->execute();
+        if (!$stmt) {
+            error_log('Prepare failed: ' . $this->db->error);
+            return [];
+        }
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt->bind_param('i', $cartId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        return $result->fetch_all(MYSQLI_ASSOC); // Fetch all rows as associative array
     }
 
     /**
@@ -134,14 +174,20 @@ class Address
     public function getUserAddress($userId)
     {
         $sql = "SELECT * FROM addresses 
-                WHERE user_id = :user_id 
+                WHERE user_id = ? 
                 ORDER BY created_at DESC 
                 LIMIT 1";
 
         $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':user_id', $userId);
-        $stmt->execute();
+        if (!$stmt) {
+            error_log('Prepare failed: ' . $this->db->error);
+            return false;
+        }
 
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        return $result->fetch_assoc(); // Fetch single row as associative array
     }
 }

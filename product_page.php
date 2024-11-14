@@ -5,6 +5,8 @@ require_once 'classes/ProductAttribute.php';
 require_once 'classes/Manufacturer.php';
 require_once 'classes/Cart.php';
 
+session_start();
+
 if (!isset($_GET['id'])) {
     echo "Product ID is missing.";
     exit;

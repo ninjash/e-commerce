@@ -4,6 +4,8 @@ require 'classes/Category.php';
 require 'classes/Product.php';
 require 'classes/Manufacturer.php';
 
+session_start();
+
 // Initialize objects
 $categoryObj = new Category($conn);
 $productObj = new Product($conn);

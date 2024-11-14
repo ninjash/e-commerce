@@ -3,9 +3,11 @@
 require_once 'web/db_connect.php';
 require_once 'classes/Cart.php';
 
-// Ensure $product is set before use
-if (!isset($product) || !is_array($product)) {
-    throw new Exception("Product data not provided to overlay_buttons.php.");
+// Check if $product is set and valid
+if (!isset($product) || !is_array($product) || empty($product)) {
+    // Gracefully handle the missing product data
+    error_log("Product data not provided to overlay_buttons.php.");
+    return; // Exit the script without rendering anything
 }
 
 $userId = $_SESSION['user_id'] ?? null;
@@ -38,8 +40,10 @@ $cart = new Cart($conn, $userId);
 
 <script>
     $(document).ready(function () {
-        // Remove any existing handlers and attach a new one
-        $(document).off('click', '.add-to-cart').on('click', '.add-to-cart', function () {
+        // Ensure proper event handling
+        $(document).off('click', '.add-to-cart').on('click', '.add-to-cart', function (e) {
+            e.preventDefault(); // Prevent default link behavior (important for <a> tags)
+
             const productId = $(this).data('product-id');
             const quantity = 1; // Automatically add 1 item to the cart
 

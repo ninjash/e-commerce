@@ -2,6 +2,8 @@
 require_once 'web/db_connect.php';
 require_once 'classes/Cart.php';
 
+session_start();
+
 ini_set('display_errors', 1); // Enable during debugging
 error_reporting(E_ALL);
 
@@ -57,6 +59,12 @@ $_SESSION['order_summary'] = [
     'taxes' => $taxes,
     'total' => $total,
 ];
+
+// Store the cart items in the session for use on subsequent pages
+$_SESSION['cart_items'] = $cartItems;
+
+// Debug log to ensure cart items are stored correctly
+error_log('Cart items stored in session: ' . print_r($_SESSION['cart_items'], true));
 ?>
 
 <!DOCTYPE html>

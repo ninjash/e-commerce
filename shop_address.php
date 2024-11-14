@@ -7,13 +7,16 @@ session_start();
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
+// Log session data for debugging
+error_log('Session Data in shop_address.php: ' . print_r($_SESSION, true));
+
 $userId = $_SESSION['user_id'] ?? null;
 $isGuest = $userId === null;
 
 $addressData = null;
 if (!$isGuest) {
     try {
-        $address = new Address($pdo);
+        $address = new Address($conn);
         $addressData = $address->getUserAddress($userId);
     } catch (Exception $e) {
         error_log("Error fetching address: " . $e->getMessage());
@@ -81,8 +84,9 @@ $total = $orderSummary['total'];
                 </div>
 
                 <!-- Address Form -->
-                <h2 class="pb-3">Fill in your address or <a href="/login" class="text-primary">Sign in</a></h2>
-                <form action="save_address.php" method="post" class="mb-4">
+                <h2 class="pb-3">Fill in your address or <a href="login.php" class="text-primary">Sign in</a></h2>
+                <form id="addressForm" class="mb-4">
+                    <input type="hidden" name="redirect_to" value="shop_payment.php">
                     <div class="mb-3">
                         <label for="name" class="form-label">Name</label>
                         <input type="text" class="form-control" id="name" name="name" value="<?= htmlspecialchars($addressData['name'] ?? '') ?>" required>
@@ -140,7 +144,7 @@ $total = $orderSummary['total'];
                     </div>
                     <div class="d-flex justify-content-between mt-4">
                         <a href="shop_cart.php" class="btn btn-secondary">Back</a>
-                        <button type="submit" class="btn btn-primary">Next</button>
+                        <button type="button" id="submitAddress" class="btn btn-primary">Next</button>
                     </div>
                 </form>
             </div>
@@ -184,5 +188,36 @@ $total = $orderSummary['total'];
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+$(document).ready(function () {
+    $('#submitAddress').on('click', function (e) {
+        e.preventDefault();
+
+        const formData = $('#addressForm').serialize();
+
+        $.ajax({
+            url: 'save_address.php',
+            type: 'POST',
+            data: formData,
+            dataType: 'json',
+            success: function (response) {
+                if (response.success) {
+                    // Redirect to the payment page
+                    window.location.href = response.redirect_to;
+                } else {
+                    // Display error message
+                    alert(response.message || 'An error occurred while saving the address.');
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('AJAX Error:', error);
+                alert('Failed to save the address. Please try again later.');
+            }
+        });
+    });
+});
+</script>
+
 </body>
 </html>

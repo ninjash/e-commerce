@@ -1,5 +1,5 @@
 <?php
-session_start();
+
 require 'web/db_connect.php';
 require_once 'classes/Cart.php';
 

@@ -20,18 +20,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $productId = $input['product_id'] ?? 0;
     $quantity = $input['quantity'] ?? 1;
 
+    // Debugging
+    error_log("Add-to-Cart Request Received. Product ID: $productId, Quantity: $quantity");
+
     if (!$productId) {
         echo json_encode(['status' => 'error', 'message' => 'Invalid product ID.']);
         exit;
     }
 
     try {
-        // Add product to the cart
         $cart->addToCart($productId, $quantity);
         $cartCount = $cart->getTotalCartItemCount();
-        echo json_encode(['status' => 'success', 'message' => 'Product added to cart successfully!', 'cartCount' => $cartCount]);
+
+        // Debugging
+        error_log("Add-to-Cart Success. Total Items in Cart: $cartCount");
+
+        echo json_encode(['status' => 'success', 'message' => 'Product added to cart!', 'cartCount' => $cartCount]);
     } catch (Exception $e) {
-        error_log('Add to Cart Error: ' . $e->getMessage());
+        // Detailed error logging
+        error_log("Add-to-Cart Error: " . $e->getMessage());
+        error_log("Stack Trace: " . $e->getTraceAsString());
         echo json_encode(['status' => 'error', 'message' => 'Failed to add product to cart.']);
     }
     exit;
@@ -73,6 +81,7 @@ if ($page_category_id > 0) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/e-commerce/styles/styles.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
 <header>
@@ -156,31 +165,31 @@ if ($page_category_id > 0) {
                     <?php if (!empty($page_product_result)): ?>
                         <?php foreach ($page_product_result as $page_product): ?>
                             <div class="col-sm-12 col-md-6 col-lg-3 category-product mb-4 p-0">
-                                <a href="product_page.php?id=<?php echo htmlspecialchars($page_product['id']); ?>" class="text-decoration-none text-reset">
-                                    <div class="product-category-card p-3 pb-0 position-relative">
+                                <div class="product-category-card p-3 pb-0 position-relative">
+                                    <a href="product_page.php?id=<?php echo htmlspecialchars($page_product['id']); ?>" class="text-decoration-none text-reset">
                                         <img src="<?php echo htmlspecialchars($page_product['image_path']); ?>" alt="Product Image" class="img-fluid product-image">
-                                        <div class="overlay-container">
-                                        <?php include 'functions/overlay-buttons.php'; ?>
-                                            <div class="product-info text-center pt-3">
-                                                <div class="product-rating-category">
-                                                    <p><i class="bi bi-star-fill"></i> 4.0</p>
-                                                </div>
-                                                <h5 class="product-category-name"><?php echo htmlspecialchars($page_product['name']); ?></h5>
-                                                <p class="product-category-price">
-                                                    <span class="category-old-price">$<?php echo number_format($page_product['old_price'], 2); ?></span>
-                                                    <span class="category-new-price">$<?php echo number_format($page_product['price'], 2); ?></span>
-                                                </p>
+                                    </a>
+                                    <div class="overlay-container">
+                                        <!-- Include overlay buttons -->
+                                        <?php 
+                                        $product = $page_product;
+                                        include 'functions/overlay-buttons.php'; 
+                                        ?>
+                                        <div class="product-info text-center pt-3">
+                                            <div class="product-rating-category">
+                                                <p><i class="bi bi-star-fill"></i> 4.0</p>
                                             </div>
-                                            <?php 
-                                            // Pass product data to the overlay-buttons.php
-                                            $product = $page_product; 
-                                            ?>
+                                            <h5 class="product-category-name"><?php echo htmlspecialchars($page_product['name']); ?></h5>
+                                            <p class="product-category-price">
+                                                <span class="category-old-price">$<?php echo number_format($page_product['old_price'], 2); ?></span>
+                                                <span class="category-new-price">$<?php echo number_format($page_product['price'], 2); ?></span>
+                                            </p>
                                         </div>
                                     </div>
-                                </a>
+                                </div>
                                 <div class="row w-100 product-nav-category px-0">
                                     <div class="col p-0 text-center">
-                                        <a href="add_to_cart.php" class="btn pnav-icon"><i class="bi bi-cart"></i></a>
+                                        <a href="#" class="btn pnav-icon add-to-cart" data-product-id="<?php echo htmlspecialchars($page_product['id']); ?>"><i class="bi bi-cart"></i></a>
                                     </div>
                                     <div class="col p-0 text-center">
                                         <a href="#" class="btn pnav-icon"><i class="bi bi-heart"></i></a>
@@ -208,10 +217,9 @@ if ($page_category_id > 0) {
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Toggle categories
+        // Toggle categories functionality
         document.querySelectorAll('.category-toggle').forEach(function (mainCategoryLink) {
             mainCategoryLink.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -230,63 +238,48 @@ if ($page_category_id > 0) {
             });
         });
 
-        // Add to Cart Functionality
-        $(document).on('click', '.add-to-cart', function (e) {
-            e.preventDefault();
+        $(document).off('click', '.add-to-cart').on('click', '.add-to-cart', function (e) {
+            e.preventDefault(); // Prevent default action of the button
+
             const productId = $(this).data('product-id');
-            const quantity = 1; // Default quantity
+            const quantity = 1; // Default quantity for add-to-cart
+
+            console.log('Add-to-Cart Clicked:', productId); // Debugging log
 
             if (!productId) {
                 alert('Product ID is missing.');
-                console.error('Add to Cart: Missing Product ID.');
+                console.error('Missing product ID in add-to-cart button.');
                 return;
             }
 
+            // AJAX request to add the product to the cart
             $.ajax({
-                url: 'handle_overlay_buttons.php', // Use the correct handler for AJAX actions
+                url: 'category_page.php',
                 type: 'POST',
                 data: JSON.stringify({ action: 'add_to_cart', product_id: productId, quantity: quantity }),
                 contentType: 'application/json',
                 dataType: 'json',
                 success: function (response) {
+                    console.log('AJAX Response:', response); // Debugging log
                     if (response.status === 'success') {
                         alert(response.message || 'Product added to cart successfully!');
-                        updateCartCount(response.cartCount); // Update cart count dynamically
+                        if (response.cartCount) {
+                            $('#cartCount').text(response.cartCount); // Update the cart count display
+                        }
                     } else {
                         alert(response.message || 'Failed to add product to cart.');
                     }
                 },
                 error: function (xhr, status, error) {
-                    console.error('Add to Cart AJAX Error:', error);
+                    console.error('AJAX Error:', xhr.responseText || error);
                     alert('An error occurred while adding the product to the cart.');
                 }
             });
         });
 
-        // Function to update cart count dynamically
-        function updateCartCount(count) {
-            const cartCountElement = document.querySelector('#cartCount');
-            if (cartCountElement) {
-                cartCountElement.textContent = count; // Update the cart count element
-            }
-        }
-
-        // View Product Functionality
-        $(document).on('click', '.view-product', function (e) {
-            e.preventDefault(); // Prevent default behavior
-            const productId = $(this).data('product-id');
-            if (productId) {
-                // Redirect to product page
-                window.location.href = `product_page.php?id=${productId}`;
-            } else {
-                alert('Product ID is missing.');
-                console.error('View Product: Missing Product ID.');
-            }
-        });
-
-        // Initialize hover effects for dynamically loaded content
+        // Initialize hover effects for overlay buttons
         function initializeHoverEffects() {
-            $('.category-product').hover(
+            $('.overlay-container').hover(
                 function () {
                     $(this).find('.overlay-buttons').css({
                         opacity: 1,
@@ -302,34 +295,16 @@ if ($page_category_id > 0) {
             );
         }
 
-        // Add to Wishlist Functionality
-        $(document).on('click', '.add-to-wishlist', function (e) {
-            e.preventDefault();
-            const productId = $(this).data('product-id');
-            if (!productId) {
-                alert('Product ID is missing.');
-                return;
-            }
-
-            $.ajax({
-                url: 'handle_overlay_buttons.php',
-                type: 'POST',
-                data: JSON.stringify({ action: 'add_to_wishlist', product_id: productId }),
-                contentType: 'application/json',
-                dataType: 'json',
-                success: function (response) {
-                    alert(response.message || 'Product added to wishlist!');
-                },
-                error: function (xhr, status, error) {
-                    console.error('Add to Wishlist AJAX Error:', error);
-                    alert('An error occurred while adding the product to the wishlist.');
-                }
-            });
-        });
-
-        // Call hover effects initialization
+        // Call hover effect initializer
         initializeHoverEffects();
+
+        // Optional: Reinitialize hover effects after dynamic content loads
+        $(document).ajaxComplete(function () {
+            initializeHoverEffects();
+        });
     });
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

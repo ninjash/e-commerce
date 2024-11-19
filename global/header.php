@@ -59,7 +59,7 @@ $totalCartItems = $cart->getTotalCartItemCount();
                 <a href="shop_cart.php" class="btn btn-light position-relative">
                     <i class="bi bi-cart"></i>
                     <span id="cartItemCount" class="position-absolute top-50 start-100 translate-middle badge rounded-pill bg-danger">
-                        <?= $totalCartItems > 0 ? $totalCartItems : ''; ?>
+                        <?php echo $totalCartItems; ?>
                     </span>
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
@@ -216,69 +216,93 @@ $totalCartItems = $cart->getTotalCartItemCount();
 
 <!-- JavaScript to handle toggle functionality -->
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Handle main category toggling to show/hide second categories
-        document.querySelectorAll('.header-category-toggle').forEach(function(mainCategoryLink) {
-            mainCategoryLink.addEventListener('click', function(e) {
-                e.preventDefault();
-                var mainCategoryId = this.getAttribute('data-id');
-                var subcategoriesList = document.getElementById('header-subcategories-' + mainCategoryId);
-                if (subcategoriesList) {
-                    subcategoriesList.style.display = (subcategoriesList.style.display === 'none') ? 'block' : 'none';
-                }
-            });
-        });
-
-        $(document).ready(function () {
-            // Function to update the cart item count dynamically
-            function updateCartItemCount() {
-                $.ajax({
-                    url: 'fetch_cart_item_count.php',
-                    type: 'GET',
-                    dataType: 'json',
-                    success: function (response) {
-                        if (response.status === 'success') {
-                            const count = response.count || 0;
-                            const badge = $('#cartItemCount');
-                            if (count > 0) {
-                                badge.text(count).show(); // Display the count
-                            } else {
-                                badge.text('').hide(); // Hide badge if count is zero
-                            }
-                        } else {
-                            console.error('Failed to fetch cart item count:', response.message);
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        console.error('Error fetching cart item count:', error);
+document.addEventListener('DOMContentLoaded', function () {
+    // Function to update cart item count
+    function updateCartItemCount() {
+        $.ajax({
+            url: 'fetch_cart_item_count.php',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status === 'success') {
+                    const count = response.count || 0;
+                    const badge = $('#cartItemCount');
+                    if (count > 0) {
+                        badge.text(count).show(); // Display the count
+                    } else {
+                        badge.text('').hide(); // Hide badge if count is zero
                     }
-                });
-            }
-
-            // Call the function on page load
-            updateCartItemCount();
-
-            // Update the cart count whenever cart items are modified
-            $(document).on('click', '.js_increase_quantity, .js_decrease_quantity, .js_delete_product', function () {
-                updateCartItemCount();
-            });
-
-            // Update cart item count after any page reload or refresh
-            $(window).on('load', function () {
-                updateCartItemCount();
-            });
-        });
-        
-        // Handle second category toggle for third categories
-        document.querySelectorAll('.dropdown-submenu > a').forEach(function(subcategoryLink) {
-            subcategoryLink.addEventListener('click', function(e) {
-                e.preventDefault();
-                var subcategoryId = this.getAttribute('data-id');
-                var thirdCategoryList = document.getElementById('header-third-categories-' + subcategoryId);
-                if (thirdCategoryList) {
-                    thirdCategoryList.style.display = (thirdCategoryList.style.display === 'none') ? 'block' : 'none';
+                } else {
+                    console.error('Failed to fetch cart item count:', response.message);
                 }
-            });
+            },
+            error: function (xhr, status, error) {
+                console.error('Error fetching cart item count:', error);
+            }
+        });
+    }
+
+    // Call the function on page load
+    updateCartItemCount();
+
+    // Update the cart count whenever cart items are modified
+    $(document).on('click', '.js_increase_quantity, .js_decrease_quantity, .js_delete_product', function () {
+        updateCartItemCount();
+    });
+
+    // Update cart item count after any page reload or refresh
+    $(window).on('load', function () {
+        updateCartItemCount();
+    });
+
+    // Prevent multiple event bindings
+    $(document).off('click', '.add-to-cart').on('click', '.add-to-cart', function (e) {
+        e.preventDefault(); // Prevent default action of the button
+
+        const productId = $(this).data('product-id');
+        const quantity = 1; // Default quantity for add-to-cart
+
+        console.log('Add-to-Cart Clicked:', productId); // Debugging log
+
+        if (!productId) {
+            alert('Product ID is missing.');
+            console.error('Missing product ID in add-to-cart button.');
+            return;
+        }
+
+        // AJAX request to add the product to the cart
+        $.ajax({
+            url: 'category_page.php',
+            type: 'POST',
+            data: JSON.stringify({ action: 'add_to_cart', product_id: productId, quantity: quantity }),
+            contentType: 'application/json',
+            dataType: 'json',
+            success: function (response) {
+                console.log('AJAX Response:', response); // Debugging log
+                if (response.status === 'success') {
+                    alert(response.message || 'Product added to cart successfully!');
+                    updateCartItemCount(); // Ensure the cart count is updated
+                } else {
+                    alert(response.message || 'Failed to add product to cart.');
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('AJAX Error:', xhr.responseText || error);
+                alert('An error occurred while adding the product to the cart.');
+            }
         });
     });
+
+    // Handle second category toggle for third categories
+    document.querySelectorAll('.dropdown-submenu > a').forEach(function(subcategoryLink) {
+        subcategoryLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            var subcategoryId = this.getAttribute('data-id');
+            var thirdCategoryList = document.getElementById('header-third-categories-' + subcategoryId);
+            if (thirdCategoryList) {
+                thirdCategoryList.style.display = (thirdCategoryList.style.display === 'none') ? 'block' : 'none';
+            }
+        });
+    });
+});
 </script>

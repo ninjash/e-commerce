@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 12, 2024 at 10:38 AM
+-- Generation Time: Nov 19, 2024 at 01:38 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -40,8 +40,20 @@ CREATE TABLE `addresses` (
   `phone_number` varchar(20) DEFAULT NULL,
   `address_type` enum('billing','shipping') NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `same_address` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `addresses`
+--
+
+INSERT INTO `addresses` (`id`, `user_id`, `cart_id`, `address_line_1`, `address_line_2`, `city`, `state`, `postal_code`, `country`, `phone_number`, `address_type`, `created_at`, `updated_at`, `name`, `email`, `same_address`) VALUES
+(40, 2, NULL, 'Purok 3, Cangmating', 'Buscato Compound', 'Sibulan', 'Armed Forces Americas', '6201', 'United States', '+639959904858', 'billing', '2024-11-17 18:18:45', '2024-11-17 18:18:45', 'Van Ashleigh Buscato Alavaren', 'vanbalavaren@su.edu.ph', 0),
+(41, 2, NULL, 'Purok 3, Cangmating', 'Buscato Compound', 'Sibulan', 'Armed Forces Americas', '6201', 'United States', '+639959904858', 'billing', '2024-11-17 18:24:39', '2024-11-17 18:24:39', 'Van Ashleigh Buscato Alavaren', 'vanbalavaren@su.edu.ph', 0),
+(42, 2, NULL, 'Purok 3, Cangmating', 'Buscato Compound', 'Sibulan', 'Armed Forces Americas', '6201', 'United States', '+639959904858', 'billing', '2024-11-19 00:37:35', '2024-11-19 00:37:35', 'Van Ashleigh Buscato Alavaren', 'vanbalavaren@su.edu.ph', 0);
 
 -- --------------------------------------------------------
 
@@ -74,7 +86,8 @@ INSERT INTO `attributes` (`id`, `name`) VALUES
 
 CREATE TABLE `cart` (
   `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `session_id` varchar(255) DEFAULT NULL,
   `product_id` int(11) NOT NULL,
   `quantity` int(11) NOT NULL DEFAULT 1,
   `added_at` timestamp NOT NULL DEFAULT current_timestamp()
@@ -84,8 +97,10 @@ CREATE TABLE `cart` (
 -- Dumping data for table `cart`
 --
 
-INSERT INTO `cart` (`id`, `user_id`, `product_id`, `quantity`, `added_at`) VALUES
-(1, 1, 1, 1, '2024-11-07 14:52:49');
+INSERT INTO `cart` (`id`, `user_id`, `session_id`, `product_id`, `quantity`, `added_at`) VALUES
+(1, 1, NULL, 1, 1, '2024-11-07 14:52:49'),
+(3, NULL, 'ii97jes885fe9efqpo8ii9hseb', 1, 1, '2024-11-19 00:36:35'),
+(4, NULL, 'ii97jes885fe9efqpo8ii9hseb', 14, 1, '2024-11-19 00:36:54');
 
 -- --------------------------------------------------------
 
@@ -763,6 +778,22 @@ INSERT INTO `manufacturers` (`id`, `name`, `logo_path`, `specialty`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `payments`
+--
+
+CREATE TABLE `payments` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `payment_details` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`payment_details`)),
+  `transaction_id` varchar(50) NOT NULL,
+  `status` varchar(20) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `products`
 --
 
@@ -1051,15 +1082,17 @@ CREATE TABLE `users` (
   `password` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
   `user_type` enum('customer','admin') DEFAULT 'customer',
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `session_id` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `username`, `password`, `email`, `user_type`, `created_at`) VALUES
-(1, 'testtest', 'asdqwe', 'vanbala@gmail.com', 'customer', '2024-11-07 14:52:13');
+INSERT INTO `users` (`id`, `username`, `password`, `email`, `user_type`, `created_at`, `session_id`) VALUES
+(1, 'testtest', 'asdqwe', 'vanbala@gmail.com', 'customer', '2024-11-07 14:52:13', NULL),
+(2, '', '', '', 'customer', '2024-11-17 16:43:20', '09nv8osjtvls0tdjq0jtct5fic');
 
 --
 -- Indexes for dumped tables
@@ -1108,6 +1141,13 @@ ALTER TABLE `manufacturers`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `payments`
+--
+ALTER TABLE `payments`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`);
+
+--
 -- Indexes for table `products`
 --
 ALTER TABLE `products`
@@ -1143,7 +1183,8 @@ ALTER TABLE `product_images`
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `username` (`username`),
-  ADD UNIQUE KEY `email` (`email`);
+  ADD UNIQUE KEY `email` (`email`),
+  ADD UNIQUE KEY `session_id` (`session_id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -1153,7 +1194,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `addresses`
 --
 ALTER TABLE `addresses`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
 
 --
 -- AUTO_INCREMENT for table `attributes`
@@ -1165,7 +1206,7 @@ ALTER TABLE `attributes`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `categories`
@@ -1184,6 +1225,12 @@ ALTER TABLE `category_images`
 --
 ALTER TABLE `manufacturers`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+
+--
+-- AUTO_INCREMENT for table `payments`
+--
+ALTER TABLE `payments`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `products`
@@ -1207,7 +1254,7 @@ ALTER TABLE `product_images`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- Constraints for dumped tables
@@ -1238,6 +1285,12 @@ ALTER TABLE `categories`
 --
 ALTER TABLE `category_images`
   ADD CONSTRAINT `fk_category` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `payments`
+--
+ALTER TABLE `payments`
+  ADD CONSTRAINT `payments_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 
 --
 -- Constraints for table `products`

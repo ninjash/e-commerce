@@ -2558,3 +2558,24 @@ body {
 .td-action .js_delete_product:hover {
     color: #d63333;
 }
+
+/* Styles for the payment table in shop_payment.php */
+.payment-table th:nth-child(1),
+.payment-table td:nth-child(1) {
+    width: 20%;
+    text-align: center;
+}
+
+.payment-table th:nth-child(2),
+.payment-table td:nth-child(2) {
+    width: 40%;
+    text-align: center;
+}
+
+.payment-table th:nth-child(3),
+.payment-table td:nth-child(3),
+.payment-table th:nth-child(4),
+.payment-table td:nth-child(4) {
+    width: 20%;
+    text-align: center;
+}

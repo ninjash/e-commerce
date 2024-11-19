@@ -166,18 +166,42 @@ class Address
         return $result->fetch_all(MYSQLI_ASSOC); // Fetch all rows as associative array
     }
 
+    public function saveUserAddress($userId, $name, $email, $phone, $street1, $street2, $city, $zip, $state, $country, $addressType, $sameAddress) {
+        $sql = "INSERT INTO addresses (user_id, name, email, phone_number, address_line_1, address_line_2, city, postal_code, state, country, address_type, same_address) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
+                ON DUPLICATE KEY UPDATE 
+                    name = VALUES(name), 
+                    email = VALUES(email), 
+                    phone_number = VALUES(phone_number), 
+                    address_line_1 = VALUES(address_line_1), 
+                    address_line_2 = VALUES(address_line_2), 
+                    city = VALUES(city), 
+                    postal_code = VALUES(postal_code), 
+                    state = VALUES(state), 
+                    country = VALUES(country), 
+                    address_type = VALUES(address_type), 
+                    same_address = VALUES(same_address)";
+        
+        $stmt = $this->db->prepare($sql);
+        if (!$stmt) {
+            error_log('Prepare failed: ' . $this->db->error);
+            throw new Exception('Database prepare failed.');
+        }
+
+        $stmt->bind_param("issssssssssi", $userId, $name, $email, $phone, $street1, $street2, $city, $zip, $state, $country, $addressType, $sameAddress);
+        if (!$stmt->execute()) {
+            error_log('Execute failed: ' . $stmt->error);
+            throw new Exception('Database execute failed.');
+        }
+    }
+
     /**
      * Get the latest address for a user
      * @param int $userId User ID
      * @return array|false The latest address for the user or false if not found
      */
-    public function getUserAddress($userId)
-    {
-        $sql = "SELECT * FROM addresses 
-                WHERE user_id = ? 
-                ORDER BY created_at DESC 
-                LIMIT 1";
-
+    public function getUserAddress($userId) {
+        $sql = "SELECT * FROM addresses WHERE user_id = ?";
         $stmt = $this->db->prepare($sql);
         if (!$stmt) {
             error_log('Prepare failed: ' . $this->db->error);

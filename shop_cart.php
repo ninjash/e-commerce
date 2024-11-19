@@ -4,7 +4,7 @@ require_once 'classes/Cart.php';
 
 session_start();
 
-ini_set('display_errors', 1); // Enable during debugging
+ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
 $userId = $_SESSION['user_id'] ?? null;
@@ -16,55 +16,96 @@ if (!isset($conn)) {
 }
 $cart = new Cart($conn, $userId);
 
-// Handle POST actions (e.g., remove item from cart)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['action']) && $_POST['action'] === 'remove') {
-        $productId = intval($_POST['product_id'] ?? 0);
+    try {
+        // Log the request method and raw input
+        error_log("Request method: " . $_SERVER['REQUEST_METHOD']);
+        $input = file_get_contents('php://input');
+        error_log("Raw input: $input");
 
-        error_log("POST Request - Action: remove, Product ID: $productId");
-
-        if ($productId > 0) {
-            $isRemoved = $cart->removeFromCart($productId);
-
-            if ($isRemoved) {
-                echo json_encode(['status' => 'success', 'message' => 'Item removed from cart.']);
-            } else {
-                error_log("Failed to remove product ID $productId from cart.");
-                echo json_encode(['status' => 'error', 'message' => 'Failed to remove item from cart.']);
-            }
-        } else {
-            error_log("Invalid product ID received: $productId");
-            echo json_encode(['status' => 'error', 'message' => 'Invalid product ID.']);
+        // Decode JSON input
+        $data = json_decode($input, true);
+        if (!$data) {
+            throw new Exception('Invalid JSON input: ' . json_last_error_msg());
         }
-        exit;
-    }
+        error_log("Decoded input: " . print_r($data, true));
 
-    // Example: Handle other actions like merge_cart
-    if (!$isGuest && isset($_POST['merge_cart'])) {
-        $cart->mergeCart();
-        echo json_encode(['status' => 'success', 'message' => 'Cart merged successfully.']);
-        exit;
+        // Extract and validate parameters
+        $productId = intval($data['product_id'] ?? 0);
+        $action = $data['action'] ?? '';
+        if ($productId <= 0 || !in_array($action, ['increase', 'decrease', 'update'])) {
+            throw new Exception("Invalid parameters: Product ID: $productId, Action: $action");
+        }
+
+        // Calculate quantity change based on action
+        $quantityChange = match ($action) {
+            'increase' => 1,
+            'decrease' => -1,
+            'update' => intval($data['quantity'] ?? 0) - $cart->getProductQuantity($productId),
+            default => throw new Exception('Invalid action type'),
+        };
+
+        // Perform the action
+        if (!$cart->updateQuantity($productId, $quantityChange)) {
+            throw new Exception('Failed to update quantity in database.');
+        }
+
+        // Prepare response data
+        $cartItems = $cart->getCartItems();
+        $subtotal = array_sum(array_map(fn($item) => $item['price'] * $item['quantity'], $cartItems));
+        $taxes = $subtotal * 0.00; // Assuming no tax
+        $total = $subtotal + $taxes;
+
+        $response = [
+            'status' => 'success',
+            'message' => 'Cart updated successfully!',
+            'cartItems' => array_map(function ($item) {
+                return [
+                    'product_id' => $item['product_id'],
+                    'name' => $item['name'],
+                    'price' => $item['price'],
+                    'quantity' => $item['quantity'],
+                    'subtotal' => $item['price'] * $item['quantity'],
+                ];
+            }, $cartItems),
+            'subtotal' => $subtotal,
+            'taxes' => $taxes,
+            'total' => $total,
+        ];
+
+        // Log and send response
+        error_log("Response: " . print_r($response, true));
+        echo json_encode($response);
+
+    } catch (Exception $e) {
+        error_log("Error: " . $e->getMessage());
+        echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
     }
+    exit;
 }
 
-// Fetch cart items and calculate totals
-$cartItems = $cart->getCartItems();
-$subtotal = array_sum(array_map(fn($item) => $item['price'] * $item['quantity'], $cartItems));
-$taxes = $subtotal * 0.00; // Assuming no tax
-$total = $subtotal + $taxes;
+// If not a POST request, fetch cart items and calculate totals
+function fetchCartItemsAndCalculateTotals($cart) {
+    $cartItems = $cart->getCartItems();
+    $subtotal = array_sum(array_map(fn($item) => $item['price'] * $item['quantity'], $cartItems));
+    $taxes = $subtotal * 0.00; // Assuming no tax
+    $total = $subtotal + $taxes;
 
-// Store the order summary in the session
-$_SESSION['order_summary'] = [
-    'subtotal' => $subtotal,
-    'taxes' => $taxes,
-    'total' => $total,
-];
+    // Store the order summary in the session
+    $_SESSION['order_summary'] = [
+        'subtotal' => $subtotal,
+        'taxes' => $taxes,
+        'total' => $total,
+    ];
 
-// Store the cart items in the session for use on subsequent pages
-$_SESSION['cart_items'] = $cartItems;
+    // Store the cart items in the session for use on subsequent pages
+    $_SESSION['cart_items'] = $cartItems;
 
-// Debug log to ensure cart items are stored correctly
-error_log('Cart items stored in session: ' . print_r($_SESSION['cart_items'], true));
+    // Debug log to ensure cart items are stored correctly
+    error_log('Cart items stored in session: ' . print_r($_SESSION['cart_items'], true));
+}
+
+fetchCartItemsAndCalculateTotals($cart);
 ?>
 
 <!DOCTYPE html>
@@ -148,15 +189,15 @@ error_log('Cart items stored in session: ' . print_r($_SESSION['cart_items'], tr
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item d-flex justify-content-between">
                                 <span>Subtotal:</span>
-                                <span id="subtotal">$<?= number_format($subtotal, 2); ?></span>
+                                <span id="subtotal">$<?= number_format($_SESSION['order_summary']['subtotal'], 2); ?></span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between">
                                 <span>Taxes:</span>
-                                <span>$<?= number_format($taxes, 2); ?></span>
+                                <span>$<?= number_format($_SESSION['order_summary']['taxes'], 2); ?></span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between">
                                 <strong>Total:</strong>
-                                <strong id="total">$<?= number_format($total, 2); ?></strong>
+                                <strong id="total">$<?= number_format($_SESSION['order_summary']['total'], 2); ?></strong>
                             </li>
                         </ul>
                         <a href="shop_address.php" class="btn btn-success mt-4 w-100">Proceed to Checkout</a>
@@ -217,7 +258,7 @@ error_log('Cart items stored in session: ' . print_r($_SESSION['cart_items'], tr
                                             </button>
                                         </div>
                                     </td>
-                                    <td class="text-center td-price">$${parseFloat(item.price).toFixed(2)}</td>
+                                    <td class="text-center td-price">$${(item.price * item.quantity).toFixed(2)}</td>
                                     <td class="td-action">
                                         <a href="#" class="js_delete_product no-decoration" data-product-id="${item.product_id}">
                                             <small><i class="fa fa-trash-o"></i></small>
@@ -262,70 +303,68 @@ error_log('Cart items stored in session: ' . print_r($_SESSION['cart_items'], tr
             $('#total').text(`$${total.toFixed(2)}`);
         }
 
-        function updateCartQuantity(productId, action) {
+        function updateCartQuantity(productId, actionType) {
             $.ajax({
-                url: 'update_cart_quantity.php',
+                url: 'shop_cart.php',
                 type: 'POST',
-                data: { product_id: productId, action: action },
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    product_id: productId,
+                    action: actionType
+                }),
                 dataType: 'json',
                 success: function (response) {
                     if (response.status === 'success') {
-                        const { cartItems, subtotal, taxes, total } = response;
-
-                        // Update the cart items
-                        let cartHtml = '';
-                        cartItems.forEach(item => {
-                            cartHtml += `
-                                <tr data-product-id="${item.product_id}">
-                                    <td align="center" class="td-img d-block">
-                                        <img src="${item.image_url}" class="img rounded o_image_64_max" alt="${item.name}" style="max-width: 80px;">
-                                    </td>
-                                    <td class="td-product_name">
-                                        <a href="product_page.php?id=${item.product_id}">
-                                            <strong>${item.name}</strong>
-                                        </a>
-                                    </td>
-                                    <td class="text-center td-qty">
-                                        <div class="input-group mx-auto justify-content-center align-items-center" style="width: auto; background-color: #122a3c; border-radius: 4px;">
-                                            <button class="btn btn-sm btn-light js_decrease_quantity" data-product-id="${item.product_id}" style="border: none; color: white; font-weight: bold;">
-                                                -
-                                            </button>
-                                            <input type="text" class="js_quantity form-control text-center quantity" value="${item.quantity}" 
-                                                style="width: 25px; border: none; background-color: #122a3c; color: white; font-weight: bold;" readonly>
-                                            <button class="btn btn-sm btn-light js_increase_quantity" data-product-id="${item.product_id}" style="border: none; color: white; font-weight: bold;">
-                                                +
-                                            </button>
-                                        </div>
-                                    </td>
-                                    <td class="text-center td-price">$${(item.price * item.quantity).toFixed(2)}</td>
-                                    <td class="td-action">
-                                        <a href="#" class="js_delete_product no-decoration" data-product-id="${item.product_id}">
-                                            <small><i class="fa fa-trash-o"></i></small>
-                                        </a>
-                                    </td>
-                                </tr>`;
-                        });
-
-                        $('#cartItemsBody').html(cartHtml);
-
-                        // Update order summary
-                        $('#subtotal').text(`$${subtotal}`);
-                        $('#taxes').text(`$${taxes}`);
-                        $('#total').text(`$${total}`);
+                        console.log('Cart updated:', response);
+                        loadCartItems(); // Reload cart items to reflect changes
                     } else {
-                        alert(response.message || 'Failed to update cart quantity.');
+                        alert(response.message);
                     }
                 },
-                error: function (xhr, status, error) {
-                    console.error(`AJAX Error: ${error}`);
-                    console.error(xhr.responseText);
-                    alert('Error processing the request.');
-                },
+                error: function (xhr) {
+                    console.error('Error:', xhr.responseText);
+                }
             });
         }
 
-        // Load cart items on page load
-        loadCartItems();
+        // Event delegation for quantity buttons
+        $(document).on('click', '.js_increase_quantity, .js_decrease_quantity', function(e) {
+            e.preventDefault();
+            
+            // Get the closest row to find the product ID
+            const row = $(this).closest('tr');
+            const productId = row.data('product-id');
+            const actionType = $(this).hasClass('js_increase_quantity') ? 'increase' : 'decrease';
+            
+            // Disable both buttons in this row temporarily
+            row.find('.js_increase_quantity, .js_decrease_quantity').prop('disabled', true);
+            
+            console.log('Button clicked:', {
+                productId: productId,
+                actionType: actionType,
+                rowFound: row.length > 0,
+                buttonClass: $(this).attr('class')
+            });
+
+            if (!productId) {
+                console.error('No product ID found for row:', row);
+                return;
+            }
+
+            updateCartQuantity(productId, actionType);
+            
+            // Re-enable the buttons after a short delay
+            setTimeout(() => {
+                row.find('.js_increase_quantity, .js_decrease_quantity').prop('disabled', false);
+            }, 500);
+        });
+
+        // Optional: Add input change handler for direct quantity updates
+        $(document).on('change', '.js_quantity', function() {
+            const row = $(this).closest('tr');
+            const productId = row.data('product-id');
+            updateCartQuantity(productId, 'update');
+        });
 
         // Event listener for item removal
         $(document).on('click', '.js_delete_product', function (e) {
@@ -345,22 +384,27 @@ error_log('Cart items stored in session: ' . print_r($_SESSION['cart_items'], tr
                 });
             }
         });
+    
+        function initializeQuantityButtons() {
+            $('.js_quantity').each(function() {
+                const quantity = parseInt($(this).val());
+                const row = $(this).closest('tr');
+                row.find('.js_decrease_quantity').prop('disabled', quantity <= 1);
+            });
+        }
 
-        // Event listeners for quantity buttons
-        $(document).on('click', '.js_increase_quantity', function () {
-            const productId = $(this).data('product-id');
-            updateCartQuantity(productId, 'increase');
+        $(document).ajaxError(function(event, jqxhr, settings, error) {
+            console.error('Ajax Error:', {
+                event: event,
+                jqxhr: jqxhr,
+                settings: settings,
+                error: error
+            });
         });
 
-        $(document).on('click', '.js_decrease_quantity', function () {
-            const productId = $(this).data('product-id');
-            updateCartQuantity(productId, 'decrease');
-        });
-
-        // Handle quantity increase/decrease and update the summary dynamically
-        $(document).on('click', '.js_decrease_quantity, .js_increase_quantity', function () {
-            updateOrderSummary(); // Update totals whenever quantities are changed
-        });
+        // Load cart items on page load
+        loadCartItems();
+        initializeQuantityButtons();
 
         // Handle "Process Checkout" button click
         $(document).on('click', '.btn-process-checkout', function (e) {

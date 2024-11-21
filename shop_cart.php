@@ -1,6 +1,7 @@
 <?php
 require_once 'web/db_connect.php';
 require_once 'classes/Cart.php';
+require_once 'classes/Order.php';
 
 session_start();
 
@@ -232,6 +233,8 @@ fetchCartItemsAndCalculateTotals($cart);
                         cartHtml = '<tr><td colspan="5" class="text-center">Your cart is empty.</td></tr>';
                     } else {
                         cartItems.forEach(item => {
+                            const price = parseFloat(item.price).toFixed(2);
+                            const subtotal = (item.price * item.quantity).toFixed(2);
                             cartHtml += `
                                 <tr data-product-id="${item.product_id}">
                                     <td align="center" class="td-img d-block">
@@ -258,7 +261,7 @@ fetchCartItemsAndCalculateTotals($cart);
                                             </button>
                                         </div>
                                     </td>
-                                    <td class="text-center td-price">$${(item.price * item.quantity).toFixed(2)}</td>
+                                    <td class="text-center td-price" data-price="${price}">$${price}</td>
                                     <td class="td-action">
                                         <a href="#" class="js_delete_product no-decoration" data-product-id="${item.product_id}">
                                             <small><i class="fa fa-trash-o"></i></small>
@@ -286,7 +289,7 @@ fetchCartItemsAndCalculateTotals($cart);
             // Calculate subtotal from cart items
             $('#cartItemsBody tr').each(function () {
                 const quantity = parseInt($(this).find('.js_quantity').val(), 10);
-                const price = parseFloat($(this).find('.td-price').text().replace('$', ''));
+                const price = parseFloat($(this).find('.td-price').data('price'));
 
                 if (!isNaN(quantity) && !isNaN(price)) {
                     subtotal += quantity * price;

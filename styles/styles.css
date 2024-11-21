@@ -2579,3 +2579,60 @@ body {
     width: 20%;
     text-align: center;
 }
+
+.order-summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    table-layout: fixed; /* Ensure consistent table layout */
+}
+
+.order-summary-table th, .order-summary-table td {
+    padding: 15px; /* Adjust padding as needed */
+    text-align: center;
+    border: 1px solid #ddd;
+    width: 50%; /* Ensure even widths for each column */
+}
+
+.order-summary-table th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+}
+
+.order-summary-table td {
+    background-color: #ffffff;
+}
+
+.order-summary-table .text-muted {
+    color: #6c757d !important;
+}
+
+.order-summary-table .monetary_field {
+    font-weight: bold;
+}
+
+.order-summary-table .oe_currency_value {
+    color: #000;
+}
+
+/* Ensure even spacing between rows */
+.order-summary-table tbody tr {
+    margin-bottom: 10px; /* Adjust margin as needed */
+}
+
+/* Styles for the confirmation page */
+.confirmation-page .card {
+    margin-top: 20px;
+}
+
+.confirmation-page .card-title {
+    font-size: 1.5rem;
+}
+
+.confirmation-page .list-group-item {
+    font-size: 1.1rem;
+}
+
+.confirmation-page .table {
+    margin-top: 20px;
+}

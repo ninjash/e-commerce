@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 19, 2024 at 01:38 AM
+-- Generation Time: Nov 21, 2024 at 03:55 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -51,9 +51,7 @@ CREATE TABLE `addresses` (
 --
 
 INSERT INTO `addresses` (`id`, `user_id`, `cart_id`, `address_line_1`, `address_line_2`, `city`, `state`, `postal_code`, `country`, `phone_number`, `address_type`, `created_at`, `updated_at`, `name`, `email`, `same_address`) VALUES
-(40, 2, NULL, 'Purok 3, Cangmating', 'Buscato Compound', 'Sibulan', 'Armed Forces Americas', '6201', 'United States', '+639959904858', 'billing', '2024-11-17 18:18:45', '2024-11-17 18:18:45', 'Van Ashleigh Buscato Alavaren', 'vanbalavaren@su.edu.ph', 0),
-(41, 2, NULL, 'Purok 3, Cangmating', 'Buscato Compound', 'Sibulan', 'Armed Forces Americas', '6201', 'United States', '+639959904858', 'billing', '2024-11-17 18:24:39', '2024-11-17 18:24:39', 'Van Ashleigh Buscato Alavaren', 'vanbalavaren@su.edu.ph', 0),
-(42, 2, NULL, 'Purok 3, Cangmating', 'Buscato Compound', 'Sibulan', 'Armed Forces Americas', '6201', 'United States', '+639959904858', 'billing', '2024-11-19 00:37:35', '2024-11-19 00:37:35', 'Van Ashleigh Buscato Alavaren', 'vanbalavaren@su.edu.ph', 0);
+(1, 2, NULL, 'Purok 3, Cangmating', 'Buscato Compound', 'Sibulan', 'Armed Forces Americas', '6201', 'United States', '+639959904858', 'billing', '2024-11-21 14:40:44', '2024-11-21 14:40:44', 'Van Ashleigh Buscato Alavaren', 'vanbalavaren@su.edu.ph', 0);
 
 -- --------------------------------------------------------
 
@@ -92,15 +90,6 @@ CREATE TABLE `cart` (
   `quantity` int(11) NOT NULL DEFAULT 1,
   `added_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `cart`
---
-
-INSERT INTO `cart` (`id`, `user_id`, `session_id`, `product_id`, `quantity`, `added_at`) VALUES
-(1, 1, NULL, 1, 1, '2024-11-07 14:52:49'),
-(3, NULL, 'ii97jes885fe9efqpo8ii9hseb', 1, 1, '2024-11-19 00:36:35'),
-(4, NULL, 'ii97jes885fe9efqpo8ii9hseb', 14, 1, '2024-11-19 00:36:54');
 
 -- --------------------------------------------------------
 
@@ -778,18 +767,63 @@ INSERT INTO `manufacturers` (`id`, `name`, `logo_path`, `specialty`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `orders`
+--
+
+CREATE TABLE `orders` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `total_amount` decimal(10,2) NOT NULL,
+  `payment_method` varchar(255) NOT NULL,
+  `transaction_id` varchar(255) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `orders`
+--
+
+INSERT INTO `orders` (`id`, `user_id`, `total_amount`, `payment_method`, `transaction_id`, `created_at`) VALUES
+(1, NULL, 9675.00, 'Credit Card', '673f48502a376', '2024-11-21 14:48:48');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `order_items`
+--
+
+CREATE TABLE `order_items` (
+  `id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `price` decimal(10,2) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `payments`
 --
 
 CREATE TABLE `payments` (
   `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
   `amount` decimal(10,2) NOT NULL,
   `payment_details` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`payment_details`)),
   `transaction_id` varchar(50) NOT NULL,
   `status` varchar(20) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `session_id` varchar(255) DEFAULT NULL,
+  `order_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `payments`
+--
+
+INSERT INTO `payments` (`id`, `user_id`, `amount`, `payment_details`, `transaction_id`, `status`, `created_at`, `session_id`, `order_id`) VALUES
+(1, NULL, 9675.00, '{\"card_number\":\"4421123456781290\",\"expiry_date\":\"12\\/29\",\"cvv\":\"335\"}', '673f48502a376', 'completed', '2024-11-21 14:48:48', '0', 1);
 
 -- --------------------------------------------------------
 
@@ -1103,8 +1137,8 @@ INSERT INTO `users` (`id`, `username`, `password`, `email`, `user_type`, `create
 --
 ALTER TABLE `addresses`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`),
-  ADD KEY `cart_id` (`cart_id`);
+  ADD KEY `fk_addresses_user_id_new` (`user_id`),
+  ADD KEY `fk_addresses_cart_id_new` (`cart_id`);
 
 --
 -- Indexes for table `attributes`
@@ -1117,8 +1151,8 @@ ALTER TABLE `attributes`
 --
 ALTER TABLE `cart`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`),
-  ADD KEY `product_id` (`product_id`);
+  ADD KEY `fk_cart_user_id_new` (`user_id`),
+  ADD KEY `fk_cart_product_id_new` (`product_id`);
 
 --
 -- Indexes for table `categories`
@@ -1141,11 +1175,27 @@ ALTER TABLE `manufacturers`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `orders`
+--
+ALTER TABLE `orders`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_orders_user_id_new` (`user_id`);
+
+--
+-- Indexes for table `order_items`
+--
+ALTER TABLE `order_items`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_order_items_order_id_new` (`order_id`),
+  ADD KEY `fk_order_items_product_id_new` (`product_id`);
+
+--
 -- Indexes for table `payments`
 --
 ALTER TABLE `payments`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`);
+  ADD KEY `fk_payments_user_id_new` (`user_id`),
+  ADD KEY `fk_payments_order_id_new` (`order_id`);
 
 --
 -- Indexes for table `products`
@@ -1194,7 +1244,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `addresses`
 --
 ALTER TABLE `addresses`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `attributes`
@@ -1206,7 +1256,7 @@ ALTER TABLE `attributes`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `categories`
@@ -1227,10 +1277,22 @@ ALTER TABLE `manufacturers`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
+-- AUTO_INCREMENT for table `orders`
+--
+ALTER TABLE `orders`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `order_items`
+--
+ALTER TABLE `order_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `payments`
 --
 ALTER TABLE `payments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `products`
@@ -1254,7 +1316,7 @@ ALTER TABLE `product_images`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- Constraints for dumped tables
@@ -1264,15 +1326,15 @@ ALTER TABLE `users`
 -- Constraints for table `addresses`
 --
 ALTER TABLE `addresses`
-  ADD CONSTRAINT `addresses_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `addresses_ibfk_2` FOREIGN KEY (`cart_id`) REFERENCES `cart` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `fk_addresses_cart_id_new` FOREIGN KEY (`cart_id`) REFERENCES `cart` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_addresses_user_id_new` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 
 --
 -- Constraints for table `cart`
 --
 ALTER TABLE `cart`
-  ADD CONSTRAINT `cart_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `cart_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `fk_cart_product_id_new` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_cart_user_id_new` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 
 --
 -- Constraints for table `categories`
@@ -1287,10 +1349,25 @@ ALTER TABLE `category_images`
   ADD CONSTRAINT `fk_category` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE CASCADE;
 
 --
+-- Constraints for table `orders`
+--
+ALTER TABLE `orders`
+  ADD CONSTRAINT `fk_orders_user_id_new` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `order_items`
+--
+ALTER TABLE `order_items`
+  ADD CONSTRAINT `fk_order_items_order_id_new` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_order_items_product_id_new` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`);
+
+--
 -- Constraints for table `payments`
 --
 ALTER TABLE `payments`
-  ADD CONSTRAINT `payments_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
+  ADD CONSTRAINT `fk_payments_order_id_new` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_payments_user_id_new` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 
 --
 -- Constraints for table `products`

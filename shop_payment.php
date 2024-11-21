@@ -1,39 +1,85 @@
 <?php
-// Ensure the session is started and required files are included
 session_start();
 require_once 'web/db_connect.php';
-require_once 'classes/Cart.php';
 require_once 'classes/Payment.php';
+require_once 'classes/Order.php';
+require_once 'classes/Cart.php';
 
-// Validate session data
-if (!isset($_SESSION['order_summary'])) {
-    $_SESSION['error_message'] = 'Your cart is empty or order summary is missing.';
-    header('Location: shop_cart.php');
-    exit;
-}
-
-// Fetch order summary from session
-$orderSummary = $_SESSION['order_summary'];
-$subtotal = $orderSummary['subtotal'];
-$taxes = $orderSummary['taxes'];
-$delivery = isset($orderSummary['delivery']) ? $orderSummary['delivery'] : 130.00;
-$total = $subtotal + $taxes + $delivery; // Include delivery fee in the total
+// Retrieve values from session
+$delivery = $_SESSION['order_summary']['delivery'] ?? 130.00;
+$subtotal = $_SESSION['order_summary']['subtotal'] ?? 0.00;
+$taxes = $_SESSION['order_summary']['taxes'] ?? 0.00;
+$total = $subtotal + $taxes + $delivery;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $paymentDetails = [
-        'card_number' => $_POST['cardNumber'],
-        'expiry_date' => $_POST['expiryDate'],
-        'cvv' => $_POST['cvv']
+        'card_number' => $_POST['cardNumber'] ?? '',
+        'expiry_date' => $_POST['expiryDate'] ?? '',
+        'cvv' => $_POST['cvv'] ?? ''
     ];
 
-    $payment = new Payment($conn, $total, 'credit_card');
+    $userId = $_SESSION['user_id'] ?? null; // Null for guest users
+    $sessionId = session_id();
+
+    // Debugging session values
+    error_log("User ID: " . ($userId ?: 'Guest'));
+    error_log("Session Order Summary: " . print_r($_SESSION['order_summary'], true));
+    error_log("Session Cart Items: " . print_r($_SESSION['cart_items'], true));
+
+    $payment = new Payment($conn, $total, 'credit_card', $sessionId);
 
     if ($payment->processPayment()) {
-        $payment->savePaymentDetails($userId, $paymentDetails);
-        header('Location: order_confirmation.php');
-        exit;
+        $transactionId = $payment->getTransactionId();
+
+        // Create order
+        $order = new Order($conn);
+        $cartItems = $_SESSION['cart_items'] ?? [];
+
+        // Debugging cart items
+        error_log("Cart Items Retrieved: " . print_r($cartItems, true));
+
+        if (empty($cartItems)) {
+            error_log("No items in the cart. Cannot proceed with order creation.");
+            $error_message = "Your cart is empty. Please add items before checking out.";
+        } else {
+            try {
+                $orderId = $order->createOrder($userId, $total, 'Credit Card', $transactionId, $cartItems);
+
+                // Insert order items
+                $order->insertOrderItems($orderId, $cartItems);
+
+                error_log("Order ID Created: " . $orderId);
+
+                // Save payment details
+                if ($payment->savePaymentDetails($userId, $paymentDetails, $orderId)) {
+                    // Clear the cart
+                    $cart = new Cart($conn, $userId);
+                    $cart->clearCart();
+
+                    // Store order confirmation details in the session
+                    $_SESSION['order_confirmation'] = [
+                        'order_id' => $orderId,
+                        'total_amount' => $total,
+                        'payment_method' => 'Credit Card',
+                        'transaction_id' => $transactionId,
+                        'order_items' => $cartItems
+                    ];
+
+                    // Redirect to confirmation page
+                    header('Location: shop_confirmation.php');
+                    exit;
+                } else {
+                    $error_message = "Failed to save payment details. Please try again.";
+                    error_log($error_message);
+                }
+            } catch (Exception $e) {
+                $error_message = 'Order creation failed: ' . $e->getMessage();
+                error_log($error_message);
+            }
+        }
     } else {
         $error_message = 'Payment processing failed. Please try again.';
+        error_log($error_message);
     }
 }
 ?>
@@ -64,11 +110,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <hr class="d-none d-xl-block">
                         <div>
                             <div id="cart_total" class="">
-                                <table class="table mb-0">
+                                <table class="table mb-0 order-summary-table">
                                     <tbody>
                                         <tr id="empty">
-                                            <td class="col-md-2 col-3 border-0"></td>
-                                            <td class="col-md-2 col-3 border-0"></td>
                                         </tr>
                                         <tr id="order_delivery">
                                             <td class="text-center border-0 text-muted" title="Delivery will be updated after choosing a new delivery method">Delivery:</td>
@@ -76,22 +120,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                 <span class="monetary_field" style="white-space: nowrap;">$&nbsp;<span class="oe_currency_value"><?= number_format($delivery, 2); ?></span></span>
                                             </td>
                                         </tr>
-                                        <tr id="order_total_untaxed">
-                                            <td class="text-center border-0">Subtotal:</td>
-                                            <td class="text-xl-center border-0">
+                                        <tr id="order_subtotal">
+                                            <td class="text-center border-0 text-muted">Subtotal:</td>
+                                            <td class="text-xl-center border-0 text-muted">
                                                 <span class="monetary_field" style="white-space: nowrap;">$&nbsp;<span class="oe_currency_value"><?= number_format($subtotal, 2); ?></span></span>
                                             </td>
                                         </tr>
-                                        <tr id="order_total_taxes" style="">
-                                            <td class="text-center border-0">Taxes:</td>
-                                            <td class="text-xl-center border-0">
+                                        <tr id="order_taxes">
+                                            <td class="text-center border-0 text-muted">Taxes:</td>
+                                            <td class="text-xl-center border-0 text-muted">
                                                 <span class="monetary_field" style="white-space: nowrap;">$&nbsp;<span class="oe_currency_value"><?= number_format($taxes, 2); ?></span></span>
                                             </td>
                                         </tr>
-                                        <tr id="order_total" style="">
-                                            <td class="text-center border-top border-bottom-0"><strong>Total:</strong></td>
-                                            <td class="text-xl-center border-top border-bottom-0">
-                                                <strong class="monetary_field">$&nbsp;<span class="oe_currency_value"><?= number_format($total, 2); ?></span></strong>
+                                        <tr id="order_total">
+                                            <td class="text-center border-0 text-muted">Total:</td>
+                                            <td class="text-xl-center border-0 text-muted">
+                                                <span class="monetary_field" style="white-space: nowrap;">$&nbsp;<span class="oe_currency_value"><?= number_format($total, 2); ?></span></span>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -180,7 +224,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
                 <div id="payment_method" class="mt-0 py-3 bg-white px-3" style="">
                     <h3 class="mb24">Pay with</h3>
-                    <form name="o_payment_checkout" class="o_payment_form mt-0 clearfix" data-amount="<?= number_format($total, 2) ?>" data-currency-id="2" data-partner-id="61085" data-access-token="1ba01496-011e-4eea-bf01-b14ca0cca81b" data-transaction-route="/shop/payment/transaction/7772" data-landing-route="/shop/payment/validate" data-allow-token-selection="True">
+                    <form id="o_payment_form" method="POST">
                         <div class="card">
                             <div name="o_payment_option_card" class="card-body o_payment_option_card" style="padding:16px  0px !important">
                                 <label>
@@ -208,21 +252,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <div class="clearfix">
                                     <div class="o_authorize_form" id="o_authorize_form_4">
                                         <div class="mb-3">
-                                            <label class="col-form-label" for="o_authorize_card_4">Card Number</label>
-                                            <input type="text" required="" maxlength="19" class="form-control" id="o_authorize_card_4">
-                                            <div data-lastpass-icon-root="" style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;"></div>
+                                            <label class="col-form-label" for="cardNumber">Card Number</label>
+                                            <input type="text" name="cardNumber" required="" maxlength="19" class="form-control" id="cardNumber">
                                         </div>
                                         <div class="row">
                                             <div class="col-sm-8 mb-3">
-                                                <label for="o_authorize_month_4">Expiration</label>
+                                                <label for="expiryDate">Expiration</label>
                                                 <div class="input-group">
-                                                    <input type="number" placeholder="MM" min="1" max="12" required="" class="form-control" id="o_authorize_month_4">
-                                                    <input type="number" placeholder="YY" min="00" max="99" required="" class="form-control" id="o_authorize_year_4">
+                                                    <input type="text" name="expiryDate" placeholder="MM/YY" required="" class="form-control" id="expiryDate" maxlength="5">
                                                 </div>
                                             </div>
                                             <div class="col-sm-4 mb-3">
-                                                <label for="o_authorize_code_4">CVV Code</label>
-                                                <input type="number" max="9999" class="form-control" id="o_authorize_code_4">
+                                                <label for="cvv">CVV Code</label>
+                                                <input type="text" name="cvv" required="" maxlength="4" class="form-control" id="cvv">
                                             </div>
                                         </div>
                                     </div>
@@ -293,6 +335,11 @@ $(document).ready(function () {
                 }
 
                 $('#cart_items_body').html(cartHtml);
+
+                // Update order summary
+                $('#order_subtotal .oe_currency_value').text(response.subtotal.toFixed(2));
+                $('#order_taxes .oe_currency_value').text(response.taxes.toFixed(2));
+                $('#order_total .oe_currency_value').text(response.total.toFixed(2));
             } else {
                 $('#cart_items_body').html('<tr><td colspan="4" class="text-center">Failed to load cart items.</td></tr>');
             }
@@ -304,7 +351,16 @@ $(document).ready(function () {
     // Load cart items on page load
     loadCartItems();
 
-    $('#paymentForm').on('submit', function (e) {
+    const expiryDateInput = document.getElementById('expiryDate');
+    expiryDateInput.addEventListener('input', function (e) {
+        let value = e.target.value.replace(/\D/g, ''); // Remove non-numeric characters
+        if (value.length >= 3) {
+            value = value.slice(0, 2) + '/' + value.slice(2, 4);
+        }
+        e.target.value = value;
+    });
+
+    $('#o_payment_form').on('submit', function(e) {
         e.preventDefault();
 
         const formData = $(this).serialize();
@@ -313,14 +369,19 @@ $(document).ready(function () {
             url: 'process_payment.php',
             type: 'POST',
             data: formData,
+            dataType: 'json', // Ensure the response is parsed as JSON
             success: function (response) {
+                console.log('AJAX response:', response); // Log the response for debugging
                 if (response.status === 'success') {
-                    window.location.href = 'order_confirmation.php';
+                    console.log('Redirecting to shop_confirmation.php');
+                    window.location.href = 'shop_confirmation.php';
                 } else {
-                    alert('Payment processing failed. Please try again.');
+                    console.error('Payment processing failed:', response.message);
+                    alert('Payment processing failed: ' + response.message);
                 }
             },
-            error: function () {
+            error: function (xhr, status, error) {
+                console.error('AJAX error:', status, error);
                 alert('Error processing payment.');
             }
         });

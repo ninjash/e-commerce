@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $payment = new Payment($conn, $total, 'credit_card', $sessionId);
 
-    if ($payment->processPayment()) {
+    if ($payment->processPayment($paymentDetails)) {
         $transactionId = $payment->getTransactionId();
 
         // Create order
@@ -43,38 +43,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error_message = "Your cart is empty. Please add items before checking out.";
         } else {
             try {
+                // Begin transaction
+                $conn->begin_transaction();
+
+                // Create order
                 $orderId = $order->createOrder($userId, $total, 'Credit Card', $transactionId, $cartItems);
-
-                // Insert order items
-                $order->insertOrderItems($orderId, $cartItems);
-
-                error_log("Order ID Created: " . $orderId);
-
-                // Save payment details
-                if ($payment->savePaymentDetails($userId, $paymentDetails, $orderId)) {
-                    // Clear the cart
-                    $cart = new Cart($conn, $userId);
-                    $cart->clearCart();
-
-                    // Store order confirmation details in the session
-                    $_SESSION['order_confirmation'] = [
-                        'order_id' => $orderId,
-                        'total_amount' => $total,
-                        'payment_method' => 'Credit Card',
-                        'transaction_id' => $transactionId,
-                        'order_items' => $cartItems
-                    ];
-
-                    // Redirect to confirmation page
-                    header('Location: shop_confirmation.php');
-                    exit;
-                } else {
-                    $error_message = "Failed to save payment details. Please try again.";
-                    error_log($error_message);
+                
+                if (!$orderId) {
+                    throw new Exception("Failed to create order");
                 }
+
+                // If we get here, commit the transaction
+                $conn->commit();
+                error_log("Order created successfully for order ID: $orderId");
+
+                // Clear the cart
+                $cart = new Cart($conn, $userId);
+                $cart->clearCart();
+
+                // Store order confirmation details in the session
+                $_SESSION['order_confirmation'] = [
+                    'order_id' => $orderId,
+                    'total_amount' => $total,
+                    'payment_method' => 'Credit Card',
+                    'transaction_id' => $transactionId,
+                    'order_items' => $cartItems
+                ];
+
+                // Redirect to confirmation page
+                header('Location: shop_confirmation.php');
+                exit;
+
             } catch (Exception $e) {
-                $error_message = 'Order creation failed: ' . $e->getMessage();
-                error_log($error_message);
+                $conn->rollback();
+                error_log("Failed to process order: " . $e->getMessage());
+                echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+                exit;
             }
         }
     } else {
@@ -337,9 +341,15 @@ $(document).ready(function () {
                 $('#cart_items_body').html(cartHtml);
 
                 // Update order summary
-                $('#order_subtotal .oe_currency_value').text(response.subtotal.toFixed(2));
-                $('#order_taxes .oe_currency_value').text(response.taxes.toFixed(2));
-                $('#order_total .oe_currency_value').text(response.total.toFixed(2));
+                const deliveryFee = parseFloat(response.delivery) || 130.00;
+                const subtotal = parseFloat(response.subtotal) || 0.00;
+                const taxes = parseFloat(response.taxes) || 0.00;
+                const total = (subtotal + taxes + deliveryFee).toFixed(2);
+
+                $('#order_delivery .oe_currency_value').text(deliveryFee.toFixed(2));
+                $('#order_subtotal .oe_currency_value').text(subtotal.toFixed(2));
+                $('#order_taxes .oe_currency_value').text(taxes.toFixed(2));
+                $('#order_total .oe_currency_value').text(total);
             } else {
                 $('#cart_items_body').html('<tr><td colspan="4" class="text-center">Failed to load cart items.</td></tr>');
             }

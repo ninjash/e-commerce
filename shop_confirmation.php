@@ -3,44 +3,25 @@ include 'web/db_connect.php';
 include 'classes/Order.php';
 include 'classes/Payment.php';
 include 'classes/Cart.php';
+include 'show_order_summary.php';
 session_start();
 
+$orderConfirmation = $_SESSION['order_confirmation'] ?? null;
+
 // Check if the order confirmation details are available in the session
-if (!isset($_SESSION['order_confirmation'])) {
-    // Call process_order.php to create the order
-    $orderData = [
-        'total_amount' => $_SESSION['order_summary']['subtotal'] + $_SESSION['order_summary']['taxes'] + $_SESSION['order_summary']['delivery'],
-        'payment_method' => 'Credit Card',
-        'transaction_id' => $_SESSION['transaction_id']
-    ];
-
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, 'process_order.php');
-    curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($orderData));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $response = curl_exec($ch);
-    curl_close($ch);
-
-    $response = json_decode($response, true);
-
-    if ($response['status'] !== 'success') {
-        $_SESSION['error_message'] = 'Order creation failed: ' . $response['message'];
-        header('Location: shop_cart.php');
-        exit;
-    }
-
-    // Fetch order confirmation details from the session
-    $orderConfirmation = $_SESSION['order_confirmation'];
-} else {
-    $orderConfirmation = $_SESSION['order_confirmation'];
+if (!$orderConfirmation) {
+    header('Location: shop_cart.php');
+    exit;
 }
 
-$orderId = $orderConfirmation['order_id'];
-$totalAmount = $orderConfirmation['total_amount'];
-$paymentMethod = $orderConfirmation['payment_method'];
-$transactionId = $orderConfirmation['transaction_id'];
-$orderItems = $orderConfirmation['order_items'];
+$orderId = $orderConfirmation['order_id'] ?? null;
+$totalAmount = $orderConfirmation['total_amount'] ?? 0.00;
+$paymentMethod = $orderConfirmation['payment_method'] ?? '';
+$transactionId = $orderConfirmation['transaction_id'] ?? '';
+$delivery = $_SESSION['order_summary']['delivery'] ?? 130.00;
+$subtotal = $_SESSION['order_summary']['subtotal'] ?? 0.00;
+$taxes = $_SESSION['order_summary']['taxes'] ?? 0.00;
+$total = $subtotal + $taxes + $delivery;
 ?>
 
 <!DOCTYPE html>
@@ -99,31 +80,11 @@ $orderItems = $orderConfirmation['order_items'];
             <p class="card-text">Your order has been successfully placed. Here are the details:</p>
             <ul class="list-group">
                 <li class="list-group-item"><strong>Order ID:</strong> <?= htmlspecialchars($orderId) ?></li>
-                <li class="list-group-item"><strong>Total Amount:</strong> $<?= number_format($totalAmount, 2) ?></li>
+                <li class="list-group-item"><strong>Total Amount:</strong> $<?= number_format($total, 2) ?></li>
                 <li class="list-group-item"><strong>Payment Method:</strong> <?= htmlspecialchars($paymentMethod) ?></li>
                 <li class="list-group-item"><strong>Transaction ID:</strong> <?= htmlspecialchars($transactionId) ?></li>
             </ul>
-            <h3 class="mt-4">Order Items</h3>
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Product</th>
-                        <th>Price</th>
-                        <th>Quantity</th>
-                        <th>Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                <?php foreach ($orderItems as $item): ?>
-                    <tr>
-                        <td><?php echo $item['product_name']; ?></td>
-                        <td><?php echo $item['quantity']; ?></td>
-                        <td><?php echo $item['price']; ?></td>
-                        <td><?php echo $item['quantity'] * $item['price']; ?></td>
-                    </tr>
-                <?php endforeach; ?>
-                </tbody>
-            </table>
+            <?php show_order_summary($orderId, $conn); ?>
         </div>
     </div>
 </main>
@@ -133,6 +94,18 @@ $orderItems = $orderConfirmation['order_items'];
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+$(document).ready(function () {
+    // Update order summary
+    const deliveryFee = parseFloat($('#order_delivery .oe_currency_value').text()) || 130.00;
+    const subtotal = parseFloat($('#order_subtotal .oe_currency_value').text()) || 0.00;
+    const taxes = parseFloat($('#order_taxes .oe_currency_value').text()) || 0.00;
+    const total = (subtotal + taxes + deliveryFee).toFixed(2);
+
+    $('#order_total .oe_currency_value').text(total);
+});
+</script>
 
 </body>
 </html>

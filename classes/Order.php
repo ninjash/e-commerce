@@ -7,7 +7,7 @@ class Order {
         $this->db = $db;
     }
 
-    public function createOrder($userId, $totalAmount, $paymentMethod, $transactionId, $orderItems) {
+    public function createOrder($userId, $total, $paymentMethod, $transactionId, $cartItems) {
         $this->db->begin_transaction();
         try {
             // Insert order into the orders table
@@ -15,53 +15,73 @@ class Order {
             if (!$stmt) {
                 throw new Exception("Prepare failed: " . $this->db->error);
             }
-            $stmt->bind_param("idss", $userId, $totalAmount, $paymentMethod, $transactionId);
+            $stmt->bind_param("idss", $userId, $total, $paymentMethod, $transactionId);
             if (!$stmt->execute()) {
                 throw new Exception("Execute failed: " . $stmt->error);
             }
-            $orderId = $stmt->insert_id;
+            $orderId = $stmt->insert_id; // Get the ID of the newly created order
 
-            // Insert order items into the order_items table
-            $stmt = $this->db->prepare("INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)");
-            if (!$stmt) {
-                throw new Exception("Prepare failed: " . $this->db->error);
-            }
-            foreach ($orderItems as $item) {
-                $stmt->bind_param("iiid", $orderId, $item['product_id'], $item['quantity'], $item['price']);
-                if (!$stmt->execute()) {
-                    throw new Exception("Execute failed: " . $stmt->error);
+            foreach ($cartItems as $item) {
+                if (!isset($item['product_id'], $item['quantity'], $item['price'])) {
+                    throw new Exception("Invalid item structure: " . print_r($item, true));
                 }
             }
-
+    
+            // Commit the order transaction
             $this->db->commit();
-            return $orderId;
+    
+            // Now handle inserting order items in a separate transaction
+            $this->db->begin_transaction();
+            $this->addOrderItems($orderId, $cartItems);
+            $this->db->commit();
+    
+            return $orderId; // Return the created order ID
         } catch (Exception $e) {
             $this->db->rollback();
+            error_log("Transaction rolled back: " . $e->getMessage());
             throw $e;
         }
     }
 
-    public function insertOrderItems($orderId, $orderItems) {
+    public function addOrderItems($orderId, $orderItems) {
+        // Prepare statement once for multiple executions
         $stmt = $this->db->prepare("INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)");
         if (!$stmt) {
+            error_log("Prepare failed: " . $this->db->error);
             throw new Exception("Prepare failed: " . $this->db->error);
         }
-        foreach ($orderItems as $item) {
-            $stmt->bind_param("iiid", $orderId, $item['product_id'], $item['quantity'], $item['price']);
-            if (!$stmt->execute()) {
-                throw new Exception("Execute failed: " . $stmt->error);
+    
+        try {
+            foreach ($orderItems as $item) {
+                // Validate item structure
+                if (!isset($item['product_id'], $item['quantity'], $item['price'])) {
+                    error_log("Invalid item structure: " . print_r($item, true));
+                    throw new Exception("Invalid item structure");
+                }
+    
+                // Debug log
+                error_log("Inserting order item: " . print_r($item, true));
+    
+                // Bind parameters using the correct field names
+                $stmt->bind_param("iiid", 
+                    $orderId, 
+                    $item['product_id'], 
+                    $item['quantity'], 
+                    $item['price']
+                );
+    
+                // Execute insert
+                if (!$stmt->execute()) {
+                    throw new Exception("Failed to insert order item: " . $stmt->error);
+                }
             }
-        }
-    }
-
-    public function addOrderItem($orderId, $productId, $quantity, $price) {
-        $stmt = $this->db->prepare("INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)");
-        if (!$stmt) {
-            throw new Exception("Prepare failed: " . $this->db->error);
-        }
-        $stmt->bind_param("iiid", $orderId, $productId, $quantity, $price);
-        if (!$stmt->execute()) {
-            throw new Exception("Execute failed: " . $stmt->error);
+            
+            return true;
+        } catch (Exception $e) {
+            error_log("Error in addOrderItems: " . $e->getMessage());
+            throw $e;
+        } finally {
+            $stmt->close();
         }
     }
 

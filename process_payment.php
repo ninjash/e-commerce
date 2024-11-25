@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Process payment
     $payment = new Payment($conn, $total, 'credit_card', $sessionId);
-    if ($payment->processPayment()) {
+    if ($payment->processPayment($paymentDetails)) {
         $transactionId = $payment->getTransactionId();
         error_log("Payment processed successfully. Transaction ID: " . $transactionId);
 
@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $orderId = $order->createOrder($userId, $total, 'Credit Card', $transactionId, $cartItems);
 
             // Insert order items
-            $order->insertOrderItems($orderId, $cartItems);
+            $order->addOrderItems($orderId, $cartItems);
 
             // Clear the cart
             $cart = new Cart($conn, $userId);

@@ -16,11 +16,21 @@ class Payment {
         $this->sessionId = $sessionId;
     }
 
-    public function processPayment() {
-        // Logic to process the payment
-        $this->transactionId = uniqid();
-        $this->status = 'completed';
-        return true;
+    public function processPayment($paymentDetails) {
+        // Validate payment details
+        if (empty($paymentDetails['card_number']) || empty($paymentDetails['expiry_date']) || empty($paymentDetails['cvv'])) {
+            throw new Exception("Payment details are incomplete.");
+        }
+
+        // Simulate payment processing logic
+        // Here you would integrate with a payment gateway
+        $this->transactionId = uniqid(); // Generate a unique transaction ID
+        $this->status = 'completed'; // Update status to completed
+
+        // Log the payment processing (for debugging)
+        error_log("Payment processed: Transaction ID: {$this->transactionId}, Amount: {$this->amount}, Status: {$this->status}");
+
+        return true; // Return true on successful payment processing
     }
 
     public function savePaymentDetails($userId, $paymentDetails, $orderId) {
@@ -29,15 +39,14 @@ class Payment {
             throw new Exception("Prepare failed: " . $this->db->error);
         }
         $paymentDetailsJson = json_encode($paymentDetails);
-        $status = 'completed'; // or whatever status is appropriate
-        $stmt->bind_param("idsssii", $userId, $this->amount, $paymentDetailsJson, $this->transactionId, $status, $this->sessionId, $orderId);
+        $stmt->bind_param("idssssi", $userId, $this->amount, $paymentDetailsJson, $this->transactionId, $this->status, $this->sessionId, $orderId);
         if (!$stmt->execute()) {
             throw new Exception("Execute failed: " . $stmt->error);
         }
         return true;
     }
 
-    // Getters
+    // Getters and Setters
     public function getTransactionId() {
         return $this->transactionId;
     }
@@ -58,7 +67,6 @@ class Payment {
         return $this->sessionId;
     }
 
-    // Setters
     public function setAmount($amount) {
         $this->amount = $amount;
     }
